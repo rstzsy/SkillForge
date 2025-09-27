@@ -11,14 +11,16 @@ function App() {
           {routes.map((route) => {
             const Page = route.page
             const EmptyWrapper = ({ children }) => <>{children}</>;
-            const Layout = route.isShowHeader ? Default : EmptyWrapper;
+            const Layout = route.isShowHeader || route.isShowFooter ? Default : EmptyWrapper;
             return (
               <Route
                 key={route.path}
                 path={route.path}
                 element={
                   <Layout
-                    showHeader={route.isShowHeader ?? true}                   >
+                    showHeader={route.isShowHeader ?? true} 
+                    showFooter={route.isShowFooter ?? true}
+                  >
                     <Page />
                   </Layout>
                 } />

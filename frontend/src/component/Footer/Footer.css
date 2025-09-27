@@ -1,0 +1,326 @@
+.footer {
+    background-color: #FFFBDE;
+    color: #d5a30a;
+    padding: 40px 10px 20px;
+    font-family: 'Baloo 2', cursive, sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Hiệu ứng nền subtle */
+  .footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(213, 163, 10, 0.05) 100%);
+    pointer-events: none;
+  }
+  
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 50px;
+    position: relative;
+    z-index: 1;
+  }
+  
+  /* Logo Section */
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .footer-logo-img {
+    width: 55px;
+    height: 55px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(213, 163, 10, 0.2);
+    transition: transform 0.3s ease;
+  }
+  
+  .footer-logo-img:hover {
+    transform: scale(1.05) rotate(5deg);
+  }
+  
+  .footer-logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 4px rgba(213, 163, 10, 0.1);
+    background: linear-gradient(135deg, #d5a30a 0%, #fe5d01 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .footer-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 25px;
+    max-width: 300px;
+    color: rgba(213, 163, 10, 0.9);
+    letter-spacing: 0.3px;
+    text-align: justify;
+  }
+  
+  /* Social Icons */
+  .footer-socials {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  
+  .footer-socials a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    font-size: 1.4rem;
+    color: #d5a30a;
+    background: rgba(213, 163, 10, 0.1);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+  
+  .footer-socials a:hover {
+    color: #fff;
+    background: linear-gradient(135deg, #d5a30a 0%, #fe5d01 100%);
+    transform: translateY(-3px) scale(1.1);
+    box-shadow: 0 8px 25px rgba(213, 163, 10, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Footer Columns */
+  .footer-col {
+    animation: fadeInUp 0.6s ease-out;
+  }
+  
+  .footer-col:nth-child(2) { animation-delay: 0.1s; }
+  .footer-col:nth-child(3) { animation-delay: 0.2s; }
+  .footer-col:nth-child(4) { animation-delay: 0.3s; }
+  
+  .footer-col h4 {
+    font-size: 1.4rem;
+    margin-bottom: 25px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    position: relative;
+    color: #d5a30a;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+  }
+  
+  /* Underline effect cho tiêu đề */
+  .footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: linear-gradient(90deg, #d5a30a 0%, #fe5d01 100%);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  
+  .footer-col:hover h4::after {
+    width: 60px;
+  }
+  
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .footer-col ul li {
+    margin-bottom: 14px;
+    position: relative;
+    padding-left: 0;
+    transition: padding-left 0.3s ease;
+  }
+  
+  .footer-col ul li::before {
+    content: '→';
+    position: absolute;
+    left: -20px;
+    color: #fe5d01;
+    font-weight: bold;
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+  
+  .footer-col ul li:hover::before {
+    opacity: 1;
+    left: -15px;
+  }
+  
+  .footer-col ul li:hover {
+    padding-left: 15px;
+  }
+  
+  .footer-col ul li a {
+    text-decoration: none;
+    color: #d5a30a;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .footer-col ul li a:hover {
+    color: #fe5d01;
+    transform: translateX(5px);
+  }
+  
+  /* Footer Bottom */
+  .footer-bottom {
+    text-align: center;
+    margin-top: 50px;
+    padding-top: 25px;
+    border-top: 2px solid rgba(213, 163, 10, 0.2);
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    color: rgba(213, 163, 10, 0.8);
+    position: relative;
+  }
+  
+  .footer-bottom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #d5a30a 50%, transparent 100%);
+  }
+  
+  /* Keyframes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  
+/* Responsive Design */
+@media (max-width: 992px) {
+    .footer-container {
+      grid-template-columns: 1fr 1fr;
+      gap: 35px;
+      text-align: left;
+      justify-items: start;
+    }
+  
+    .footer-col h4::after {
+      left: 0;
+      transform: none;
+    }
+  
+    .footer-desc {
+      max-width: 100%;
+      text-align: left;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .footer {
+      padding: 25px 15px 10px;
+    }
+  
+    .footer-container {
+      grid-template-columns: 1fr;
+      gap: 25px;
+      text-align: center; /* ✅ căn giữa khi mobile cho đẹp */
+      justify-items: center;
+    }
+  
+    .footer-logo {
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+  
+    .footer-logo-img {
+      width: 45px;
+      height: 45px;
+    }
+  
+    .footer-desc {
+      max-width: 90%;
+      margin: 0 auto 15px;
+      text-align: center;
+    }
+  
+    .footer-socials {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+  
+    .footer-col {
+      text-align: center;
+    }
+  
+    .footer-col h4::after {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  
+    .footer-col ul li::before {
+      display: none;
+    }
+  
+    .footer-col ul li:hover {
+      padding-left: 0;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .footer-logo-text {
+      font-size: 1.3rem;
+    }
+  
+    .footer-col h4 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+  
+    .footer-col ul li a {
+      font-size: 0.9rem;
+    }
+  
+    .footer-socials a {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+    }
+  
+    .footer-container {
+      gap: 20px;
+    }
+  
+    .footer-bottom {
+      font-size: 0.8rem;
+      margin-top: 20px;
+      padding-top: 10px;
+    }
+  }
+  
