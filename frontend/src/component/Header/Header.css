@@ -1,0 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 25px;
+  background-color: #FFFBDE;
+  color: #d5a30a;
+  font-family: 'Baloo 2', cursive, sans-serif;
+  font-weight: 700;
+  height: 80px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Logo */
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.logo-img {
+  width: 60px;
+  height: 60px;
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #d5a30a;
+}
+
+/* Navigation (Desktop Default) */
+.header-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.nav-link {
+  color: #d5a30a;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #fe5d01;
+}
+
+/* Dropdown */
+.nav-dropdown {
+  position: relative;
+}
+
+.dropdown-btn {
+  background: none;
+  border: none;
+  color: #d5a30a;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+.dropdown-btn:hover {
+  color: #fe5d01;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 110%;
+  left: 0;
+  background-color: #fffbea;
+  border: 1px solid #f3e0a0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  padding: 8px 0;
+  border-radius: 8px;
+  min-width: 180px;
+  z-index: 999;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 16px;
+  color: #d5a30a;
+  text-decoration: none;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.dropdown-menu a:hover {
+  background-color: #fff2c6;
+  color: #fe5d01;
+}
+
+.nav-dropdown:hover .dropdown-menu,
+.nav-dropdown:focus-within .dropdown-menu {
+  display: block;
+}
+
+/* Icons */
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon {
+  cursor: pointer;
+  font-size: 1.5rem;
+  transition: color 0.3s;
+}
+
+.icon:hover {
+  color: #fe5d01;
+}
+
+.menu-toggle {
+  display: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+}
+
+.top-strip {
+  background-color: #111;
+  color: white;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.scrolling-text {
+  display: inline-block;
+  animation: scrollText 15s linear infinite;
+}
+
+@keyframes scrollText {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.menu-toggle {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: 28px;
+}
+
+.top-strip {
+    background-color: #111;
+    color: white;
+    font-size: 15px;
+    font-family: 'Baloo 2', cursive, sans-serif;
+    font-weight: 600;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .scrolling-text {
+    display: inline-flex;
+    gap: 40px;
+    white-space: nowrap;
+    animation: scrollText linear infinite;
+  }
+  
+  .coupon-item {
+    flex-shrink: 0;
+  }
+  
+  @keyframes scrollText {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(calc(-1 * var(--scroll-width)));
+    }
+  }
+  
+  
+
+/* ===================== Responsive ===================== */
+
+/* Mobile & Tablet */
+@media (max-width: 1024px) {
+    /* Ẩn nav desktop, hiện icon menu */
+    .header-nav {
+      display: none;
+    }
+  
+    .menu-toggle {
+      display: block;
+      z-index: 1001;
+    }
+  
+    /* Responsive Menu Overlay */
+    .responsive-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.4);
+      display: flex;
+      justify-content: flex-end;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 1000;
+    }
+  
+    .responsive-menu.open {
+      opacity: 1;
+      visibility: visible;
+    }
+  
+    /* Menu Content (Slide-in) */
+    .responsive-menu .menu-content {
+      background-color: #FFFBDE;
+      width: 260px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 30px 20px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+  
+    .responsive-menu.open .menu-content {
+      transform: translateX(0);
+    }
+  
+    .responsive-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .responsive-menu li a {
+      color: #d5a30a;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+  
+    .responsive-menu li a:hover {
+      color: #fe5d01;
+    }
+  }
+  
+  /* Desktop giữ nguyên */
+  @media (min-width: 1025px) {
+    .responsive-menu {
+      display: none !important;
+    }
+  }
+
+/* ===================== Responsive Font ===================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .logo-text {
+      font-size: 1.5rem;
+    }
+  
+    .nav-link,
+    .dropdown-btn {
+      font-size: 1rem;
+    }
+  
+    .dropdown-menu a {
+      font-size: 0.95rem;
+    }
+  
+    .header-icons .icon {
+      font-size: 1.4rem;
+    }
+  }
+  
+  /* Mobile */
+  @media (max-width: 768px) {
+    .logo-img {
+      width: 50px;
+      height: 50px;
+    }
+  
+    .logo-text {
+      font-size: 1.3rem;
+    }
+  
+    .responsive-menu li a {
+      font-size: 1.1rem;
+    }
+  
+
+    .header-icons {
+        display: flex;
+        align-items: center;   
+        gap: 15px;
+        height: 100%;        
+      }
+      
+     
+      .menu-toggle {
+        display: none;
+        font-size: 1.8rem;
+        width: 44px;          
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: background 0.2s ease;
+      }
+      
+      .menu-toggle:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+      }
+  }
+  
+  

@@ -1,6 +1,13 @@
+import HomePage from "../pages/HomePage/HomePage";
 import Listen from '../pages/ListenPage/ListenPage';
 
 export const routes = [
+    {
+        path: '/', 
+        page: HomePage,
+        isShowHeader: true
+
+    },
     {
         path: '/listen',
         page: Listen,
