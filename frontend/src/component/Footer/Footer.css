@@ -243,45 +243,41 @@
   
   @media (max-width: 768px) {
     .footer {
-      padding: 25px 15px 10px;
+      padding: 25px 24px 10px; 
     }
   
     .footer-container {
       grid-template-columns: 1fr;
       gap: 25px;
-      text-align: center; /* ✅ căn giữa khi mobile cho đẹp */
-      justify-items: center;
+      text-align: left;
+      justify-items: start;
     }
   
     .footer-logo {
-      justify-content: center;
+      justify-content: flex-start;
       margin-bottom: 10px;
-    }
-  
-    .footer-logo-img {
-      width: 45px;
-      height: 45px;
     }
   
     .footer-desc {
       max-width: 90%;
-      margin: 0 auto 15px;
-      text-align: center;
+      margin: 0 0 15px 0;
+      text-align: left;
     }
   
     .footer-socials {
-      justify-content: center;
+      justify-content: flex-start;
       flex-wrap: wrap;
       gap: 10px;
     }
   
     .footer-col {
-      text-align: center;
+      text-align: left;
+      width: 100%;
     }
   
     .footer-col h4::after {
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      transform: none;
     }
   
     .footer-col ul li::before {
@@ -294,17 +290,21 @@
   }
   
   @media (max-width: 480px) {
+    .footer {
+      padding: 20px 20px 10px; 
+    }
+  
     .footer-logo-text {
       font-size: 1.3rem;
     }
   
     .footer-col h4 {
-      font-size: 1rem;
+      font-size: 1.5rem;
       margin-bottom: 12px;
     }
   
     .footer-col ul li a {
-      font-size: 0.9rem;
+      font-size: 1.2rem;
     }
   
     .footer-socials a {
@@ -321,6 +321,7 @@
       font-size: 0.8rem;
       margin-top: 20px;
       padding-top: 10px;
+      text-align: left;
     }
   }
   
