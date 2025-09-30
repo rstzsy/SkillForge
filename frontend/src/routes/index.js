@@ -1,7 +1,8 @@
-import HomePage from "../pages/HomePage/HomePage";
+import HomePage from "../pages/HomePage/Homepage";
 import Listen from '../pages/ListenPage/ListenPage';
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
+import ListenDetail from "../pages/ListenPage/ListenDetail";
 
 export const routes = [
     {
@@ -22,7 +23,11 @@ export const routes = [
     {
         path: '/listen',
         page: Listen,
-        // isShowHeader: true,
-        // isShowFooter: true
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/listen/:id',
+        page: ListenDetail,
     }
 ]

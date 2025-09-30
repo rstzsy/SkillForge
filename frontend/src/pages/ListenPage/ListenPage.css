@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
 .listening-page {
   display: flex;
-  font-family: Arial, sans-serif;
+  font-family: 'Baloo 2', cursive, sans-serif;
   background: #f8f9fb;
   min-height: 100vh;
 }
@@ -9,7 +11,7 @@
 .sidebar-lis {
   width: 220px;
   background: #f9ecc0;
-  padding: 20px;
+  padding: 10px;
   height: 350px;
   margin-top: 80px;
   margin-left: 50px;
@@ -18,18 +20,18 @@
 
 .sidebar-lis h3 {
   margin-bottom: 15px;
-  font-size: 22px;
+  font-size: 18px;
   color: #dc9f36;
 }
 
 .filter-group-lis {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .filter-group-lis label {
   display: block;
   margin: 20px 0;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Content */

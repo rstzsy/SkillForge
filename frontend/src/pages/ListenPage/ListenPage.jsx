@@ -2,26 +2,91 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeadphones } from "@fortawesome/free-solid-svg-icons";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import "./ListenPage.css";
 
-const mockData = [
+export const mockData = [
   {
     id: 1,
     section: "Section 4",
     title: "VOL 6 Test 6 - Crocodile",
     type: "Gap Filling",
     attempts: 1716,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • Type of crocodile studied: crocodiles found in salt water
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 35
   },
   {
     id: 2,
     section: "Section 3",
     title: "VOL 6 Test 6 - Taking part",
-    type: "Map, Diagram Label, Multiple Choice",
+    type: "Multiple Choice",
     attempts: 946,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: true,
+    submissionFile: null,
+    passage: `
+      • Taking part in district 1
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 25
   },
   {
     id: 3,
@@ -29,8 +94,40 @@ const mockData = [
     title: "VOL 6 Test 6 - The Map",
     type: "Map, Diagram Label, One Answer",
     attempts: 887,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • The Map in Ho Chi Minh city
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 20
   },
   {
     id: 4,
@@ -38,8 +135,40 @@ const mockData = [
     title: "VOL 6 Test 6 - A Hotel",
     type: "Gap Filling",
     attempts: 1338,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: true,
+    submissionFile: null,
+    passage: `
+      • Hotel in Ba Na Hill
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 15
   },
   {
     id: 5,
@@ -47,8 +176,40 @@ const mockData = [
     title: "VOL 6 Test 6 - Crocodile",
     type: "Gap Filling",
     attempts: 1716,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • Type of crocodile studied: crocodiles found in salt water
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 40
   },
   {
     id: 6,
@@ -56,8 +217,40 @@ const mockData = [
     title: "VOL 6 Test 6 - Taking part",
     type: "Map, Diagram Label, Multiple Choice",
     attempts: 946,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • Taking part behind the tree
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 30
   },
   {
     id: 7,
@@ -65,8 +258,40 @@ const mockData = [
     title: "VOL 6 Test 6 - The Map",
     type: "Map, Diagram Label, One Answer",
     attempts: 887,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • TThe map in Ha Noi
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 20
   },
   {
     id: 8,
@@ -74,8 +299,40 @@ const mockData = [
     title: "VOL 6 Test 6 - A Hotel",
     type: "Gap Filling",
     attempts: 1338,
-    img: "listpic.jpg",
+    img: "/assets/listpic.jpg",
     completed: false,
+    submissionFile: null,
+    passage: `
+      • Hotel in Area
+
+      • Location of study: Northern Territory, Australia
+
+      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
+
+      Previous studies:
+      • Done using (2) ___
+      • Stressful method, also unreliable due to loss of the (3) ___
+
+      Reasons for study:
+      • The management of crocodiles by the government may not be effective
+
+      Research questions:
+      • How far can crocodiles travel?
+      • How easily can crocodiles (4) ___ ?
+
+      Challenge:
+      • Crocodiles are difficult to (5) ___ in the wild
+    `,
+    // blank de user nhap
+    blanks: [
+      { id: 1, answer: "" },
+      { id: 2, answer: "" },
+      { id: 3, answer: "" },
+      { id: 4, answer: "" },
+      { id: 5, answer: "" }
+    ],
+    audio: "/audio/test1.mp3",
+    timeLimit: 10
   },
 ];
 
@@ -91,6 +348,7 @@ const ListeningPage = () => {
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const sections = [
     "Section 1",
@@ -112,8 +370,7 @@ const ListeningPage = () => {
       {/* Sidebar */}
       <aside className="sidebar-lis">
         <h3>
-          <FontAwesomeIcon icon={faHeadphones} size="x" />
-          Listening Practise
+          <FontAwesomeIcon icon={faHeadphones} size="x" />Listening Practise
         </h3>
         <div className="filter-group-lis active">
           {sections.map((sec) => (
@@ -171,7 +428,12 @@ const ListeningPage = () => {
 
         <div className="cards-lis">
           {filteredData.map((item) => (
-            <div className="card-lis" key={item.id}>
+            <div
+              className="card-lis"
+              key={item.id}
+              onClick={() => navigate(`/listen/${item.id}`)} // chuyen trang lam bai
+              style={{ cursor: "pointer" }}
+            >
               <img src={item.img} alt={item.title} />
               <div className="card-info-lis">
                 <span
