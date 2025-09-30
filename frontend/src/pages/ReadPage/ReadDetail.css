@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+/* Container */
+.listen-detail-container {
+  padding: 20px;
+  padding-bottom: 100px; 
+  font-family: 'Baloo 2', cursive, sans-serif;
+  background-color: #FFFBDE;
+}
+
+.listen-detail-title {
+  font-size: 30px;
+  margin-bottom: 5px;
+  text-align: center;
+  color: #d5a30a;
+}
+
+/* Countdown timer */
+.listen-detail-timer {
+  font-size: 50px;
+  color: #d5a30a;
+  margin-top: 10px;
+  border: 2px solid #d5a30a;
+  padding: 30px;
+  border-radius: 50%;
+}
+
+/* Audio player fixed */
+.listen-detail-audio {
+  position: fixed;      
+  bottom: 0;            
+  left: 0;
+  width: 100%;           
+  padding: 10px;
+  background-color: #f1f3f4;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* main layout */
+.listen-detail-main {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap; 
+}
+
+/* Passage */
+.listen-detail-left {
+  flex: 2;
+  min-width: 300px;
+  background-color: white;
+  padding: 25px;
+  border-radius: 20px;
+}
+
+/* right side */
+.listen-detail-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+}
+
+.listen-detail-right-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Hình ảnh */
+.listen-detail-image {
+  max-width: 100%;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Passage text */
+.listen-detail-passage {
+  line-height: 1.5;
+  white-space: pre-line;
+  font-size: 20px;
+}
+
+/* Input blanks */
+.listen-detail-input {
+  width: 120px;
+  margin: 0 5px;
+  padding: 2px 5px;
+  font-size: 20px;
+  border: none;                
+  border-bottom: 2px solid #d5a30a; 
+  background: transparent;    
+  text-align: center;         
+}
+
+.listen-detail-input:focus {
+  outline: none;               
+  border-bottom: 2px solid #b58105; 
+}
+
+
+/* blanks group */
+.listen-detail-blank {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 5px;
+  position: relative;
+}
+
+/* small number in the left input side */
+.listen-detail-blank-number {
+  font-size: 15px;
+  color: #d5a30a;
+  margin-right: 3px;
+  font-weight: bold;
+}
+
+
+/* Submit button */
+.listen-detail-submit {
+  padding: 15px 30px;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.listen-detail-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.listen-detail-modal-content {
+  background: #fff;
+  padding: 30px 30px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  max-width: 500px;
+  width: 100%;
+}
+
+.listen-detail-modal-buttons {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+}
+
+.listen-detail-modal-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  background-color: #FFFBDE;
+  color: #d5a30a;
+  font-size: 18px;
+  transition: background 0.2s;
+  font-weight: bold;
+}
+
+.listen-detail-modal-buttons button:hover {
+  background-color: #d5a30a;
+  color: #FFFBDE;
+}
+
+
+/* responsive */
+@media (max-width: 768px) {
+  .listen-detail-main {
+    flex-direction: column; 
+  }
+
+  .listen-detail-right {
+    justify-content: center;
+    align-items: center; 
+    margin-top: 20px;    
+  }
+
+  .listen-detail-right-inner {
+    width: 100%;         
+  }
+
+  .listen-detail-image {
+    max-width: 100%;
+    height: auto;
+  }
+}
