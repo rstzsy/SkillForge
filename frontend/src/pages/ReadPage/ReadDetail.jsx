@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate  } from "react-router-dom";
-import { mockData } from "../ListenPage/ListenPage";
-import "./ListenDetail.css";
+import { mockData } from "../ReadPage/ReadPage";
+import "./ReadDetail.css";
 
-const ListenDetail = () => {
+const ReadDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const test = mockData.find((t) => t.id === Number(id));
@@ -54,12 +54,12 @@ const ListenDetail = () => {
       parts.push(test.passage.slice(lastIndex, index));
 
       parts.push(
-        <span key={`blank-${blankId}`} className="listen-detail-blank">
-          <sup className="listen-detail-blank-number">{blankId}</sup>
+        <span key={`blank-${blankId}`} className="read-detail-blank">
+          <sup className="read-detail-blank-number">{blankId}</sup>
           <input
             value={answers[blankId] || ""}
             onChange={(e) => handleChange(blankId, e.target.value)}
-            className="listen-detail-input"
+            className="read-detail-input"
           />
         </span>
       );
@@ -87,55 +87,50 @@ const ListenDetail = () => {
   };
 
   return (
-    <div className="listen-detail-container">
-      <h2 className="listen-detail-title">{test.title}</h2>
+    <div className="read-detail-container">
+      <h2 className="read-detail-title">{test.title}</h2>
 
-      {/* Audio Player */}
-      {test.audio && (
-        <div className="listen-detail-audio">
-          <audio controls>
-            <source src={test.audio} type="audio/mpeg" />
-            Your browser does not support the audio element.
-          </audio>
-        </div>
-      )}
-
-      <div className="listen-detail-main">
-        <div className="listen-detail-left">
-          <div className="listen-detail-passage">{renderPassageInline()}</div>
+      <div className="read-detail-main">
+        <div className="read-detail-left">
+            <h3>Reading Passage</h3>
+            <div className="read-detail-full-passage">
+                {test.passageText.split("\n").map((line, index) => {
+                    const trimmed = line.trim();
+                    return trimmed ? <p key={index}>{trimmed}</p> : null;
+                })}
+            </div>
         </div>
 
         {test.img && (
-          <div className="listen-detail-right">
-            {/* image */}
-            <div className="listen-detail-right-inner">
-              <img
-                src={test.img}
-                alt={test.title}
-                className="listen-detail-image"
-              />
-              {/* timer */}
-              <div className="listen-detail-timer">
-                <strong>{formatTime(timeLeft)}</strong>
-              </div>
-              <button className="listen-detail-submit" onClick={handleSubmit}>
-                Submit
-              </button>
+            <div className="read-detail-right">
+            <div className="read-detail-right-inner">
+                <div className="read-detail-passage">{renderPassageInline()}</div>
             </div>
-          </div>
+            </div>
         )}
-      </div>
+        </div>
+
+        {/* Timer + Submit*/}
+        <div className="read-detail-bottom-controls" style={{ marginTop: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
+            <div className="read-detail-timer">
+                <strong>{formatTime(timeLeft)}</strong>
+            </div>
+            <button className="read-detail-submit" onClick={handleSubmit}>
+                Submit
+            </button>
+        </div>
+
 
       {/* Modal */}
       {showModal && (
-        <div className="listen-detail-modal">
-          <div className="listen-detail-modal-content">
+        <div className="read-detail-modal">
+          <div className="read-detail-modal-content">
             <h3>The assignment has been submitted</h3>
-            <div className="listen-detail-modal-buttons">
+            <div className="read-detail-modal-buttons">
               <button onClick={() => navigate("/")}>Return Course Page</button>
               <button
                 onClick={() =>
-                  navigate(`/score/${test.id}`, { state: { userAnswers: answers } })
+                  navigate(`/score/read/${test.id}`, { state: { userAnswers: answers } })
                 }
               >
                 View Score
@@ -149,4 +144,4 @@ const ListenDetail = () => {
   );
 };
 
-export default ListenDetail;
+export default ReadDetail;

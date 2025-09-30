@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+/* Container */
+.score-container-lis {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+/* Title */
+.score-title-lis {
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ff843d;
+}
+
+/* Summary */
+.score-summary-lis {
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 25px;
+  color: #d5a30a;
+}
+
+/* Detail Section */
+.score-detail-lis {
+  margin-bottom: 25px;
+}
+
+.score-item-lis {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 18px;
+}
+
+.score-num-lis {
+  font-weight: bold;
+  color: #d5a30a;
+  min-width: 50px;
+}
+
+.score-user-lis {
+  flex: 1;
+}
+
+.score-correct-lis {
+  color: #d5a30a;
+  font-weight: bold;
+}
+
+/* Correct / Wrong highlighting */
+.correct-lis {
+  color: green;
+  font-weight: bold;
+}
+
+.wrong-lis {
+  color: red;
+  font-weight: bold;
+}
+
+/* Buttons */
+.score-buttons-lis {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.score-buttons-lis button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s ease;
+  font-weight: bold;
+}
+
+.score-buttons-lis button:first-child {
+  background: #f0ad4e;
+  color: #FFFBDE;
+}
+
+.score-buttons-lis button:first-child:hover {
+  background: #ec971f;
+}
+
+.score-buttons-lis button:last-child {
+  background: #5cb85c;
+  color: white;
+}
+
+.score-buttons-lis button:last-child:hover {
+  background: #4cae4c;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+  .score-container-lis {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .score-title-lis {
+    font-size: 22px;
+  }
+
+  .score-summary-lis {
+    font-size: 18px;
+  }
+
+  .score-item-lis {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 16px;
+    padding: 10px 0;
+  }
+
+  .score-num-lis {
+    min-width: auto;
+  }
+
+  .score-buttons-lis {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .score-buttons-lis button {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .score-title-lis {
+    font-size: 20px;
+  }
+
+  .score-summary-lis {
+    font-size: 16px;
+  }
+
+  .score-item-lis {
+    font-size: 14px;
+  }
+
+  .score-buttons-lis button {
+    font-size: 14px;
+  }
+}
+

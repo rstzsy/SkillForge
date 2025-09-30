@@ -1,20 +1,36 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeadphones } from "@fortawesome/free-solid-svg-icons";
+import { faBook } from "@fortawesome/free-solid-svg-icons";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import "./ListenPage.css";
+import "./ReadPage.css";
 
 export const mockData = [
   {
     id: 1,
-    section: "Section 4",
+    section: "Section 3",
     title: "VOL 6 Test 6 - Crocodile",
     type: "Gap Filling",
     attempts: 1716,
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Type of crocodile studied: crocodiles found in salt water
 
@@ -45,13 +61,12 @@ export const mockData = [
       { id: 5, answer: "" }
     ],
     correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
+      1: "croc1",
+      2: "croc2",
+      3: "croc3",
+      4: "croc4",
+      5: "croc5"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 35
   },
   {
@@ -63,6 +78,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: true,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Taking part in district 1
 
@@ -99,7 +130,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 25
   },
   {
@@ -111,6 +141,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • The Map in Ho Chi Minh city
 
@@ -147,7 +193,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 20
   },
   {
@@ -159,6 +204,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: true,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Hotel in Ba Na Hill
 
@@ -195,18 +256,33 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 15
   },
   {
     id: 5,
-    section: "Section 4",
+    section: "Section 3",
     title: "VOL 6 Test 6 - Crocodile",
     type: "Gap Filling",
     attempts: 1716,
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Type of crocodile studied: crocodiles found in salt water
 
@@ -243,7 +319,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 40
   },
   {
@@ -255,6 +330,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Taking part behind the tree
 
@@ -291,7 +382,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 30
   },
   {
@@ -303,6 +393,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • TThe map in Ha Noi
 
@@ -339,7 +445,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 20
   },
   {
@@ -351,6 +456,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Hotel in Area
 
@@ -387,7 +508,6 @@ export const mockData = [
       4: "adapt",
       5: "observe"
     },
-    audio: "/audio/test1.mp3",
     timeLimit: 10
   },
 ];
@@ -396,11 +516,10 @@ const sectionColors = {
   "Section 1": "#d2b5de",
   "Section 2": "#f2b8e4",
   "Section 3": "#c2eff9",
-  "Section 4": "#ddffe6",
   "Full Test": "#D3D3D3",
 };
 
-const ListeningPage = () => {
+const ReadingPage = () => {
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -410,7 +529,6 @@ const ListeningPage = () => {
     "Section 1",
     "Section 2",
     "Section 3",
-    "Section 4",
     "Full Test",
   ];
 
@@ -422,18 +540,18 @@ const ListeningPage = () => {
   });
 
   return (
-    <div className="listening-page">
+    <div className="reading-page">
       {/* Sidebar */}
-      <aside className="sidebar-lis">
+      <aside className="sidebar-read">
         <h3>
-          <FontAwesomeIcon icon={faHeadphones} size="x" />Listening Practise
+          <FontAwesomeIcon icon={faBook} size="x" />Reading Practise
         </h3>
-        <div className="filter-group-lis active">
+        <div className="filter-group-read active">
           {sections.map((sec) => (
             <label key={sec}>
               <input
                 type="radio"
-                name="listening"
+                name="reading"
                 checked={selectedSection === sec}
                 onChange={() => setSelectedSection(sec)}
               />{" "}
@@ -443,7 +561,7 @@ const ListeningPage = () => {
           <label>
             <input
               type="radio"
-              name="listening"
+              name="reading"
               checked={selectedSection === null}
               onChange={() => setSelectedSection(null)}
             />{" "}
@@ -453,10 +571,10 @@ const ListeningPage = () => {
       </aside>
 
       {/* Main content */}
-      <main className="content-lis">
+      <main className="content-read">
         {/* Tabs + Search */}
-        <div className="tabs-search-lis">
-          <div className="tabs-lis">
+        <div className="tabs-search-read">
+          <div className="tabs-read">
             <button
               className={tab === "uncompleted" ? "active" : ""}
               onClick={() => setTab("uncompleted")}
@@ -471,7 +589,7 @@ const ListeningPage = () => {
             </button>
           </div>
 
-          <div className="search-lis">
+          <div className="search-read">
             <FontAwesomeIcon icon={faMagnifyingGlass} size="x" color="#dc9f36" />
             <input
               type="text"
@@ -482,25 +600,25 @@ const ListeningPage = () => {
           </div>
         </div>
 
-        <div className="cards-lis">
+        <div className="cards-read">
           {filteredData.map((item) => (
             <div
-              className="card-lis"
+              className="card-read"
               key={item.id}
-              onClick={() => navigate(`/listen/${item.id}`)} // chuyen trang lam bai
+              onClick={() => navigate(`/read/${item.id}`)} // chuyen trang lam bai
               style={{ cursor: "pointer" }}
             >
               <img src={item.img} alt={item.title} />
-              <div className="card-info-lis">
+              <div className="card-info-read">
                 <span
-                  className="section-lis"
+                  className="section-read"
                   style={{ backgroundColor: sectionColors[item.section] }}
                 >
                   {item.section}
                 </span>
                 <h4>{item.title}</h4>
-                <p className="type-lis">{item.type}</p>
-                <p className="attempts-lis">{item.attempts} attempts</p>
+                <p className="type-read">{item.type}</p>
+                <p className="attempts-read">{item.attempts} attempts</p>
                 {item.completed && (
                   <span className="completed-label">Completed</span>
                 )}
@@ -514,4 +632,4 @@ const ListeningPage = () => {
   );
 };
 
-export default ListeningPage;
+export default ReadingPage;
