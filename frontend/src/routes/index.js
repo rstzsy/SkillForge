@@ -3,6 +3,7 @@ import Listen from '../pages/ListenPage/ListenPage';
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ListenDetail from "../pages/ListenPage/ListenDetail";
+import Score from "../pages/ListenPage/ScorePage"
 
 export const routes = [
     {
@@ -29,5 +30,11 @@ export const routes = [
     {
         path: '/listen/:id',
         page: ListenDetail,
-    }
+    },
+    {
+        path: '/score/:id',
+        page: Score,
+        isShowHeader: true,
+        isShowFooter: true
+    },
 ]

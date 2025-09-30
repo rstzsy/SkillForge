@@ -44,6 +44,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 35
   },
@@ -85,6 +92,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 25
   },
@@ -126,6 +140,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 20
   },
@@ -167,6 +188,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 15
   },
@@ -208,6 +236,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 40
   },
@@ -249,6 +284,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 30
   },
@@ -290,6 +332,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 20
   },
@@ -331,6 +380,13 @@ export const mockData = [
       { id: 4, answer: "" },
       { id: 5, answer: "" }
     ],
+    correctAnswers: {
+      1: "satellite transmitter",
+      2: "tags",
+      3: "signal",
+      4: "adapt",
+      5: "observe"
+    },
     audio: "/audio/test1.mp3",
     timeLimit: 10
   },

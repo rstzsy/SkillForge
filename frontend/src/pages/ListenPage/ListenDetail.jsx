@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate  } from "react-router-dom";
 import { mockData } from "../ListenPage/ListenPage";
 import "./ListenDetail.css";
 
 const ListenDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const test = mockData.find((t) => t.id === Number(id));
 
   // State
   const [answers, setAnswers] = useState({});
   const initialTime = test?.timeLimit ? test.timeLimit * 60 : 0; // thoi gian tinh bang giay
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [showModal, setShowModal] = useState(false);
 
   // Countdown Timer
   useEffect(() => {
@@ -52,12 +54,14 @@ const ListenDetail = () => {
       parts.push(test.passage.slice(lastIndex, index));
 
       parts.push(
-        <input
-          key={blankId}
-          value={answers[blankId] || ""}
-          onChange={(e) => handleChange(blankId, e.target.value)}
-          className="listen-detail-input"
-        />
+        <span key={`blank-${blankId}`} className="listen-detail-blank">
+          <sup className="listen-detail-blank-number">{blankId}</sup>
+          <input
+            value={answers[blankId] || ""}
+            onChange={(e) => handleChange(blankId, e.target.value)}
+            className="listen-detail-input"
+          />
+        </span>
       );
 
       lastIndex = index + match[0].length;
@@ -68,10 +72,11 @@ const ListenDetail = () => {
     return parts;
   };
 
+
   // Handle submit
   const handleSubmit = () => {
     console.log("User answers:", answers);
-    alert("Đã nộp bài! Kiểm tra console để xem câu trả lời.");
+    setShowModal(true);
   };
 
   // Format time MM:SS
@@ -111,15 +116,35 @@ const ListenDetail = () => {
               />
               {/* timer */}
               <div className="listen-detail-timer">
-                <strong>Time left: {formatTime(timeLeft)}</strong>
+                <strong>{formatTime(timeLeft)}</strong>
               </div>
               <button className="listen-detail-submit" onClick={handleSubmit}>
-                Nộp bài
+                Submit
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="listen-detail-modal">
+          <div className="listen-detail-modal-content">
+            <h3>The assignment has been submitted</h3>
+            <div className="listen-detail-modal-buttons">
+              <button onClick={() => navigate("/")}>Return Course Page</button>
+              <button
+                onClick={() =>
+                  navigate(`/score/${test.id}`, { state: { userAnswers: answers } })
+                }
+              >
+                View Score
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
