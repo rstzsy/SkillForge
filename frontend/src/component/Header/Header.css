@@ -33,6 +33,13 @@
   color: #d5a30a;
 }
 
+.header,
+.header-nav,
+.dropdown-menu {
+  z-index: 2000;
+}
+
+
 /* Navigation (Desktop Default) */
 .header-nav {
   position: absolute;
@@ -134,14 +141,6 @@
   font-size: 1.3rem;
 }
 
-.top-strip {
-  background-color: #111;
-  color: white;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
 .scrolling-text {
   display: inline-block;
   animation: scrollText 15s linear infinite;
@@ -160,8 +159,8 @@
 }
 
 .top-strip {
-    background-color: #111;
-    color: white;
+    background-color: #ffcad4;
+    color: #f10d5b;
     font-size: 15px;
     font-family: 'Baloo 2', cursive, sans-serif;
     font-weight: 600;

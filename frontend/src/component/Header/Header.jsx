@@ -27,7 +27,7 @@ const Header = () => {
     const parentWidth = wrapper.parentElement.offsetWidth
     const contentWidth = wrapper.scrollWidth
 
-    // Nếu nội dung chưa đủ rộng, nhân bản thêm cho đến khi >= chiều rộng màn hình
+    
     if (contentWidth < parentWidth) {
       let html = wrapper.innerHTML
       while (wrapper.scrollWidth < parentWidth * 1.5) {
