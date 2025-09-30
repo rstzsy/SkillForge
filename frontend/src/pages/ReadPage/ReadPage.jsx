@@ -15,6 +15,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Type of crocodile studied: crocodiles found in salt water
 
@@ -45,11 +61,11 @@ export const mockData = [
       { id: 5, answer: "" }
     ],
     correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
+      1: "croc1",
+      2: "croc2",
+      3: "croc3",
+      4: "croc4",
+      5: "croc5"
     },
     timeLimit: 35
   },
@@ -62,6 +78,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: true,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Taking part in district 1
 
@@ -109,6 +141,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • The Map in Ho Chi Minh city
 
@@ -156,6 +204,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: true,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Hotel in Ba Na Hill
 
@@ -203,6 +267,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Type of crocodile studied: crocodiles found in salt water
 
@@ -250,6 +330,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Taking part behind the tree
 
@@ -297,6 +393,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • TThe map in Ha Noi
 
@@ -344,6 +456,22 @@ export const mockData = [
     img: "/assets/listpic.jpg",
     completed: false,
     submissionFile: null,
+    passageText: `
+        Researchers have recently conducted a study on crocodiles found in salt water, 
+        specifically in the Northern Territory of Australia. This study was unique because 
+        it was the first time a satellite transmitter had been used to track crocodiles in this 
+        region. In the past, researchers had relied on tags, which was a stressful method for the 
+        animals and often unreliable due to the frequent loss of the signal.\n
+        The government's management of crocodiles has raised concerns, prompting the need for 
+        more accurate data. Key research questions included how far crocodiles can travel and how 
+        easily they can adapt to changing environments. Observing crocodiles in the wild poses a 
+        significant challenge, as these animals are notoriously difficult to monitor without disturbing 
+        their natural behavior.\n
+        The results of this study are expected to provide valuable insights for wildlife management and 
+        conservation efforts, helping ensure that crocodile populations are monitored effectively while 
+        minimizing stress to the animals.
+        `,
+
     passage: `
       • Hotel in Area
 

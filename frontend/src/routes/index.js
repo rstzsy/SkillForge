@@ -6,6 +6,7 @@ import ListenDetail from "../pages/ListenPage/ListenDetail";
 import Score from "../pages/ListenPage/ScorePage"
 import Read from "../pages/ReadPage/ReadPage";
 import ReadDetail from "../pages/ReadPage/ReadDetail";
+import ScoreRead from "../pages/ReadPage/ScoreReadPage";
 
 export const routes = [
     {
@@ -48,5 +49,11 @@ export const routes = [
     {
         path: '/read/:id',
         page: ReadDetail,
+    },
+    {
+        path: '/score/read/:id',
+        page: ScoreRead,
+        isShowHeader: true,
+        isShowFooter: true
     },
 ]
