@@ -1,4 +1,4 @@
-import HomePage from "../pages/HomePage/Homepage";
+import HomePage from "../pages/HomePage/HomePage";
 import Listen from '../pages/ListenPage/ListenPage';
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";

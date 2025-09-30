@@ -17,13 +17,11 @@ const SliderComponent = ({ images }) => {
     setCurrentIndex(index);
   };
 
-  // Auto slide
   useEffect(() => {
     intervalRef.current = setInterval(nextSlide, 4000);
     return () => clearInterval(intervalRef.current);
   }, [images.length]);
 
-  // Pause auto slide on hover
   const handleMouseEnter = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
