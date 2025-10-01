@@ -171,8 +171,8 @@
   }
   
   .signin-btn {
-    background: linear-gradient(135deg, #5865ff 0%, #7b87ff 100%);
-    color: white;
+    background: linear-gradient(135deg, #ffe7b3, #ffd77d);
+    color: #fe5d01;
     border: none;
     padding: 16px;
     border-radius: 16px;
@@ -185,7 +185,9 @@
   
   .signin-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(88, 101, 255, 0.4);
+    background: linear-gradient(135deg, #ffc94d, #ffb733);
+    color: #f10d5b;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
   }
   
   .signin-btn:active {
