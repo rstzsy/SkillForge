@@ -11,16 +11,14 @@ const ScorePage = () => {
   const test = mockData.find((t) => t.id === Number(id));
   if (!test) return <p>Test not found!</p>;
 
-  // lay dap an tu data o trang listen page
+  // dap an dung
   const correctAnswers = test.correctAnswers || {};
-
-  // ;ay dap an cua user
+  // dap an cua user
   const userAnswers = location.state?.userAnswers || {};
 
-  // tinh diem
   let score = 0;
   const total = Object.keys(correctAnswers).length;
-
+  //tinh diem
   Object.keys(correctAnswers).forEach((key) => {
     if (
       userAnswers[key] &&
@@ -31,41 +29,62 @@ const ScorePage = () => {
     }
   });
 
+  // feedback AI 
+  const percent = (score / total) * 100;
+  let feedback = "";
+
+  if (percent >= 80) {
+    feedback = "🔥 Xuất sắc! Bạn đọc hiểu rất tốt, chỉ cần luyện thêm để đạt độ chính xác tuyệt đối.";
+  } else if (percent >= 50) {
+    feedback = "👍 Khá ổn! Bạn đã nắm được ý chính, nhưng cần tập trung cải thiện chi tiết và từ vựng.";
+  } else {
+    feedback = "⚠️ Cần cải thiện! Bạn nên luyện kỹ năng scanning & skimming để bắt ý chính nhanh hơn.";
+  }
+
   return (
-    <div className="score-container-lis">
-      <h2 className="score-title-lis">{test.title} - Result</h2>
-
-      <div className="score-summary-lis">
-        <p>
-          <strong>Score: {score}</strong> / {total}
-        </p>
+    <div className="score-page-layout">
+      {/* left side */}
+      <div className="ai-feedback-lis">
+        <h3>AI Feedback</h3>
+        <p>{feedback}</p>
       </div>
 
-      <div className="score-detail-lis">
-        {Object.keys(correctAnswers).map((num) => (
-          <div key={num} className="score-item-lis">
-            <span className="score-num-lis">({num})</span>
-            <span
-              className={`score-user-lis ${
-                userAnswers[num] &&
-                userAnswers[num].trim().toLowerCase() ===
-                  correctAnswers[num].trim().toLowerCase()
-                  ? "correct-lis"
-                  : "wrong-lis"
-              }`}
-            >
-              Your answer: {userAnswers[num] || "—"}
-            </span>
-            <span className="score-correct-lis">
-              Correct: {correctAnswers[num]}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* right side */}
+      <div className="score-container-lis">
+        <h2 className="score-title-lis">{test.title} - Result</h2>
 
-      <div className="score-buttons-lis">
-        <button onClick={() => navigate("/")}>Return Home Page</button>
-        <button onClick={() => navigate("/listen")}>Try Another Test</button>
+        <div className="score-summary-lis">
+          <p>
+            <strong>Score: {score}</strong> / {total}
+          </p>
+        </div>
+
+        <div className="score-detail-lis">
+          {Object.keys(correctAnswers).map((num) => (
+            <div key={num} className="score-item-lis">
+              <span className="score-num-lis">({num})</span>
+              <span
+                className={`score-user-lis ${
+                  userAnswers[num] &&
+                  userAnswers[num].trim().toLowerCase() ===
+                    correctAnswers[num].trim().toLowerCase()
+                    ? "correct-lis"
+                    : "wrong-lis"
+                }`}
+              >
+                Your answer: {userAnswers[num] || "—"}
+              </span>
+              <span className="score-correct-lis">
+                Correct: {correctAnswers[num]}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="score-buttons-lis">
+          <button onClick={() => navigate("/")}>Return Home Page</button>
+          <button onClick={() => navigate("/listen")}>Try Another Test</button>
+        </div>
       </div>
     </div>
   );

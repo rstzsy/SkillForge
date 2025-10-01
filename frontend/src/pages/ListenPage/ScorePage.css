@@ -1,14 +1,42 @@
 @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
 
-/* Container */
-.score-container-lis {
-  max-width: 800px;
+/* Layout tổng */
+.score-page-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
   margin: 40px auto;
+  max-width: 1200px;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+/* left side */
+.ai-feedback-lis {
+  flex: 1;
+  background: #FFFBDE;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.ai-feedback-lis h3 {
+  font-size: 22px;
+  font-weight: bold;
+  color: #d5a30a;
+  margin-bottom: 15px;
+}
+
+/* Container bên phải */
+.score-container-lis {
+  flex: 2;
+  max-width: 800px;
   padding: 20px;
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-  font-family: 'Baloo 2', cursive, sans-serif;
 }
 
 /* Title */
@@ -103,10 +131,25 @@
   background: #4cae4c;
 }
 
-/* responsive */
+/* Responsive */
+@media (max-width: 992px) {
+  .score-page-layout {
+    flex-direction: column;
+    max-width: 90%;
+  }
+
+  .ai-feedback-lis {
+    width: 100%;
+  }
+
+  .score-container-lis {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   .score-container-lis {
-    margin: 20px;
+    margin: 20px 0;
     padding: 15px;
   }
 
@@ -159,4 +202,3 @@
     font-size: 14px;
   }
 }
-
