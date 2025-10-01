@@ -74,10 +74,10 @@ const Header = () => {
           <div className="nav-dropdown">
             <button className="nav-link dropdown-btn">Skills</button>
             <div className="dropdown-menu">
-              <Link to="/skills/speaking">Speaking</Link>
-              <Link to="/skills/reading">Reading</Link>
-              <Link to="/shop/listening">Listening</Link>
-              <Link to="/shop/writing">Writing</Link>
+              <Link to="/speak">Speaking</Link>
+              <Link to="/read">Reading</Link>
+              <Link to="/listen">Listening</Link>
+              <Link to="/write">Writing</Link>
             </div>
           </div>
 

@@ -1,0 +1,170 @@
+.write-page {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background: #fff;
+    font-family: 'Baloo 2', cursive, sans-serif;
+  }
+  
+  /* Left side */
+  .write-left {
+    flex: 1;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 12px;
+  }
+  
+  .question-box {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .question-text {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  
+  .question-image {
+    width: 100%;
+    border-radius: 10px;
+  }
+  
+  /* Right side */
+  .write-right {
+    flex: 1.2; /* rộng hơn để viết thoải mái */
+    background: #fffaf4;
+    padding: 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Header */
+  .write-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .word-count {
+    font-size: 14px;
+    color: #666;
+    font-weight: 700;
+  }
+
+  .timeCountdown {
+    font-size: 25px;
+    color: #666;
+    font-weight: 700;
+  }
+  
+  /* Toggle switch */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-left: 10px;
+  }
+  
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: 0.4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #ff9e47;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(18px);
+  }
+  
+  /* Form sections */
+  .write-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .form-section label {
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  .form-section textarea {
+    width: 100%;
+    min-height: 120px; /* cao hơn */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    resize: vertical;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  
+  /* Footer */
+  .write-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .back-btn {
+    background: #eee;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 400;
+    font-family: 'Baloo 2', cursive, sans-serif;
+  }
+  
+  .ai-btn {
+    background: #ff9e47;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 400;
+    font-family: 'Baloo 2', cursive, sans-serif;
+  }
+  

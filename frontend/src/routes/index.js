@@ -5,6 +5,8 @@ import Register from "../pages/Register/Register";
 import ListenDetail from "../pages/ListenPage/ListenDetail";
 import Score from "../pages/ListenPage/ScorePage"
 import Read from "../pages/ReadPage/ReadPage";
+import WritePage from "../pages/WritePage/WritePage";
+import WriteDetail from "../pages/WritePage/WriteDetail";
 import ReadDetail from "../pages/ReadPage/ReadDetail";
 import ScoreRead from "../pages/ReadPage/ScoreReadPage";
 import Account from "../pages/Account/Account";
@@ -47,6 +49,16 @@ export const routes = [
         page: Read,
         isShowHeader: true,
         isShowFooter: true
+    },
+    {
+        path: '/write',
+        page: WritePage,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/write/:id',
+        page: WriteDetail,
     },
     {
         path: '/read/:id',
