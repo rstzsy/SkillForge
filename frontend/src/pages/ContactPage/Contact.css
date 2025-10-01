@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+.contact-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  min-height: 80vh;
+  padding: 40px;
+  gap: 30px;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+/* lefft-side */
+.contact-form {
+  flex: 1;
+  padding: 30px;
+  border-radius: 12px;
+}
+
+.contact-form h2 {
+  margin-bottom: 20px;
+  color: #ff7221;
+}
+
+.contact-form label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+  color: #d5a30a;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 8px;
+  border: 1px solid #f2dd9e;
+  border-radius: 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: #d5a30a;
+  outline: none;
+}
+
+.contact-form button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background: #f2dd9e;
+  border: none;
+  border-radius: 20px;
+  color: #ff7221;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* right-side */
+.contact-map {
+  flex: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ressponsive*/
+@media (max-width: 992px) {
+  .contact-container {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .contact-form,
+  .contact-map {
+    width: 100%;
+  }
+
+  .contact-map {
+    height: 300px;
+  }
+}

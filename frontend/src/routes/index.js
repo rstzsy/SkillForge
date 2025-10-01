@@ -8,6 +8,7 @@ import Read from "../pages/ReadPage/ReadPage";
 import ReadDetail from "../pages/ReadPage/ReadDetail";
 import ScoreRead from "../pages/ReadPage/ScoreReadPage";
 import Account from "../pages/Account/Account";
+import Contact from "../pages/ContactPage/Contact";
 
 export const routes = [
     {
@@ -60,6 +61,12 @@ export const routes = [
     {
         path: '/account',
         page: Account,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/contact',
+        page: Contact,
         isShowHeader: true,
         isShowFooter: true
     },
