@@ -11,6 +11,8 @@ import ReadDetail from "../pages/ReadPage/ReadDetail";
 import ScoreRead from "../pages/ReadPage/ScoreReadPage";
 import Account from "../pages/Account/Account";
 import Contact from "../pages/ContactPage/Contact";
+import SpeakPage from "../pages/SpeakPage/SpeakPage";
+import SpeakDetail from "../pages/SpeakPage/SpeakDetail";
 
 export const routes = [
     {
@@ -59,6 +61,16 @@ export const routes = [
     {
         path: '/write/:id',
         page: WriteDetail,
+    },
+    {
+        path: '/speak',
+        page: SpeakPage,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/speak/:id',
+        page: SpeakDetail,
     },
     {
         path: '/read/:id',

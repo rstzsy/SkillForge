@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+.speaking-page {
+  display: flex;
+  font-family: 'Baloo 2', cursive, sans-serif;
+  background: #f8f9fb;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar-speak {
+    width: 220px;
+    background: #fff3d9;
+    padding: 20px;
+    margin-top: 80px;
+    margin-left: 50px;
+    border-radius: 20px;
+    align-self: flex-start;
+    height: auto;
+}
+
+.sidebar-speak h3 {
+  margin-bottom: 15px;
+  font-size: 18px;
+  color: #dc9f36;
+}
+
+.filter-group-speak label {
+  display: block;
+  margin: 20px 0;
+  font-size: 18px;
+}
+
+/* Content */
+.content-speak {
+  flex: 1;
+  padding: 20px 30px;
+}
+
+.tabs-search-speak {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  margin-bottom: 20px; 
+}
+
+/* Tabs */
+.tabs-speak button {
+  border: 1px solid #fff3d9;
+  background: #fff;
+  padding: 12px 20px;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 16px;
+  font-weight: 700;
+}
+
+.tabs-speak button.active {
+  background: #fff3d9;
+  color: #dc9f36;
+  border-color: #fff3d9;
+}
+
+/* Search */
+.search-speak {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px 8px;
+  border: 1px solid #dc9f36;
+  gap: 8px; 
+}
+
+.search-speak input {
+  flex: 1; 
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  border-radius: 6px;
+}
+
+/* Cards */
+.cards-speak {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 20px;
+}
+
+.card-speak {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.card-speak:hover {
+  transform: translateY(-4px);
+}
+
+.card-speak img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+}
+
+.card-info-speak {
+  padding: 12px;
+}
+
+.section-speak {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.card-speak h4 {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.type-speak {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.attempts-speak {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Completed label */
+.completed-label {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #28a745; 
+  color: white;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Radio */
+input[type="radio"] {
+  width: 20px;  
+  height: 20px;
+  accent-color: #9e7400; 
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .speaking-page {
+    flex-direction: column;
+    align-items: center;
+  }
+  .sidebar-speak {
+    margin: 20px 0;
+    width: 90%;
+  }
+}

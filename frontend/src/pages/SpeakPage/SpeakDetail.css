@@ -1,0 +1,223 @@
+.speak-detail-page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    background: #fff9f4;
+    font-family: 'Baloo 2', cursive, sans-serif;
+    position: relative;
+  }
+  
+  /* Sidebar Left */
+  .sidebar-left {
+    width: 280px;
+    background: #fff;
+    border-right: 1px solid #eee;
+    padding: 15px;
+    overflow-y: auto;
+  }
+  
+  .search-topic {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin-bottom: 15px;
+  }
+  
+  .search-topic input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+  }
+  
+  .search-btn {
+    background: #dc9f36;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .topic-item {
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #f9f9f9;
+    font-size: 14px;
+  }
+  
+  .topic-item.active {
+    background: #ffe8b3;
+    font-weight: bold;
+  }
+  
+  /* Main Content */
+  .question-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .question-box {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+  .audio-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 18px;
+  }
+  
+  .nav-buttons {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-buttons button {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  /* Sidebar Right */
+  .sidebar-right {
+    width: 280px;
+    background: #fff;
+    border-left: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+  
+  .micro-check {
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+  
+  .note-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .note-header {
+    display: flex;
+    justify-content: space-between;
+    background: #ffe066;
+    padding: 6px 10px;
+    border-radius: 6px 6px 0 0;
+    font-weight: bold;
+  }
+  
+  .note-box textarea {
+    flex: 1;
+    resize: none;
+    border: 1px solid #ffe066;
+    border-top: none;
+    padding: 10px;
+    font-size: 14px;
+  }
+  
+  /* Bottom bar */
+  .bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 280px;
+    right: 280px;
+    background: #fff9f4;
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+  }
+  
+  .record-btn {
+    background: #ff7f32;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+ /* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+  }
+  
+  /* Modal content */
+  .modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    font-family: 'Baloo 2', cursive, sans-serif;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+  
+  .modal-content h3 {
+    margin-bottom: 16px;
+    color: #1a1a1a;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .modal-content ul {
+    text-align: left;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+  }
+  
+  .check-mic-btn {
+    background-color: #ff6b35;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .check-mic-btn:hover {
+    background-color: #e85a2c;
+  }
+  .check-mic-btn:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+  }
+  
