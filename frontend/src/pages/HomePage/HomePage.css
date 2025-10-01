@@ -13,7 +13,7 @@ html, body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
-    background-color: #fff2e0;
+    background-color: #fffaf0;
     color: #fff;
     padding: 4rem clamp(1rem, 4vw, 5rem);
     align-items: center;
@@ -84,7 +84,7 @@ html, body {
 }
   
 .intro-detail {
-    background-color: #fff2e0;
+    background-color: #fffaf0;
     padding: 1.5rem;
 }
   
@@ -259,7 +259,7 @@ html, body {
 
 .suggested-exercises {
   margin: 60px auto;
-  padding: 20px;
+  padding: 5px;
   max-width: 1200px;
   font-family: 'Baloo 2', cursive, sans-serif;
 }
@@ -440,3 +440,186 @@ html, body {
     justify-content: space-between;
   }
 }
+
+
+/* VIDEO CALL SECTION */
+.video-call-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+    padding: 10px 8%;
+    /* background: #fffaf0; */
+    font-family: 'Baloo 2', cursive, sans-serif;
+  }
+  
+  .video-call-left {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .video-call-image {
+    width: 100%;
+    max-width: 550px;
+  }
+  
+  .video-call-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .video-call-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #fe5d01;
+    line-height: 1.3;
+  }
+  
+  .video-call-title .highlight {
+    color: #f10d5b;
+  }
+  
+  .video-call-text {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.6;
+  }
+  
+  .video-call-points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  
+  .video-call-points li {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 500;
+    gap: 10px;
+  }
+
+  .point-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+  
+  .book-btn {
+    background: linear-gradient(135deg, #ffe7b3, #ffd77d);
+    color: #fe5d01;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(252, 219, 140, 0.484);
+  }
+  
+  .book-btn:hover {
+    background: linear-gradient(135deg, #ffc94d, #ffb733);
+    color: #f10d5b;
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(247, 178, 18, 0.484);
+  }
+  
+  /* Responsive */
+  @media (max-width: 900px) {
+    .video-call-section {
+      grid-template-columns: 1fr;
+      text-align: left;
+    }
+  
+    .video-call-left {
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+/* SERVICES SECTION */
+.services-section {
+    background: #fffaf0;
+    color: #000000;
+    padding: 60px 20px;
+    text-align: center;
+    font-family: "Baloo 2", cursive, sans-serif;
+  }
+  
+  .services-title {
+    font-size: 2rem;
+    margin-bottom: 40px;
+    font-weight: 700;
+    color: #fe5d01;
+  }
+  
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    justify-items: center;
+  }
+  
+  .service-card {
+    background: transparent;
+    text-align: left;
+    max-width: 300px;
+  }
+  
+  /* Icon style */
+  .service-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(255, 165, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+  }
+  
+  .service-icon img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+  }
+  
+  .service-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fe5d01;
+  }
+  
+  .service-desc {
+    font-size: 0.95rem;
+    color: #000000;
+    line-height: 1.5;
+  }
+  
+  /* Responsive: icon bên trái, text bên phải */
+  @media (max-width: 768px) {
+    .service-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      max-width: 100%;
+    }
+  
+    .service-icon {
+      margin-bottom: 0; /* bỏ margin dưới */
+    }
+  
+    .service-content {
+      text-align: left;
+    }
+  }
+  

@@ -22,6 +22,29 @@ const exercises = [
   { id: 8, title: "Speaking Part 3 – Discussion", skill: "S", difficulty: "Medium", duration: 20 },
 ];
 
+const services = [
+    {
+      icon: "/assets/ieltsTestService.png",
+      title: "IELTS Tests",
+      desc: "Access a bank of real IELTS tests and practice mock exams anytime.",
+    },
+    {
+      icon: "/assets/aiService.png",
+      title: "AI Scoring & Guidance",
+      desc: "AI evaluates Speaking & Writing, analyzes Reading & Listening, and suggests a personalized study roadmap.",
+    },
+    {
+      icon: "/assets/personalizedService.png",
+      title: "Personalized Learning",
+      desc: "Track your learning history, adapt exercises to your weak points, and get smarter recommendations.",
+    },
+    {
+      icon: "/assets/reportService.png",
+      title: "Reports & Statistics",
+      desc: "View progress charts, compare with goals, and export detailed study reports as PDF or via email.",
+    },
+];
+
 const ITEMS_PER_PAGE = 4;
 
 const HomePage = () => {
@@ -180,7 +203,7 @@ const HomePage = () => {
           {currentExercises.length === 0 && <p>No exercises found.</p>}
         </div>
 
-        {/* Phân trang */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination-controls">
             <button
@@ -203,6 +226,66 @@ const HomePage = () => {
           </div>
         )}
       </section>
+
+      {/* Video Call Section */}
+        <section className="video-call-section">
+            <div className="video-call-left">
+                <img
+                src="/assets/videoCall1.png"
+                alt="Video Call with Teacher"
+                className="video-call-image"
+                />
+            </div>
+
+            <div className="video-call-right">
+                <h2 className="video-call-title">
+                    Book a <span className="highlight">1-on-1 Video Class</span> <br /> with IELTS Experts
+                </h2>
+                <p className="video-call-text">
+                    Get personalized guidance from certified IELTS teachers. 
+                    Practice speaking, receive instant feedback, and accelerate your progress 
+                    with interactive video call sessions.
+                </p>
+
+                <ul className="video-call-points">
+                    <li>
+                        <img src="/assets/video.png" alt="Video Call" className="point-icon" />
+                        Real-time speaking practice
+                    </li>
+                    <li>
+                        <img src="/assets/schedule.png" alt="Calendar" className="point-icon" />
+                        Flexible scheduling options
+                    </li>
+                    <li>
+                        <img src="/assets/star.png" alt="Expert Feedback" className="point-icon" />
+                        Expert feedback & tips
+                    </li>
+                </ul>
+
+
+                <button className="book-btn">Book a Session</button>
+            </div>
+        </section>
+
+        {/* Services Section */}
+        <section className="services-section">
+            <h2 className="services-title">Our Services</h2>
+            <div className="services-grid">
+                {services.map((service, idx) => (
+                    <div className="service-card" key={idx}>
+                        <div className="service-icon">
+                            <img src={service.icon} alt={service.title} />
+                        </div>
+                        <div className="service-content">
+                            <h3 className="service-title">{service.title}</h3>
+                            <p className="service-desc">{service.desc}</p>
+                        </div>
+                    </div>
+                  
+                  
+                ))}
+            </div>
+        </section>
     </>
   );
 };

@@ -10,12 +10,12 @@ const Footer = () => {
         {/* Logo + Description */}
         <div className="footer-col footer-brand">
           <div className="footer-logo">
-            <img src="/assets/logo2.png" alt="SkillForge Logo" className="footer-logo-img" />
+            <img src="/assets/logo2.png" alt="IELTSForge Logo" className="footer-logo-img" />
             <span className="footer-logo-text">SkillForge</span>
           </div>
           <p className="footer-desc">
-            Donec elementum aliquet dui, ut feugiat est vulputate quis.
-            Etiam egestas nulla nec odio posuere, ut porta tortor pretium.
+            SkillForge helps you prepare for the IELTS test comprehensively with a test bank, 
+            smart AI scoring and a personalized learning path to achieve your desired band score.
           </p>
           <div className="footer-socials">
             <a href="#"><FiTwitter /></a>
@@ -28,23 +28,22 @@ const Footer = () => {
         <div className="footer-col">
           <h4>About</h4>
           <ul>
-            <li><a href="#">History</a></li>
-            <li><a href="#">Our Team</a></li>
+            <li><a href="#">Our Story</a></li>
+            <li><a href="#">Teachers & Experts</a></li>
+            <li><a href="#">Partnerships</a></li>
             <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Services Offered</a></li>
-            <li><a href="#">Product Catalog</a></li>
           </ul>
         </div>
 
-        {/* Information */}
+        {/* Learning */}
         <div className="footer-col">
-          <h4>Information</h4>
+          <h4>Learning</h4>
           <ul>
-            <li><a href="#">Store Location</a></li>
-            <li><a href="#">Order Tracking</a></li>
-            <li><a href="#">Affiliate</a></li>
-            <li><a href="#">Sizing Guide</a></li>
-            <li><a href="#">Accessibility</a></li>
+            <li><a href="#">Placement Test</a></li>
+            <li><a href="#">IELTS Practice Tests</a></li>
+            <li><a href="#">AI Scoring</a></li>
+            <li><a href="#">Video Call with Teachers</a></li>
+            <li><a href="#">Reports & Statistics</a></li>
           </ul>
         </div>
 
@@ -52,11 +51,11 @@ const Footer = () => {
         <div className="footer-col">
           <h4>Support</h4>
           <ul>
-            <li><a href="#">Your Account</a></li>
-            <li><a href="#">Press Release</a></li>
-            <li><a href="#">Return Centre</a></li>
-            <li><a href="#">App Download</a></li>
-            <li><a href="#">Advertisements</a></li>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Feedback</a></li>
+            <li><a href="#">Terms & Conditions</a></li>
           </ul>
         </div>
       </div>
