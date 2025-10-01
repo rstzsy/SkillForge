@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+/* Wrapper chia 2 bên */
+.account-wrapper {
+  display: flex;
+  max-width: 900px;
+  margin: 40px auto;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+/* Left side (Avatar) */
+.account-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+
+.account-avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 2px solid #d5a30a;
+  object-fit: cover;
+}
+
+.account-avatar-btn {
+  margin-top: 15px;
+  background: #d5a30a;
+  border: none;
+  border-radius: 20px;
+  color: #FFFBDE;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* Right side (Form) */
+.account-right {
+  flex: 2;
+  padding: 30px;
+}
+
+.account-title {
+  font-size: 30px;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #ff843d;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.account-form label {
+  font-size: 16px;
+  color: #d5a30a;
+  font-weight: bold;
+}
+
+.account-form input {
+  padding: 20px;
+  border: 1px solid #f2dd9e;
+  border-radius: 20px;
+  outline: none;
+  transition: border 0.3s;
+  font-size: 18px;
+}
+
+.account-form input:focus {
+  border-color: #d5a30a;
+}
+
+.account-update-btn {
+  margin-top: 10px;
+  background: #f8f2c2;
+  color: #d5a30a;
+  border: none;
+  padding: 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.account-update-btn:hover {
+  background: #d5a30a;
+  color: #f8f2c2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .account-wrapper {
+    flex-direction: column;
+  }
+
+  .account-left {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+  }
+}

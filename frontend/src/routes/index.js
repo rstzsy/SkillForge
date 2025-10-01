@@ -7,6 +7,7 @@ import Score from "../pages/ListenPage/ScorePage"
 import Read from "../pages/ReadPage/ReadPage";
 import ReadDetail from "../pages/ReadPage/ReadDetail";
 import ScoreRead from "../pages/ReadPage/ScoreReadPage";
+import Account from "../pages/Account/Account";
 
 export const routes = [
     {
@@ -53,6 +54,12 @@ export const routes = [
     {
         path: '/score/read/:id',
         page: ScoreRead,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/account',
+        page: Account,
         isShowHeader: true,
         isShowFooter: true
     },
