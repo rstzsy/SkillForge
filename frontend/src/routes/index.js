@@ -13,6 +13,7 @@ import Account from "../pages/Account/Account";
 import Contact from "../pages/ContactPage/Contact";
 import SpeakPage from "../pages/SpeakPage/SpeakPage";
 import SpeakDetail from "../pages/SpeakPage/SpeakDetail";
+import AdminDashboard from "../pages/Admin/AdminDashboard/DashBoard";
 
 export const routes = [
     {
@@ -93,5 +94,9 @@ export const routes = [
         page: Contact,
         isShowHeader: true,
         isShowFooter: true
+    },
+    {
+        path: '/admin',
+        page: AdminDashboard,
     },
 ]
