@@ -16,6 +16,7 @@ import SpeakDetail from "../pages/SpeakPage/SpeakDetail";
 import AdminDashboard from "../pages/Admin/AdminDashboard/DashBoard";
 import AdminUser from "../pages/Admin/AdminUser/ManageUser";
 import UpdateUser from "../pages/Admin/AdminUser/UpdateUser"
+import AdminTestResult from "../pages/Admin/AdminTestResult/AdminTestResult";
 
 export const routes = [
     {
@@ -108,5 +109,9 @@ export const routes = [
     {
         path: '/admin/manage_user/update/:id',
         page: UpdateUser,
+    },
+    {
+        path: '/admin/test_results',
+        page: AdminTestResult,
     },
 ]
