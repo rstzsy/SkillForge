@@ -14,6 +14,8 @@ import Contact from "../pages/ContactPage/Contact";
 import SpeakPage from "../pages/SpeakPage/SpeakPage";
 import SpeakDetail from "../pages/SpeakPage/SpeakDetail";
 import AdminDashboard from "../pages/Admin/AdminDashboard/DashBoard";
+import AdminUser from "../pages/Admin/AdminUser/ManageUser";
+import UpdateUser from "../pages/Admin/AdminUser/UpdateUser"
 
 export const routes = [
     {
@@ -98,5 +100,13 @@ export const routes = [
     {
         path: '/admin',
         page: AdminDashboard,
+    },
+    {
+        path: '/admin/manage_user',
+        page: AdminUser,
+    },
+    {
+        path: '/admin/manage_user/update/:id',
+        page: UpdateUser,
     },
 ]
