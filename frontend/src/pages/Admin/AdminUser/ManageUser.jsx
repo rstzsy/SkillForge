@@ -24,8 +24,13 @@ const ManageUser = () => {
   ]);
 
   const navigate = useNavigate();
+
   const handleUpdate = (id) => {
     navigate(`/admin/manage_user/update/${id}`);
+  };
+
+  const handleViewLearningPath = (id) => {
+    navigate(`/admin/manage_user/learning_path/${id}`);
   };
 
   return (
@@ -39,6 +44,7 @@ const ManageUser = () => {
           <table className="user-table-usermanage">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Avatar</th>
                 <th>Username</th>
                 <th>Email</th>
@@ -50,6 +56,7 @@ const ManageUser = () => {
             <tbody>
               {users.map((user) => (
                 <tr key={user.id}>
+                  <td data-label="ID">{user.id}</td>
                   <td>
                     <img
                       src={user.avatar}
@@ -71,12 +78,18 @@ const ManageUser = () => {
                       {user.active ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td data-label="Control">
+                  <td data-label="Control" className="control-buttons-usermanage">
                     <button
                       className="btn-update-usermanage"
                       onClick={() => handleUpdate(user.id)}
                     >
                       Update
+                    </button>
+                    <button
+                      className="btn-learningpath-usermanage"
+                      onClick={() => handleViewLearningPath(user.id)}
+                    >
+                      View Learning Path
                     </button>
                   </td>
                 </tr>

@@ -149,3 +149,18 @@
     margin-bottom: 8px;
   }
 }
+
+/* Nút View Learning Path */
+.btn-learningpath-usermanage {
+  background: linear-gradient(135deg, #4cafef, #2196f3);
+  color: #fff;
+  border: none;
+  padding: 8px 17px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+
