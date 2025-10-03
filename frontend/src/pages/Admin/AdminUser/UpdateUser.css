@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+.main-content-updateuser {
+  padding: 20px;
+  font-family: "Baloo 2", cursive, sans-serif;
+  position: relative;
+}
+
+.page-title-updateuser {
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 350px;
+  color: #d5a30a;
+  font-size: 30px;
+
+}
+
+.update-user-form-updateuser {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.update-user-avatar-updateuser {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-top: 8px;
+}
+
+.form-group-updateuser {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group-updateuser label {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.form-group-updateuser input,
+.form-group-updateuser select {
+  padding: 10px 13px;
+  border-radius: 15px;
+  border: 1px solid #d5a30a;
+  font-size: 16px;
+}
+
+.checkbox-group-updateuser {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-save-updateuser {
+  background: #f6f0c7;
+  color: #d5a30a;
+  font-weight: bold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-cancel-updateuser {
+  background: #ff8b97;
+  color: rgb(157, 3, 3);
+  font-weight: bold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.button-group-updateuser {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.button-group-updateuser .btn-save-updateuser,
+.button-group-updateuser .btn-cancel-updateuser {
+  flex: 1; /*2 nut bang nhau*/
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .main-content-updateuser {
+    padding: 10px;
+    margin-top: 30px;
+    margin-left: 60px;
+  }
+
+  .page-title-updateuser {
+    color: #d5a30a;
+    margin-left: 60px;
+
+  }
+
+  .update-user-form-updateuser {
+    padding: 16px;
+    max-width: 100%;
+    width: 100%;
+    gap: 12px;
+  }
+
+  .update-user-avatar-updateuser {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 10px auto;
+  }
+
+  .form-group-updateuser {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group-updateuser input,
+  .form-group-updateuser select {
+    width: 100%;
+    font-size: 14px;
+    padding: 6px 8px;
+  }
+
+  .checkbox-group-updateuser {
+    flex-direction: row;
+    gap: 6px;
+    font-size: 14px;
+  }
+
+  .btn-save-updateuser,
+  .btn-cancel-updateuser {
+    width: 100%;
+    padding: 8px 0;
+    font-size: 14px;
+  }
+}

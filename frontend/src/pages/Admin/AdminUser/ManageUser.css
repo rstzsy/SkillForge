@@ -1,0 +1,151 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+/* main */
+.main-content-usermanage {
+  flex: 1;
+  padding: 20px;
+  margin-top: 40px;
+  margin-left: 240px;
+  transition: margin-left 0.3s ease;
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+.user-table-wrapper-usermanage {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+.page-title-usermanage {
+    color: #d5a30a;
+    font-size: 30px;
+}
+
+/* table */
+.user-table-usermanage {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  min-width: 700px;
+}
+
+.user-table-usermanage thead {
+    background-color: #FFFBDE;
+    color: #ff7221;
+
+}
+
+.user-table-usermanage th,
+.user-table-usermanage td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap; /* chu khong xuong dong */
+}
+
+/* Avatar */
+.user-avatar-usermanage {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* state */
+.active-usermanage {
+  color: green;
+  font-weight: bold;
+}
+.inactive-usermanage {
+  color: red;
+  font-weight: bold;
+}
+
+/* button */
+.btn-update-usermanage {
+  background: #d5a30a;
+  color: #FFFBDE;
+  border: none;
+  padding: 8px 17px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-content-usermanage {
+    margin-left: 60px;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  .user-table-wrapper-usermanage {
+    overflow-x: hidden;
+    padding: 0;
+  }
+
+  .user-table-usermanage {
+    display: block;
+    width: 100%;
+    font-size: 14px;
+    min-width: 0;
+  }
+
+  .user-table-usermanage thead {
+    display: none;
+  }
+
+  .user-table-usermanage tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .user-table-usermanage tr {
+    display: block;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .user-table-usermanage td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+    white-space: normal;
+    position: relative;
+  }
+
+  .user-table-usermanage td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+    text-align: left;
+    margin-right: 8px;
+    position: relative;
+    z-index: 0;
+    color: #ff7221;
+  }
+
+  .btn-update-usermanage {
+    width: 100%;
+    padding: 8px 0;
+    margin-top: 8px;
+    z-index: 2;
+    position: relative;
+  }
+
+  /* Avatar */
+  .user-avatar-usermanage {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 8px;
+  }
+}
