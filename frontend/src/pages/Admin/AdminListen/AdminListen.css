@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+.lesson-container-listenadmin {
+  margin-left: 240px; /*  sidebar */
+  margin-top: 40px; /*  header */
+  padding: 20px;
+  min-height: 100vh;
+  font-family: "Baloo 2", cursive, sans-serif;
+  position: relative;
+  z-index: 1;
+}
+
+.lesson-title-listenadmin {
+  font-size: 30px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #d5a30a;
+}
+
+.lesson-filter-listenadmin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+  justify-content: end;
+  position: relative;
+  z-index: 1;
+}
+
+.lesson-search-listenadmin,
+.lesson-select-listenadmin {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.lesson-grid-listenadmin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Card */
+.lesson-card-listenadmin {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.lesson-card-listenadmin:hover {
+  transform: translateY(-4px);
+}
+
+/* Ảnh */
+.lesson-image-listenadmin {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+/* Section badge */
+.lesson-section-badge-listenadmin {
+  display: inline-block;
+  background: #fffbde;
+  color: #ff7221;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Title */
+.lesson-card-title-listenadmin {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+/* Type */
+.lesson-type-listenadmin {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* Attempts */
+.lesson-attempts-listenadmin {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+
+/* Control */
+.lesson-control-listenadmin {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.lesson-btn-edit-listenadmin,
+.lesson-btn-delete-listenadmin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+}
+
+.lesson-btn-edit-listenadmin {
+  background: #d5a30a;
+  color: white;
+}
+
+.lesson-btn-delete-listenadmin {
+  background: #ef4444;
+  color: white;
+}
+
+.lesson-btn-add-listadmin {
+  margin-top: 20px;
+  background-color: #d5a30a;
+  color: #fffbde;
+  padding: 10px 18px;
+  border-radius: 15px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .lesson-container-listenadmin {
+    margin-left: 100px; /*  sidebar */
+  }
+  .lesson-grid-listenadmin {
+    grid-template-columns: repeat(2, 1fr); /* Tablet */
+  }
+  .lesson-filter-listenadmin {
+    justify-content: start;
+  }
+  .lesson-container-listenadmin {
+    position: relative;
+    z-index: 1; 
+  }
+}
+
+@media (max-width: 640px) {
+  .lesson-container-listenadmin {
+    margin-left: 60px; /*  sidebar */
+  }
+  .lesson-grid-listenadmin {
+    grid-template-columns: 1fr; /* Mobile */
+  }
+}
