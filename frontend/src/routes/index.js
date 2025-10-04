@@ -18,6 +18,7 @@ import AdminUser from "../pages/Admin/AdminUser/ManageUser";
 import UpdateUser from "../pages/Admin/AdminUser/UpdateUser"
 import AdminTestResult from "../pages/Admin/AdminTestResult/AdminTestResult";
 import AdminListen from "../pages/Admin/AdminListen/AdminListen"
+import AdminLearningPath from "../pages/Admin/AdminLearningPath/AdminLearningPath";
 
 export const routes = [
     {
@@ -110,6 +111,10 @@ export const routes = [
     {
         path: '/admin/manage_user/update/:id',
         page: UpdateUser,
+    },
+    {
+        path: '/admin/manage_user/learning_path/:id',
+        page: AdminLearningPath,
     },
     {
         path: '/admin/test_results',

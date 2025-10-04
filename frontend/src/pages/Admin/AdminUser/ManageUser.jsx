@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "./ManageUser.css";
 
 const ManageUser = () => {
-  const [users, setUsers] = useState([
+  const [users] = useState([
     {
       id: 1,
       avatar: "/assets/avatar.jpg",
@@ -25,19 +25,18 @@ const ManageUser = () => {
 
   const navigate = useNavigate();
 
-  const handleUpdate = (id) => {
-    navigate(`/admin/manage_user/update/${id}`);
+  const handleUpdate = (user) => {
+    navigate(`/admin/manage_user/update/${user.id}`, { state: { user } });
   };
 
-  const handleViewLearningPath = (id) => {
-    navigate(`/admin/manage_user/learning_path/${id}`);
+  const handleViewLearningPath = (user) => {
+    navigate(`/admin/manage_user/learning_path/${user.id}`, { state: { user } });
   };
 
   return (
     <div className="admin-container-usermanage">
       <AdminHeader />
 
-      {/* Nội dung quản lý người dùng */}
       <div className="main-content-usermanage">
         <h2 className="page-title-usermanage">Manage Users</h2>
         <div className="user-table-wrapper-usermanage">
@@ -81,13 +80,13 @@ const ManageUser = () => {
                   <td data-label="Control" className="control-buttons-usermanage">
                     <button
                       className="btn-update-usermanage"
-                      onClick={() => handleUpdate(user.id)}
+                      onClick={() => handleUpdate(user)}
                     >
                       Update
                     </button>
                     <button
                       className="btn-learningpath-usermanage"
-                      onClick={() => handleViewLearningPath(user.id)}
+                      onClick={() => handleViewLearningPath(user)}
                     >
                       View Learning Path
                     </button>
