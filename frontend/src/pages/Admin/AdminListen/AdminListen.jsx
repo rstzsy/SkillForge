@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -48,17 +49,26 @@ const lessonsData = [
 ];
 
 const AdminListen = () => {
+  const [lessons, setLessons] = useState(lessonsData);
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState("");
   const [filterType, setFilterType] = useState("");
+  const navigate = useNavigate();
 
-  const filteredLessons = lessonsData.filter((lesson) => {
+  const filteredLessons = lessons.filter((lesson) => {
     return (
       lesson.title.toLowerCase().includes(search.toLowerCase()) &&
       (filterSection ? lesson.section === filterSection : true) &&
       (filterType ? lesson.type === filterType : true)
     );
   });
+
+  // Hàm xoa bai
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure you want to delete this lesson?")) {
+      setLessons(lessons.filter((lesson) => lesson.id !== id));
+    }
+  };
 
   return (
     <div className="lesson-container-listenadmin">
@@ -129,10 +139,18 @@ const AdminListen = () => {
 
             {/* Control buttons */}
             <div className="lesson-control-listenadmin">
-              <button className="lesson-btn-edit-listenadmin">
+              <button
+                className="lesson-btn-edit-listenadmin"
+                onClick={() =>
+                  navigate(`/admin/practice_listening/edit/${lesson.id}`)
+                }
+              >
                 <FontAwesomeIcon icon={faPen} size="sm" />
               </button>
-              <button className="lesson-btn-delete-listenadmin">
+              <button
+                className="lesson-btn-delete-listenadmin"
+                onClick={() => handleDelete(lesson.id)}
+              >
                 <FontAwesomeIcon icon={faTrash} size="sm" />
               </button>
             </div>
@@ -141,10 +159,12 @@ const AdminListen = () => {
       </div>
 
       {/* add button */}
-      <button className="lesson-btn-add-listadmin">
+      <button
+        className="lesson-btn-add-listadmin"
+        onClick={() => navigate("/admin/practice_listening/add")}
+      >
         Add Task
       </button>
-      
     </div>
   );
 };

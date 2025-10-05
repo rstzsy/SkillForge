@@ -1,0 +1,121 @@
+.addlisten-container {
+  margin-left: 240px; 
+  margin-top: 20px;
+  padding: 20px;
+  font-family: "Baloo 2", cursive, sans-serif;
+  position: relative;
+  z-index: 1;
+}
+
+.addlisten-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #d5a30a;
+}
+
+.addlisten-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.addlisten-form label {
+  font-weight: 600;
+  color: #ff7221;
+}
+
+.addlisten-form input,
+.addlisten-form select,
+.addlisten-form textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  width: 100%; 
+  box-sizing: border-box;
+}
+
+.addlisten-form textarea {
+  min-height: 120px;
+  resize: vertical; 
+}
+
+.addlisten-btn {
+  background: #fcf5c4;
+  border: none;
+  padding: 12px;
+  border-radius: 15px;
+  color: #d5a30a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.addlisten-or {
+  text-align: center;
+  font-style: italic;
+  color: gray;
+}
+
+/* 🔹 Responsive cho tablet */
+@media (max-width: 1024px) {
+  .addlisten-container {
+    margin-left: 200px; /* bỏ sidebar margin để không bị che */
+    padding: 15px;
+  }
+
+  .addlisten-title {
+    font-size: 24px;
+  }
+}
+
+/* 🔹 Responsive cho mobile */
+@media (max-width: 768px) {
+  .addlisten-container {
+    margin-left: 60px;
+    margin-top: 70px; /* chừa khoảng cách cho header nếu header fixed */
+    padding: 15px;
+  }
+
+  .addlisten-form {
+    padding: 15px;
+    gap: 12px;
+  }
+
+  .addlisten-title {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .addlisten-btn {
+    width: 100%; /* nút full width để dễ bấm */
+    font-size: 16px;
+  }
+}
+
+/* 🔹 Responsive cho màn hình rất nhỏ (điện thoại <480px) */
+@media (max-width: 480px) {
+  .addlisten-container {
+    padding: 10px;
+  }
+
+  .addlisten-form {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .addlisten-title {
+    font-size: 20px;
+  }
+
+  .addlisten-btn {
+    padding: 10px;
+    font-size: 14px;
+  }
+}

@@ -19,6 +19,8 @@ import UpdateUser from "../pages/Admin/AdminUser/UpdateUser"
 import AdminTestResult from "../pages/Admin/AdminTestResult/AdminTestResult";
 import AdminListen from "../pages/Admin/AdminListen/AdminListen"
 import AdminLearningPath from "../pages/Admin/AdminLearningPath/AdminLearningPath";
+import AdminAddListen from "../pages/Admin/AdminListen/AdminAddListen"
+import AdminEditListen from "../pages/Admin/AdminListen/AdminEditListen"
 
 export const routes = [
     {
@@ -123,5 +125,13 @@ export const routes = [
     {
         path: '/admin/practice_listening',
         page: AdminListen,
+    },
+    {
+        path: '/admin/practice_listening/add',
+        page: AdminAddListen,
+    },
+    {
+        path: '/admin/practice_listening/edit/:id',
+        page: AdminEditListen,
     },
 ]
