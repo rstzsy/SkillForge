@@ -21,6 +21,10 @@ import AdminListen from "../pages/Admin/AdminListen/AdminListen"
 import AdminLearningPath from "../pages/Admin/AdminLearningPath/AdminLearningPath";
 import AdminAddListen from "../pages/Admin/AdminListen/AdminAddListen"
 import AdminEditListen from "../pages/Admin/AdminListen/AdminEditListen"
+import AdminRead from "../pages/Admin/AdminReading/AdminRead"
+import AdminAddRead from "../pages/Admin/AdminReading/AdminAddRead"
+import AdminEditRead from "../pages/Admin/AdminReading/AdminEditRead"
+
 
 export const routes = [
     {
@@ -133,5 +137,17 @@ export const routes = [
     {
         path: '/admin/practice_listening/edit/:id',
         page: AdminEditListen,
+    },
+    {
+        path: '/admin/practice_reading',
+        page: AdminRead,
+    },
+    {
+        path: '/admin/practice_reading/add',
+        page: AdminAddRead,
+    },
+    {
+        path: '/admin/practice_reading/edit/:id',
+        page: AdminEditRead,
     },
 ]
