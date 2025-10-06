@@ -24,6 +24,7 @@ import AdminEditListen from "../pages/Admin/AdminListen/AdminEditListen"
 import AdminRead from "../pages/Admin/AdminReading/AdminRead"
 import AdminAddRead from "../pages/Admin/AdminReading/AdminAddRead"
 import AdminEditRead from "../pages/Admin/AdminReading/AdminEditRead"
+import TeacherStudent from "../pages/Teacher/TeacherStudent/TeacherStudent";
 
 
 export const routes = [
@@ -149,5 +150,9 @@ export const routes = [
     {
         path: '/admin/practice_reading/edit/:id',
         page: AdminEditRead,
+    },
+    {
+        path: '/teacher/manage_student',
+        page: TeacherStudent,
     },
 ]
