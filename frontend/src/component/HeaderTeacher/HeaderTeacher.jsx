@@ -15,10 +15,10 @@ const HeaderTeacher = ({ children }) => {
 
   const menuItems = [
     { name: "Dashboard", icon: faHouse, link: "/teacher/dashboard" },
-    { name: "Classes", icon: faBook, link: "/teacher/classes" },
-    { name: "Students", icon: faUsers, link: "/teacher/exercises" },
-    { name: "Courses", icon: faChartBar, link: "/teacher/scores" },
-    { name: "Records", icon: faVideo, link: "/teacher/settings" },
+    { name: "Classes", icon: faBook, link: "/teacher/manage_class" },
+    { name: "Students", icon: faUsers, link: "/teacher/manage_student" },
+    { name: "Courses", icon: faChartBar, link: "/teacher/manage_course" },
+    { name: "Records", icon: faVideo, link: "/teacher/manage_record" },
   ];
 
   return (

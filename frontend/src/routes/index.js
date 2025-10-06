@@ -25,7 +25,7 @@ import AdminRead from "../pages/Admin/AdminReading/AdminRead"
 import AdminAddRead from "../pages/Admin/AdminReading/AdminAddRead"
 import AdminEditRead from "../pages/Admin/AdminReading/AdminEditRead"
 import TeacherStudent from "../pages/Teacher/TeacherStudent/TeacherStudent";
-
+import TeacherClass from "../pages/Teacher/TeacherClass/TeacherClass";
 
 export const routes = [
     {
@@ -154,5 +154,9 @@ export const routes = [
     {
         path: '/teacher/manage_student',
         page: TeacherStudent,
+    },
+    {
+        path: '/teacher/manage_class',
+        page: TeacherClass,
     },
 ]
