@@ -1,0 +1,194 @@
+.teacher-header-container {
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+/* Header */
+.teacher-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: #fffbde;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 50;
+}
+
+.teacher-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.teacher-logo-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.teacher-logo-text {
+  font-size: 30px;
+  font-weight: bold;
+  color: #d5a30a;
+  margin-left: 10px;
+}
+
+.teacher-header-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.teacher-noti {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.teacher-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+.username {
+  font-weight: 500;
+  color: #d5a30a;
+}
+
+.teacher-logout {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #d5a30a;
+}
+
+.teacher-logout:hover {
+  color: #fe5d01;
+}
+
+/* Sidebar */
+.teacher-sidebar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  height: 100%;
+  background: #fffbde;
+  color: #fff;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.teacher-sidebar.open {
+  width: 220px;
+}
+
+.teacher-sidebar.collapsed {
+  width: 60px;
+}
+
+.teacher-menu {
+  flex: 1;
+  margin-top: 60px;
+}
+
+.teacher-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #d5a30a;
+  font-size: 20px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.teacher-menu-item:hover {
+  background: #f1d7a6;
+  color: #fe5d01;
+  border-radius: 15px;
+}
+
+.teacher-menu-item .icon {
+  width: 18px;
+}
+
+.menu-text {
+  white-space: nowrap;
+}
+
+/* Nút toggle */
+.sidebar-toggle {
+  margin: 10px auto;
+  padding: 5px 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover {
+  background: #1d4ed8;
+}
+
+/* Main content */
+.teacher-main {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f9fafb;
+  transition: margin-left 0.3s ease;
+  margin-top: 60px;
+}
+
+.teacher-main.ml-open {
+  margin-left: 220px;
+}
+
+.teacher-main.ml-collapsed {
+  margin-left: 60px;
+}
+
+/* ✅ Responsive */
+@media (max-width: 768px) {
+  .teacher-sidebar {
+    width: 60px !important; 
+  }
+  .teacher-main {
+    margin-left: 60px !important;
+  }
+  .menu-text {
+    display: none; 
+  }
+  .username,
+  .logout-text {
+    display: none; 
+  }
+  .teacher-logo-text {
+    font-size: 20px;
+  }
+  .teacher-logo-img {
+    width: 50px;
+    height: 50px;
+  }
+  .teacher-header {
+    height: 80px;
+  }
+}

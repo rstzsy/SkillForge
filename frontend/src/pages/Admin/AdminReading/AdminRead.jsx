@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
-import "./AdminListen.css";
+import "../AdminListen/AdminListen.css";
 
 const lessonsData = [
   {
@@ -48,7 +48,7 @@ const lessonsData = [
   },
 ];
 
-const AdminListen = () => {
+const AdminRead = () => {
   const [lessons, setLessons] = useState(lessonsData);
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState("");
@@ -73,7 +73,7 @@ const AdminListen = () => {
   return (
     <div className="lesson-container-listenadmin">
       <AdminHeader />
-      <h1 className="lesson-title-listenadmin">Manage Listening Practices</h1>
+      <h1 className="lesson-title-listenadmin">Manage Reading Practices</h1>
 
       {/* filter */}
       <div className="lesson-filter-listenadmin">
@@ -94,7 +94,6 @@ const AdminListen = () => {
           <option value="Section 1">Section 1</option>
           <option value="Section 2">Section 2</option>
           <option value="Section 3">Section 3</option>
-          <option value="Section 4">Section 4</option>
         </select>
 
         <select
@@ -105,9 +104,7 @@ const AdminListen = () => {
           <option value="">Types</option>
           <option value="Gap Filling">Gap Filling</option>
           <option value="Map">Map</option>
-          <option value="Filling">Quiz</option>
-          <option value="True/False">Video</option>
-          <option value="Audio">Audio</option>
+          <option value="True/False">True/False</option>
         </select>
       </div>
 
@@ -142,7 +139,7 @@ const AdminListen = () => {
               <button
                 className="lesson-btn-edit-listenadmin"
                 onClick={() =>
-                  navigate(`/admin/practice_listening/edit/${lesson.id}`)
+                  navigate(`/admin/practice_reading/edit/${lesson.id}`)
                 }
               >
                 <FontAwesomeIcon icon={faPen} size="sm" />
@@ -161,7 +158,7 @@ const AdminListen = () => {
       {/* add button */}
       <button
         className="lesson-btn-add-listadmin"
-        onClick={() => navigate("/admin/practice_listening/add")}
+        onClick={() => navigate("/admin/practice_reading/add")}
       >
         Add Task
       </button>
@@ -169,4 +166,4 @@ const AdminListen = () => {
   );
 };
 
-export default AdminListen;
+export default AdminRead;

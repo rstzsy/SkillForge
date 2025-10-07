@@ -19,6 +19,13 @@ import UpdateUser from "../pages/Admin/AdminUser/UpdateUser"
 import AdminTestResult from "../pages/Admin/AdminTestResult/AdminTestResult";
 import AdminListen from "../pages/Admin/AdminListen/AdminListen"
 import AdminLearningPath from "../pages/Admin/AdminLearningPath/AdminLearningPath";
+import AdminAddListen from "../pages/Admin/AdminListen/AdminAddListen"
+import AdminEditListen from "../pages/Admin/AdminListen/AdminEditListen"
+import AdminRead from "../pages/Admin/AdminReading/AdminRead"
+import AdminAddRead from "../pages/Admin/AdminReading/AdminAddRead"
+import AdminEditRead from "../pages/Admin/AdminReading/AdminEditRead"
+import TeacherStudent from "../pages/Teacher/TeacherStudent/TeacherStudent";
+import TeacherClass from "../pages/Teacher/TeacherClass/TeacherClass";
 
 export const routes = [
     {
@@ -123,5 +130,33 @@ export const routes = [
     {
         path: '/admin/practice_listening',
         page: AdminListen,
+    },
+    {
+        path: '/admin/practice_listening/add',
+        page: AdminAddListen,
+    },
+    {
+        path: '/admin/practice_listening/edit/:id',
+        page: AdminEditListen,
+    },
+    {
+        path: '/admin/practice_reading',
+        page: AdminRead,
+    },
+    {
+        path: '/admin/practice_reading/add',
+        page: AdminAddRead,
+    },
+    {
+        path: '/admin/practice_reading/edit/:id',
+        page: AdminEditRead,
+    },
+    {
+        path: '/teacher/manage_student',
+        page: TeacherStudent,
+    },
+    {
+        path: '/teacher/manage_class',
+        page: TeacherClass,
     },
 ]
