@@ -26,6 +26,9 @@ import AdminAddRead from "../pages/Admin/AdminReading/AdminAddRead"
 import AdminEditRead from "../pages/Admin/AdminReading/AdminEditRead"
 import TeacherStudent from "../pages/Teacher/TeacherStudent/TeacherStudent";
 import TeacherClass from "../pages/Teacher/TeacherClass/TeacherClass";
+import AdminWrite from "../pages/Admin/AdminWriting/AdminWrite";
+import AdminAddWrite from "../pages/Admin/AdminWriting/AddminAddWrite";
+import AdminEditWrite from "../pages/Admin/AdminWriting/AdminEditWrite";
 
 export const routes = [
     {
@@ -150,6 +153,18 @@ export const routes = [
     {
         path: '/admin/practice_reading/edit/:id',
         page: AdminEditRead,
+    },
+    {
+        path: '/admin/practice_writing',
+        page: AdminWrite,
+    },
+    {
+        path: '/admin/practice_writing/add',
+        page: AdminAddWrite,
+    },
+    {
+        path: '/admin/practice_writing/edit/:id',
+        page: AdminEditWrite,
     },
     {
         path: '/teacher/manage_student',
