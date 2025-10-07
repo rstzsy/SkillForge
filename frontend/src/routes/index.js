@@ -29,6 +29,9 @@ import TeacherClass from "../pages/Teacher/TeacherClass/TeacherClass";
 import AdminWrite from "../pages/Admin/AdminWriting/AdminWrite";
 import AdminAddWrite from "../pages/Admin/AdminWriting/AddminAddWrite";
 import AdminEditWrite from "../pages/Admin/AdminWriting/AdminEditWrite";
+import AdminSpeak from "../pages/Admin/AdminSpeak/AdminSpeak";
+import AdminAddSpeak from "../pages/Admin/AdminSpeak/AdminAddSpeak";
+import AdminEditSpeak from "../pages/Admin/AdminSpeak/AdminEditSpeak";
 
 export const routes = [
     {
@@ -165,6 +168,18 @@ export const routes = [
     {
         path: '/admin/practice_writing/edit/:id',
         page: AdminEditWrite,
+    },
+    {
+        path: '/admin/practice_speaking',
+        page: AdminSpeak,
+    },
+    {
+        path: '/admin/practice_speaking/add',
+        page: AdminAddSpeak,
+    },
+    {
+        path: '/admin/practice_speaking/edit/:id',
+        page: AdminEditSpeak,
     },
     {
         path: '/teacher/manage_student',

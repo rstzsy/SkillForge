@@ -59,14 +59,14 @@ const HeaderAdmin = () => {
                         <FaRocketchat />
                         <span className="sidebar-text">Speaking Practice</span>
                     </li>
-                    <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
+                    {/* <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
                         <RiBook2Fill />
                         <span className="sidebar-text">Skill-Based Tests</span>
                     </li>
                     <li className={location.pathname === "/admin/full_test" ? "active" : ""} onClick={() => navigate("/admin/full_test")}>
                         <FaBook />
                         <span className="sidebar-text">Full IELTS Test</span>
-                    </li>
+                    </li> */}
                     <li className="logout-item" onClick={() => console.log("Logging out...")}>
                         <FaSignOutAlt />
                         <span className="sidebar-text">Logout</span>
