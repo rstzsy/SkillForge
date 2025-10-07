@@ -1,11 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
 
+/* ===== Base Layout ===== */
 .main-content-learningpath {
   flex: 1;
   padding: 20px;
   margin-top: 40px;
-  margin-left: 240px;
+  margin-left: 240px; /* để trừ chỗ sidebar */
   font-family: "Baloo 2", cursive, sans-serif;
+  transition: all 0.3s ease;
 }
 
 .page-title-learningpath {
@@ -13,9 +15,10 @@
   font-size: 28px;
   font-weight: 700;
   margin-bottom: 25px;
+  text-align: left;
 }
 
-/* User Info */
+/* ===== User Info ===== */
 .user-info-learningpath {
   display: flex;
   align-items: center;
@@ -25,6 +28,7 @@
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
+  flex-wrap: wrap; /* để ảnh + text xuống hàng nếu nhỏ */
 }
 
 .user-avatar-learningpath {
@@ -38,13 +42,14 @@
 .user-details-learningpath p {
   margin: 6px 0;
   font-size: 16px;
+  word-break: break-word;
 }
 
 .user-details-learningpath strong {
   color: #ff7221;
 }
 
-/* Learning Days */
+/* ===== Learning Days ===== */
 .day-list-learningpath {
   display: flex;
   flex-direction: column;
@@ -64,7 +69,7 @@
   margin-bottom: 12px;
 }
 
-/* Task Item */
+/* ===== Task Item ===== */
 .task-item-learningpath {
   margin-bottom: 12px;
 }
@@ -75,6 +80,8 @@
   align-items: center;
   font-weight: 600;
   margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .progress-bar-learningpath {
@@ -96,7 +103,7 @@
   font-size: 14px;
 }
 
-/* Back Button */
+/* ===== Back Button ===== */
 .btn-back-learningpath {
   margin-top: 30px;
   padding: 10px 25px;
@@ -112,4 +119,116 @@
 .btn-back-learningpath:hover {
   background: linear-gradient(135deg, #ff934d, #ffd280);
   transform: translateY(-2px);
+}
+
+/* ===== Responsive Section ===== */
+
+/* Tablet */
+@media (max-width: 992px) {
+  .main-content-learningpath {
+    margin-left: 200px; /* sidebar thu nhỏ */
+    padding: 15px;
+  }
+
+  .page-title-learningpath {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  .user-info-learningpath {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .user-details-learningpath p {
+    font-size: 15px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main-content-learningpath {
+    margin-left: 0; /* bỏ sidebar margin */
+    margin-top: 80px; /* tránh bị che bởi header */
+    padding: 15px;
+  }
+
+  .page-title-learningpath {
+    font-size: 22px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .user-info-learningpath {
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+  }
+
+  .user-avatar-learningpath {
+    width: 70px;
+    height: 70px;
+  }
+
+  .user-details-learningpath p {
+    font-size: 14px;
+  }
+
+  .day-card-learningpath {
+    padding: 15px;
+  }
+
+  .day-card-learningpath h3 {
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .task-info {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 14px;
+  }
+
+  .progress-text {
+    font-size: 13px;
+  }
+
+  .btn-back-learningpath {
+    width: 100%;
+    font-size: 14px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .main-content-learningpath {
+    padding: 10px;
+  }
+
+  .page-title-learningpath {
+    font-size: 20px;
+  }
+
+  .user-avatar-learningpath {
+    width: 60px;
+    height: 60px;
+  }
+
+  .user-details-learningpath p {
+    font-size: 13px;
+  }
+
+  .day-card-learningpath {
+    padding: 12px;
+  }
+
+  .task-info span {
+    font-size: 13px;
+  }
+
+  .btn-back-learningpath {
+    padding: 8px 15px;
+    font-size: 13px;
+  }
 }
