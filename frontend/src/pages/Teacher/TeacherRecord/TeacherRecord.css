@@ -1,0 +1,339 @@
+/* Container */
+.record-container-teacherrecord {
+  margin-left: 30px;
+  padding: 20px;
+  min-height: 100vh;
+  margin-top: 40px;
+}
+
+/* Header */
+.record-header-teacherrecord {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.record-container-teacherrecord h2 {
+  font-size: 30px;
+  color: #d5a30a;
+}
+
+.record-title-teacherrecord {
+  font-size: 30px;
+  font-weight: bold;
+  color: #d5a30a;
+}
+
+.btn-add-teacherrecord {
+  background-color: #d5a30a;
+  color: #fffbde;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+/* Filter */
+.record-filter-teacherrecord {
+  margin-bottom: 10px;
+}
+
+.record-filter-teacherrecord input {
+  width: 100%;
+  padding: 10px 10px;
+  font-size: 14px;
+  border-radius: 15px;
+  border: 1px dashed #d5a30a;
+  color: #d5a30a;
+}
+
+.record-filter-teacherrecord input:focus {
+  outline: none;
+  border-color: #d5a30a;
+}
+
+/* Table */
+.record-table-wrapper-teacherrecord {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.record-table-teacherrecord {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.record-table-teacherrecord th,
+.record-table-teacherrecord td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.record-table-teacherrecord th {
+  background-color: #fffbde;
+  color: #fe5d01;
+}
+
+.no-data-teacherrecord {
+  text-align: center;
+  padding: 10px;
+  color: #888;
+}
+
+/* Action Buttons */
+.record-action-buttons-teacherrecord button {
+  margin-right: 6px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-edit-teacherrecord {
+  background-color: #ff9800;
+  color: white;
+}
+
+.btn-delete-teacherrecord {
+  background-color: #f44336;
+  color: white;
+}
+
+.record-action-buttons-teacherrecord button:hover {
+  opacity: 0.9;
+}
+
+/* Modal */
+.record-modal-overlay-teacherrecord {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.record-modal-content-teacherrecord {
+  background-color: #fffbde;
+  padding: 20px 25px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
+}
+
+.record-modal-content-teacherrecord h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #fe5d01;
+}
+
+.record-modal-content-teacherrecord p {
+  margin: 6px 0;
+}
+
+/* Add Form */
+.add-form-teacherrecord label {
+  display: block;
+  margin: 8px 0 4px;
+  font-weight: bold;
+}
+
+.add-form-teacherrecord input {
+  width: 100%;
+  padding: 6px 15px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+/* Custom select */
+.add-form-teacherrecord select {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 18px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  appearance: none;
+  background: url("data:image/svg+xml;utf8,<svg fill='gray' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+    no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  cursor: pointer;
+}
+
+/* Hover & Focus */
+.add-form-teacherrecord select:hover {
+  border-color: #888;
+}
+
+.add-form-teacherrecord select:focus {
+  outline: none;
+  border-color: #d5a30a;
+}
+
+.add-form-buttons-teacherrecord {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-save-teacherrecord {
+  background-color: #89f08d;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-cancel-teacherrecord {
+  background-color: #f98d86;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-close-modal-teacherrecord {
+  margin-top: 15px;
+  width: 100%;
+  padding: 6px 0;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-close-modal-teacherrecord:hover,
+.btn-save-teacherrecord:hover,
+.btn-cancel-teacherrecord:hover {
+  opacity: 0.9;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .record-container-teacherrecord {
+    margin-left: 20px;
+    padding: 15px;
+  }
+
+  .record-title-teacherrecord {
+    font-size: 20px;
+  }
+
+  .btn-add-teacherrecord {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  .record-filter-teacherrecord input {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  .record-table-teacherrecord th,
+  .record-table-teacherrecord td {
+    padding: 8px;
+  }
+
+  .record-modal-content-teacherrecord {
+    width: 90%;
+    padding: 15px;
+  }
+
+  .add-form-teacherrecord input {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+
+  .add-form-teacherrecord select {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .record-container-teacherrecord {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .record-header-teacherrecord {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .record-table-wrapper-teacherrecord {
+    overflow-x: auto;
+  }
+
+  .record-table-teacherrecord {
+    min-width: 500px;
+  }
+
+  .btn-add-teacherrecord {
+    width: 100%;
+    text-align: center;
+  }
+
+  .record-modal-content-teacherrecord {
+    width: 95%;
+    max-height: 95%;
+  }
+}
+
+@media (max-width: 480px) {
+  .record-title-teacherrecord {
+    font-size: 18px;
+  }
+
+  .record-table-teacherrecord th,
+  .record-table-teacherrecord td {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .btn-add-teacherrecord {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+
+  .add-form-teacherrecord input {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .add-form-teacherrecord select {
+    font-size: 12px;
+  }
+
+  .record-modal-content-teacherrecord {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    padding: 10px;
+  }
+
+  .btn-close-modal-teacherrecord {
+    font-size: 14px;
+  }
+}
