@@ -1,22 +1,68 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import HeaderTeacher from "../../../component/HeaderTeacher/HeaderTeacher";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEye,
+  faPen,
+  faTrash,
+  faLink,
+} from "@fortawesome/free-solid-svg-icons";
 import "./TeacherClass.css";
 
 const TeacherClass = () => {
   const [classes, setClasses] = useState([
-    { id: "S101", name: "Speaking 101", subject: "Speak", studentCount: 25, schedule: "Mon 8:00-10:00" },
-    { id: "R101", name: "Reading 101", subject: "Read", studentCount: 30, schedule: "Tue 10:00-12:00" },
-    { id: "L102", name: "Listening 102", subject: "Listen", studentCount: 28, schedule: "Wed 14:00-16:00" },
+    {
+      id: "S101",
+      name: "Speaking 101",
+      subject: "Speaking",
+      studentCount: 25,
+      schedule: "Mon 8:00-10:00",
+      students: [
+        { id: "ST01", name: "Nguyen Van A" },
+        { id: "ST02", name: "Le Thi B" },
+      ],
+      driveLink: "https://drive.google.com/speaking101",
+      zoomLink: "https://zoom.us/j/123456789",
+    },
+    {
+      id: "R101",
+      name: "Reading 101",
+      subject: "Reading",
+      studentCount: 30,
+      schedule: "Tue 10:00-12:00",
+      students: [
+        { id: "ST03", name: "Tran Van C" },
+        { id: "ST04", name: "Pham Thi D" },
+      ],
+      driveLink: "https://drive.google.com/reading101",
+      zoomLink: "https://zoom.us/j/987654321",
+    },
   ]);
 
   const [filter, setFilter] = useState("");
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure to delete this class?")) {
       setClasses(classes.filter((c) => c.id !== id));
     }
+  };
+
+  const handleView = (cls) => {
+    setSelectedClass(cls);
+    setShowModal(true);
+  };
+  const navigate = useNavigate();
+
+  const handleEdit = (id) => {
+    navigate(`/teacher/manage_class/edit/${id}`);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedClass(null);
   };
 
   const filteredClasses = classes.filter(
@@ -65,12 +111,19 @@ const TeacherClass = () => {
                     <td>{cls.schedule}</td>
                     <td>
                       <div className="action-buttons-teacherclass">
-                        <button className="btn-view-teacherclass">
+                        <button
+                          className="btn-view-teacherclass"
+                          onClick={() => handleView(cls)}
+                        >
                           <FontAwesomeIcon icon={faEye} />
                         </button>
-                        <button className="btn-edit-teacherclass">
+                        <button
+                          className="btn-edit-teacherclass"
+                          onClick={() => handleEdit(cls.id)}
+                        >
                           <FontAwesomeIcon icon={faPen} />
                         </button>
+
                         <button
                           className="btn-delete-teacherclass"
                           onClick={() => handleDelete(cls.id)}
@@ -91,6 +144,67 @@ const TeacherClass = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Modal View Detail */}
+        {showModal && selectedClass && (
+          <div className="modal-overlay-teacherclass" onClick={closeModal}>
+            <div
+              className="modal-content-teacherclass"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Class Detail</h3>
+              <p>
+                <strong>ID:</strong> {selectedClass.id}
+              </p>
+              <p>
+                <strong>Name:</strong> {selectedClass.name}
+              </p>
+              <p>
+                <strong>Subject:</strong> {selectedClass.subject}
+              </p>
+              <p>
+                <strong>Schedule:</strong> {selectedClass.schedule}
+              </p>
+
+              <div className="modal-student-list">
+                <strong>Students:</strong>
+                <ul>
+                  {selectedClass.students.map((s) => (
+                    <li key={s.id}>
+                      {s.id} - {s.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <p>
+                <strong>Drive Link: </strong>
+                <a
+                  href={selectedClass.driveLink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FontAwesomeIcon icon={faLink} /> Open Drive
+                </a>
+              </p>
+
+              <p>
+                <strong>Zoom Link: </strong>
+                <a
+                  href={selectedClass.zoomLink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <FontAwesomeIcon icon={faLink} /> Join Zoom
+                </a>
+              </p>
+
+              <button className="btn-close-modal" onClick={closeModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </HeaderTeacher>
   );

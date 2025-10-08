@@ -33,6 +33,7 @@ import AdminSpeak from "../pages/Admin/AdminSpeak/AdminSpeak";
 import AdminAddSpeak from "../pages/Admin/AdminSpeak/AdminAddSpeak";
 import AdminEditSpeak from "../pages/Admin/AdminSpeak/AdminEditSpeak";
 import TeacherDashBoard from "../pages/Teacher/TeacherDashBoard/TeacherDashBoard";
+import TeacherEditClass from "../pages/Teacher/TeacherClass/TeacherEditClass"
 
 export const routes = [
     {
@@ -193,5 +194,9 @@ export const routes = [
     {
         path: '/teacher/manage_class',
         page: TeacherClass,
+    },
+    {
+        path: '/teacher/manage_class/edit/:id',
+        page: TeacherEditClass,
     },
 ]
