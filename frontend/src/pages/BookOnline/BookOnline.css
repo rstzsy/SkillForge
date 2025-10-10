@@ -1,0 +1,131 @@
+.booking-page-container-bookonl {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+/* left side */
+.booking-left-bookonl {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.decor-image-bookonl {
+  width: 80%;
+  height: 80%;
+  background-image: url('../../../public/assets/videoCall.jpeg');
+  background-size: cover;
+  background-position: center;
+  border-radius: 16px;
+}
+
+/* right side */
+.booking-right-bookonl {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  margin-top: 40px;
+}
+
+.booking-title-bookonl {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: #f5c951;
+}
+
+.booking-form-bookonl {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-form-bookonl label {
+    color: #fe5d01;
+    font-weight: bold;
+}
+
+.input-bookonl {
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 18px;
+  width: 100%;
+}
+
+.time-grid-bookonl {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.time-slot-bookonl {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.time-slot-bookonl:hover {
+  background-color: #f5c951;
+  color: white;
+}
+
+.selected-bookonl {
+  background-color: #f5c951;
+  color: white;
+}
+
+.book-btn-bookonl {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background-color: #f8eed3;
+  color: #f5c951;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.book-btn-bookonl:hover {
+  background-color: #f5c951;
+  color: #f8eed3;
+}
+
+.booking-history-bookonl {
+  margin-top: 2rem;
+}
+
+.booking-history-bookonl ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.booking-history-bookonl li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .booking-page-container-bookonl {
+    flex-direction: column;
+  }
+
+  .booking-left-bookonl,
+  .booking-right-bookonl {
+    width: 100%;
+  }
+
+  .decor-image-bookonl {
+    width: 90%;
+    height: 200px;
+    margin: 0 auto 1rem;
+    margin-top: 20px;
+  }
+}

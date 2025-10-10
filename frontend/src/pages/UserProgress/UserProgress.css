@@ -1,0 +1,179 @@
+.user-progress-page-userprogress {
+  min-height: 100vh;
+  padding: 2rem;
+  font-family: "Baloo 2", cursive, sans-serif;
+  margin-top: 30px;
+}
+
+/* header */
+.user-progress-title-userprogress {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #fe5d01;
+}
+
+/* card */
+.score-card-userprogress {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(255, 220, 104, 0.86);
+  margin-bottom: 2rem;
+}
+
+.score-card-grid-userprogress {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.score-item-userprogress {
+  background: #fff;
+  border: 1px solid #fbef99;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.score-item-userprogress:hover {
+  transform: translateY(-3px);
+}
+
+.score-skill-userprogress {
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.score-value-userprogress {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fe5d01;
+}
+
+/* line and pie */
+.chart-grid-userprogress {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.chart-card-userprogress {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(255, 220, 104, 0.86);
+  padding: 1rem;
+}
+
+.chart-title-userprogress {
+  font-size: 18px;
+  font-weight: 600;
+  color: #d5a30a;
+  margin-bottom: 1rem;
+}
+
+/* pie chart */
+.pie-section-userprogress {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.pie-card-userprogress {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(255, 220, 104, 0.86);
+  width: 420px;
+  padding: 1rem;
+}
+
+/* bar chart */
+.bar-section-userprogress {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.bar-card-userprogress {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(255, 220, 104, 0.86);
+  width: 90%;
+}
+
+/* export file */
+.export-buttons-userprogress {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.export-btn-userprogress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.export-pdf-userprogress {
+  background: #fad672;
+  color: white;
+}
+
+.export-pdf-userprogress:hover {
+  background: #f5c951;
+}
+
+.export-excel-userprogress {
+  background: #f796ae;
+  color: white;
+}
+
+.export-excel-userprogress:hover {
+  background: #f64471;
+}
+
+.chart-card-userprogress,
+.bar-card-userprogress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chart-content-userprogress {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+/* Responsive  */
+@media (max-width: 768px) {
+  .chart-grid-userprogress {
+    grid-template-columns: 1fr;
+  }
+
+  .user-progress-page-userprogress {
+    margin-left: 0;
+    margin-top: 80px;
+  }
+
+  .pie-card-userprogress {
+    width: 100%;
+  }
+
+  .bar-card-userprogress {
+    width: 100%;
+  }
+}
