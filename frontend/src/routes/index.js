@@ -227,5 +227,7 @@ export const routes = [
     {
         path: '/goalsetup',
         page: GoalSetup,
+        isShowHeader: true,
+        isShowFooter: true
     },
 ]
