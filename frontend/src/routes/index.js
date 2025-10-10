@@ -36,6 +36,7 @@ import TeacherDashBoard from "../pages/Teacher/TeacherDashBoard/TeacherDashBoard
 import TeacherEditClass from "../pages/Teacher/TeacherClass/TeacherEditClass"
 import TeacherRecord from "../pages/Teacher/TeacherRecord/TeacherRecord";
 import TeacherEditRecord from "../pages/Teacher/TeacherRecord/TeacherEditRecord"
+import GoalSetup from "../pages/GoalSetup/GoalSetup";
 
 export const routes = [
     {
@@ -208,5 +209,9 @@ export const routes = [
     {
         path: '/teacher/manage_record/edit/:id',
         page: TeacherEditRecord,
+    },
+    {
+        path: '/goalsetup',
+        page: GoalSetup,
     },
 ]

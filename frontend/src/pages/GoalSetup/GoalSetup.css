@@ -1,0 +1,594 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+/* ===== Root ===== */
+.goalsetup-root {
+  font-family: "Baloo 2", "Inter", sans-serif;
+  background: linear-gradient(135deg, #fff9f0, #fffaf5);
+  min-height: 100vh;
+}
+
+/* ===== Layout ===== */
+.goalsetup-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 5%;
+  align-items: start;
+}
+
+.goalsetup-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ===== Titles ===== */
+.goalsetup-subtitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fe5d01;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.goalsetup-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #2c1810;
+  margin: 0;
+}
+
+.goalsetup-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: #5a4a3a;
+}
+
+.goalsetup-image-container {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+.goalsetup-image {
+    width: 100%;
+    max-width: none;
+    border-radius: 24px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+  }
+  
+.goalsetup-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+  
+
+/* ===== Info Box ===== */
+.goalsetup-info {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 20px;
+  border: 2px solid #ffe7b3;
+  box-shadow: 0 8px 24px rgba(254, 93, 1, 0.08);
+}
+
+.goalsetup-info-title {
+  color: #fe5d01;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.goalsetup-info-text {
+  color: #5a4a3a;
+  margin-bottom: 1rem;
+}
+
+.goalsetup-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.goalsetup-points li {
+  position: relative;
+  padding-left: 1.8rem;
+  font-weight: 600;
+  color: #3b2e00;
+  margin-bottom: 0.4rem;
+}
+
+.goalsetup-points li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #fe5d01;
+  font-weight: bold;
+}
+
+/* ===== Form Section ===== */
+.goalsetup-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* FORM CONTAINER */
+.goalsetup-form {
+  background: #ffffff;
+  padding: 2.8rem;
+  border-radius: 28px;
+  border: 1px solid #ffe7b3;
+  box-shadow: 0 16px 40px rgba(254, 93, 1, 0.1);
+  transition: all 0.3s ease;
+}
+
+.goalsetup-form:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 50px rgba(254, 93, 1, 0.15);
+}
+
+/* LABELS */
+.goalsetup-label {
+  font-weight: 700;
+  color: #3b2e00;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* INPUTS, SELECT, TEXTAREA */
+.goalsetup-form input,
+.goalsetup-form select,
+.goalsetup-form textarea {
+  width: 100%;
+  padding: 0.9rem 1.1rem;
+  border-radius: 14px;
+  border: 2px solid #ffd77d;
+  font-size: 1rem;
+  background-color: #fffdf7;
+  transition: all 0.25s ease;
+  margin-bottom: 1rem;
+}
+
+.goalsetup-form input:focus,
+.goalsetup-form select:focus,
+.goalsetup-form textarea:focus {
+  outline: none;
+  border-color: #fe5d01;
+  box-shadow: 0 0 0 4px rgba(254, 93, 1, 0.1);
+  background-color: #fff9ef;
+}
+
+/* CHECKBOXES */
+.goalsetup-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.goalsetup-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff7ea;
+  border: 1.5px solid #ffd77d;
+  border-radius: 12px;
+  padding: 6px 12px;
+  transition: 0.25s;
+}
+
+.goalsetup-checkbox-item:hover {
+  background: #fff1d9;
+}
+
+.goalsetup-form input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #fe5d01;
+}
+
+/* ===== Buttons ===== */
+.goalsetup-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.goalsetup-save-btn {
+  background: linear-gradient(135deg, #fe5d01, #ff8534);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  padding: 0.85rem 1.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.goalsetup-save-btn:hover {
+  background: linear-gradient(135deg, #ff7020, #ff9a4d);
+  transform: scale(1.04);
+}
+
+.goalsetup-clear-btn {
+  background: #fffaf0;
+  color: #fe5d01;
+  border: 2px solid #ffd77d;
+  border-radius: 50px;
+  padding: 0.85rem 1.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.goalsetup-clear-btn:hover {
+  background: #ffd77d;
+}
+
+/* ===== Message ===== */
+.goalsetup-message {
+  font-weight: 600;
+  margin-top: 1rem;
+  color: #2c1810;
+  background: #fff5e2;
+  border-left: 4px solid #fe5d01;
+  padding: 10px 15px;
+  border-radius: 10px;
+}
+
+/* ===== Summary Box ===== */
+.goalsetup-summary {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 20px;
+  border: 2px solid #ffe7b3;
+  box-shadow: 0 6px 20px rgba(254, 93, 1, 0.08);
+}
+
+.goalsetup-summary p {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.goalsetup-suggestion {
+  font-weight: 700;
+  color: #3b2e00;
+  margin-top: 8px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 992px) {
+  .goalsetup-intro {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 3rem 8%;
+  }
+
+  .goalsetup-title {
+    font-size: 2.4rem;
+  }
+
+  .goalsetup-form {
+    padding: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .goalsetup-title {
+    font-size: 1.9rem;
+  }
+
+  .goalsetup-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .goalsetup-save-btn,
+  .goalsetup-clear-btn {
+    width: 100%;
+  }
+}
+
+/* ===== SUGGESTED ROADMAP SECTION ===== */
+.goalsetup-roadmap {
+    padding: 4rem 8%;
+    text-align: center;
+    font-family: "Baloo 2", sans-serif;
+    background: linear-gradient(135deg, #fffaf5, #fff5ec);
+    border-radius: 32px;
+    margin-top: 3rem;
+    box-shadow: 0 8px 32px rgba(254, 93, 1, 0.05);
+  }
+  
+  .goalsetup-roadmap-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fe5d01;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .goalsetup-roadmap-subtitle {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #4d3c30;
+    margin-bottom: 2.5rem;
+  }
+  
+  /* Steps container */
+  .goalsetup-roadmap-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 2rem;
+  }
+  
+  /* Step card */
+  .goalsetup-roadmap-step {
+    background: #fff;
+    border-radius: 1.2rem;
+    padding: 2rem 1.5rem;
+    border: 2px solid #ffe7b3;
+    box-shadow: 0 4px 18px rgba(254, 93, 1, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .goalsetup-roadmap-step:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(254, 93, 1, 0.15);
+  }
+  
+  /* Icon */
+  .goalsetup-roadmap-icon {
+    width: 65px;
+    height: 65px;
+    object-fit: contain;
+    margin: 0 auto 1.2rem;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  
+  .goalsetup-roadmap-step:hover .goalsetup-roadmap-icon {
+    transform: scale(1.1) rotate(3deg);
+  }
+  
+  /* Step title & text */
+  .goalsetup-roadmap-step-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fe5d01;
+    margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
+  }
+  
+  .goalsetup-roadmap-step-title:hover {
+    color: #f43b16;
+  }
+  
+  .goalsetup-roadmap-step-text {
+    font-size: 1rem;
+    color: #3d2b20;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .goalsetup-roadmap {
+      padding: 3rem 6%;
+    }
+  
+    .goalsetup-roadmap-steps {
+      grid-template-columns: 1fr;
+    }
+  
+    .goalsetup-roadmap-title {
+      font-size: 1.9rem;
+    }
+  }
+
+/* suggested exercise */
+
+/* ===== SUGGESTED EXERCISES SECTION ===== */
+.goal-exercises {
+    margin: 60px auto;
+    padding: 5px;
+    max-width: 1200px;
+    font-family: 'Baloo 2', cursive, sans-serif;
+  }
+  
+  /* Header with title & filters */
+  .goal-exercises-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .goal-exercises-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fe5d01;
+    margin: 0;
+    position: relative;
+  }
+  
+  .goal-exercises-title:hover {
+    color: #f10d5b;
+  }
+  
+  .goal-exercises-title::after {
+    content: "";
+    display: block;
+    width: 50px;
+    height: 4px;
+    background: #f1b24a;
+    border-radius: 2px;
+    margin-top: 6px;
+  }
+  
+  /* Filters */
+  .goal-exercises-filters {
+    display: flex;
+    gap: 12px;
+    background: #fff2e0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .goal-exercises-filters select {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    background: #fedeb1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-family: 'Baloo 2', cursive, sans-serif;
+    font-weight: 700;
+  }
+  
+  .goal-exercises-filters select:hover {
+    background: #f5ad04;
+  }
+  
+  /* Grid */
+  .goal-exercises-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  /* Cards */
+  .goal-exercise-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(252, 219, 140, 0.484);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .goal-exercise-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(247, 178, 18, 0.484);
+  }
+  
+  .goal-exercise-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 10px;
+  }
+  
+  .goal-exercise-card h3 {
+    font-size: 16px;
+    margin: 6px 0;
+    color: #333;
+  }
+  
+  .goal-exercise-card p {
+    font-size: 14px;
+    margin: 3px 0;
+  }
+  
+  /* Start button */
+  .goal-exercise-start-btn {
+    background: linear-gradient(135deg, #ffe7b3, #ffd77d);
+    color: #fe5d01;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 16px;
+    margin-top: auto;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+  }
+  
+  .goal-exercise-start-btn:hover {
+    background: linear-gradient(135deg, #ffc94d, #ffb733);
+    color: #f10d5b;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Pagination */
+  .goal-exercises-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  
+  .goal-exercises-nav-btn {
+    background: linear-gradient(135deg, #ffe7b3, #ffd77d);
+    color: #fe5d01;
+    font-weight: 600;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+  }
+  
+  .goal-exercises-nav-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ffc94d, #ffb733);
+    color: #f10d5b;
+    transform: scale(1.05);
+  }
+  
+  .goal-exercises-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  
+  .goal-exercises-page-info {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .goal-exercises-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .goal-exercises-title {
+      font-size: 24px;
+    }
+  
+    .goal-exercises-filters {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .goalsetup-image {
+      max-width: 450px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .goalsetup-image {
+      max-width: 100%;
+      border-radius: 20px;
+    }
+  }
+  
