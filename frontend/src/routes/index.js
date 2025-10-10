@@ -37,7 +37,8 @@ import TeacherEditClass from "../pages/Teacher/TeacherClass/TeacherEditClass"
 import TeacherRecord from "../pages/Teacher/TeacherRecord/TeacherRecord";
 import TeacherEditRecord from "../pages/Teacher/TeacherRecord/TeacherEditRecord"
 import UserProgress from "../pages/UserProgress/UserProgress"
-import BookOnline from "../pages/BookOnline/BookOnline"
+import BookOnline from "../pages/BookOnline/BookOnline";
+import GoalSetup from "../pages/GoalSetup/GoalSetup";
 
 export const routes = [
     {
@@ -222,5 +223,9 @@ export const routes = [
         page: BookOnline,
         isShowHeader: true,
         isShowFooter: true
+    },
+    {
+        path: '/goalsetup',
+        page: GoalSetup,
     },
 ]
