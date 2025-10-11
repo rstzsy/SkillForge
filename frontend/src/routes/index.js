@@ -39,6 +39,7 @@ import TeacherEditRecord from "../pages/Teacher/TeacherRecord/TeacherEditRecord"
 import UserProgress from "../pages/UserProgress/UserProgress"
 import BookOnline from "../pages/BookOnline/BookOnline";
 import GoalSetup from "../pages/GoalSetup/GoalSetup";
+import Wishlist from "../pages/Wishlist/Wishlist";
 
 export const routes = [
     {
@@ -117,6 +118,12 @@ export const routes = [
     {
         path: '/contact',
         page: Contact,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/wishlist',
+        page: Wishlist,
         isShowHeader: true,
         isShowFooter: true
     },

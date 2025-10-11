@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './Header.css'
-import { FiSearch, FiUser, FiMenu, FiX } from 'react-icons/fi'
+import { FiSearch, FiUser, FiMenu, FiX, FiHeart } from 'react-icons/fi'
 import { Link } from 'react-router-dom'
 
 const coupons = [
@@ -94,6 +94,7 @@ const Header = () => {
 
         <div className="header-icons">
           <FiSearch className="icon" />
+          <Link to="/wishlist" className='icon'><FiHeart className="icon" /></Link>
           <Link to="/account" className='icon'><FiUser className="icon" /></Link>
           <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
