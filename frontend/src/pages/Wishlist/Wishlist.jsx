@@ -70,10 +70,7 @@ const Wishlist = () => {
   return (
     <div className="wishlist-page">
       {/* Banner */}
-      <section
-        className="wishlist-banner"
-        style={{ backgroundImage: "url('assets/background.png')" }}
-      >
+      <section className="wishlist-banner" style={{ backgroundImage: "url('assets/background.png')" }}>
         <h2 className="wishlist-title">Wish List</h2>
       </section>
 

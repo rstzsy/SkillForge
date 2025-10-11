@@ -93,9 +93,9 @@ const Header = () => {
         </nav>
 
         <div className="header-icons">
-          <FiSearch className="icon" />
-          <Link to="/wishlist" className='icon'><FiHeart className="icon" /></Link>
-          <Link to="/account" className='icon'><FiUser className="icon" /></Link>
+          {/* <FiSearch className="icon" /> */}
+          <Link to="/wishlist" className="icon-wrapper"><FiHeart className="icon" /></Link>
+          <Link to="/account" className="icon-wrapper"><FiUser className="icon" /></Link>
           <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
           </div>

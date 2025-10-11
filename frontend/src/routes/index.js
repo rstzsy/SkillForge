@@ -40,6 +40,7 @@ import UserProgress from "../pages/UserProgress/UserProgress"
 import BookOnline from "../pages/BookOnline/BookOnline";
 import GoalSetup from "../pages/GoalSetup/GoalSetup";
 import Wishlist from "../pages/Wishlist/Wishlist";
+import CoursePage from "../pages/CoursePage/CoursePage";
 
 export const routes = [
     {
@@ -234,6 +235,12 @@ export const routes = [
     {
         path: '/goalsetup',
         page: GoalSetup,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/coursepage',
+        page: CoursePage,
         isShowHeader: true,
         isShowFooter: true
     },

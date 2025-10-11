@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+/* ===== Course Banner ===== */
+.Course-banner {
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+  font-family: 'Baloo 2', cursive, sans-serif;
+  padding: 100px 20px;
+  position: relative;
+  background: linear-gradient(135deg, #fff3d9 0%, #ffe0e0 100%);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.Course-title {
+  color: #dc9f36;
+  font-size: 48px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 1px 2px 4px rgba(255, 186, 73, 0.4);
+  transition: color 0.3s ease;
+}
+
+.Course-title:hover {
+  color: #ff4757;
+}
+
+/* ===== Course List Section ===== */
+.course-list-container {
+  padding: 60px 10%;
+  background-color: #fffefb;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+/* Căn trái cho tiêu đề */
+.course-list-title {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #d97706;
+  text-shadow: 1px 1px 3px rgba(255, 193, 7, 0.3);
+  text-align: left; /* ✅ Căn trái theo yêu cầu */
+  padding-left: 10px;
+}
+
+/* ===== Table Style ===== */
+.course-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+}
+
+.course-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+.course-table th,
+.course-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #f1f1f1;
+  text-align: center;
+}
+
+.course-table th {
+  background: linear-gradient(90deg, #fff3cd 0%, #ffeeba 100%);
+  color: #fe5d01;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.course-table tr:hover td {
+  background-color: #fff8e6;
+  transition: 0.2s;
+}
+
+/* ===== Buttons ===== */
+.btn-view-course {
+  background: linear-gradient(135deg, #fbbf24 0%, #fe5d01 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-view-course:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(254, 93, 1, 0.3);
+}
+
+/* ===== Modal ===== */
+.modal-overlay-course {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content-course {
+  background: #fffdf5;
+  padding: 35px;
+  border-radius: 15px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  text-align: left;
+  animation: slideUp 0.35s ease;
+}
+
+.modal-content-course h3 {
+  font-size: 26px;
+  margin-bottom: 15px;
+  color: #fe5d01;
+  text-align: center;
+}
+
+.modal-content-course p {
+  margin-bottom: 10px;
+  color: #444;
+}
+
+.modal-content-course .desc {
+  margin-top: 15px;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.btn-close-course {
+  background: linear-gradient(90deg, #fef9c3 0%, #fde68a 100%);
+  color: #b45309;
+  border: 1px dashed #fbbf24;
+  padding: 10px 20px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-weight: 700;
+  transition: 0.2s;
+  width: 100%;
+}
+
+.btn-close-course:hover {
+  background: linear-gradient(90deg, #fde68a 0%, #fcd34d 100%);
+  color: #92400e;
+  transform: scale(1.03);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .Course-title {
+    font-size: 34px;
+  }
+
+  .course-list-container {
+    padding: 30px 5%;
+  }
+
+  .course-table th,
+  .course-table td {
+    padding: 12px 10px;
+    font-size: 14px;
+  }
+
+  .course-list-title {
+    font-size: 26px;
+  }
+}
