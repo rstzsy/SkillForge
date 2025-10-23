@@ -1,0 +1,284 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+/* ==============================
+   CONTAINER
+============================== */
+.admineditclass-container {
+  margin-left: 240px; /* sidebar */
+  margin-top: 40px; /* header */
+  padding: 30px;
+  font-family: "Baloo 2", cursive, sans-serif;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.admineditclass-container h2 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #fe5d01;
+}
+
+/* ==============================
+   FORM STYLES
+============================== */
+.admineditclass-form {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.admineditclass-form label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+.admineditclass-form input[type="text"],
+.admineditclass-form input[type="datetime-local"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #c5c5c5;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: border-color 0.3s ease;
+}
+
+.admineditclass-form input:focus {
+  border-color: #d5a30a;
+  outline: none;
+}
+
+/* ==============================
+   STUDENT LIST
+============================== */
+.student-list-admineditclass {
+  margin-top: 25px;
+  background: #fffbde;
+  padding: 15px 20px;
+  border-radius: 12px;
+  border: 1px dashed #fbbf24;
+}
+
+.student-list-admineditclass h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fe5d01;
+}
+
+.student-list-admineditclass ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+.student-list-admineditclass ul::-webkit-scrollbar {
+  width: 8px;
+}
+
+.student-list-admineditclass ul::-webkit-scrollbar-thumb {
+  background-color: #c1c1c1;
+  border-radius: 10px;
+}
+
+.student-list-admineditclass ul::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1a1;
+}
+
+.student-list-admineditclass li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.student-list-admineditclass li:last-child {
+  border-bottom: none;
+}
+
+/* ==============================
+   BUTTONS
+============================== */
+.admineditclass-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-save-admineditclass,
+.btn-cancel-admineditclass {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+.btn-save-admineditclass {
+  background-color: #d5a30a;
+  color: #fff;
+}
+
+.btn-save-admineditclass:hover {
+  background-color: #fe5d01;
+}
+
+.btn-cancel-admineditclass {
+  background-color: #ddd;
+  color: #333;
+}
+
+.btn-cancel-admineditclass:hover {
+  background-color: #bbb;
+}
+
+/* student - teacher */
+/* Label chung */
+.admineditclass-form label {
+  display: block;
+  font-weight: 600;
+  color: #444;
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+
+/* Select Teacher */
+.admineditclass-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #939191;
+  border-radius: 10px;
+  font-size: 15px;
+  background-color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admineditclass-form select:focus {
+  border-color: #fbbf24;
+  outline: none;
+  box-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+}
+
+.teacher-name-display {
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #f3f4f6;
+  font-size: 15px;
+  color: #444;
+}
+
+.student-item-admineditclass {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.student-item-admineditclass select,
+.student-item-admineditclass input {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.btn-remove-student-admineditclass {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-add-student-admineditclass {
+  margin-top: 10px;
+  background-color: #d5a30a;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+/* ==============================
+   RESPONSIVE DESIGN
+============================== */
+
+/* Laptop nhỏ (≤1024px) */
+@media (max-width: 1024px) {
+  .admineditclass-container {
+    margin-left: 200px;
+    padding: 20px;
+  }
+
+  .admineditclass-form {
+    padding: 20px;
+  }
+
+  .admineditclass-container h2 {
+    font-size: 26px;
+  }
+}
+
+/* Tablet (≤768px) */
+@media (max-width: 768px) {
+  .admineditclass-container {
+    margin-left: 60px;
+    margin-top: 80px; /* tránh header */
+    padding: 20px;
+  }
+
+  .admineditclass-form {
+    padding: 20px;
+  }
+
+  .admineditclass-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-save-admineditclass,
+  .btn-cancel-admineditclass {
+    width: 100%;
+  }
+}
+
+/* Mobile (≤480px) */
+@media (max-width: 480px) {
+  .admineditclass-container {
+    padding: 15px;
+    margin-left: 60px; /* sidebar icon */
+  }
+
+  .admineditclass-container h2 {
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .admineditclass-form {
+    padding: 15px;
+  }
+
+  .student-list-admineditclass {
+    padding: 10px 15px;
+  }
+
+  .admineditclass-buttons {
+    gap: 10px;
+  }
+}
