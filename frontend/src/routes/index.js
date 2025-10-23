@@ -264,6 +264,8 @@ export const routes = [
     {
         path: '/admin/manage_class/add',
         page: AdminAddClass,
+    },
+    {
         path: '/admin/manage_booking',
         page: AdminManageBooking,
     },
