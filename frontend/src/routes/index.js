@@ -44,6 +44,8 @@ import CoursePage from "../pages/CoursePage/CoursePage";
 import AdminClass from "../pages/Admin/AdminClass/AdminClass"
 import AdminEditClass from "../pages/Admin/AdminClass/AdminEditClass"
 import AdminAddClass from "../pages/Admin/AdminClass/AdminAddClass"
+import AdminPersonalAim from "../pages/Admin/AdminPersonalAim/AdminPersonalAim";
+import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBooking";
 
 export const routes = [
     {
@@ -146,6 +148,10 @@ export const routes = [
     {
         path: '/admin/manage_user/learning_path/:id',
         page: AdminLearningPath,
+    },
+    {
+        path: '/admin/manage_user/personal_aim/:id',
+        page: AdminPersonalAim,
     },
     {
         path: '/admin/test_results',
@@ -258,5 +264,7 @@ export const routes = [
     {
         path: '/admin/manage_class/add',
         page: AdminAddClass,
+        path: '/admin/manage_booking',
+        page: AdminManageBooking,
     },
 ]

@@ -33,6 +33,10 @@ const ManageUser = () => {
     navigate(`/admin/manage_user/learning_path/${user.id}`, { state: { user } });
   };
 
+  const handleViewPersonalAim = (user) => {
+    navigate(`/admin/manage_user/personal_aim/${user.id}`, { state: { user } });
+  };
+
   return (
     <div className="admin-container-usermanage">
       <AdminHeader />
@@ -88,7 +92,13 @@ const ManageUser = () => {
                       className="btn-learningpath-usermanage"
                       onClick={() => handleViewLearningPath(user)}
                     >
-                      View Learning Path
+                      View Path
+                    </button>
+                    <button
+                      className="btn-personalaim-usermanage"
+                      onClick={() => handleViewPersonalAim(user)}
+                    >
+                      View Aim
                     </button>
                   </td>
                 </tr>

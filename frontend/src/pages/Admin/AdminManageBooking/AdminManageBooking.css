@@ -1,0 +1,108 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+.main-content-bookingadmin {
+  flex: 1;
+  padding: 20px;
+  margin-top: 40px;
+  margin-left: 240px;
+  font-family: "Baloo 2", cursive, sans-serif;
+}
+
+.page-title-bookingadmin {
+  color: #d5a30a;
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+.page-subtitle-bookingadmin {
+  color: #666;
+  margin-bottom: 25px;
+}
+
+.table-wrapper-bookingadmin {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow-x: auto;
+}
+
+.booking-table-bookingadmin {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  min-width: 700px;
+}
+
+.booking-table-bookingadmin thead {
+  background-color: #fffbde;
+  color: #ff7221;
+}
+
+.booking-table-bookingadmin th,
+.booking-table-bookingadmin td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.btn-delete-bookingadmin {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 8px 17px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+.btn-delete-bookingadmin:hover {
+  background: #ff4b4b;
+}
+
+.empty-bookingadmin {
+  color: #999;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-content-bookingadmin {
+    margin-left: 60px;
+    padding: 10px;
+  }
+
+  .booking-table-bookingadmin {
+    display: block;
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .booking-table-bookingadmin thead {
+    display: none;
+  }
+
+  .booking-table-bookingadmin tr {
+    display: block;
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .booking-table-bookingadmin td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border: none;
+  }
+
+  .booking-table-bookingadmin td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    color: #ff7221;
+  }
+}
