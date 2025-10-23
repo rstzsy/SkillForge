@@ -41,6 +41,8 @@ import BookOnline from "../pages/BookOnline/BookOnline";
 import GoalSetup from "../pages/GoalSetup/GoalSetup";
 import Wishlist from "../pages/Wishlist/Wishlist";
 import CoursePage from "../pages/CoursePage/CoursePage";
+import AdminPersonalAim from "../pages/Admin/AdminPersonalAim/AdminPersonalAim";
+import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBooking";
 
 export const routes = [
     {
@@ -145,6 +147,10 @@ export const routes = [
         page: AdminLearningPath,
     },
     {
+        path: '/admin/manage_user/personal_aim/:id',
+        page: AdminPersonalAim,
+    },
+    {
         path: '/admin/test_results',
         page: AdminTestResult,
     },
@@ -243,5 +249,9 @@ export const routes = [
         page: CoursePage,
         isShowHeader: true,
         isShowFooter: true
+    },
+    {
+        path: '/admin/manage_booking',
+        page: AdminManageBooking,
     },
 ]

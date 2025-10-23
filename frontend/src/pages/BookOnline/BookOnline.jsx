@@ -23,16 +23,19 @@ const BookOnline = () => {
       alert("Vui lòng điền đầy đủ thông tin!");
       return;
     }
-
-    const newBooking = { ...formData };
-    
-    // print console
-    console.log("Dữ liệu đặt lịch:", newBooking);
-
-    setBookings([...bookings, newBooking]);
+  
+    const newBooking = { ...formData, bookedAt: new Date().toISOString() };
+  
+    // Lấy dữ liệu cũ trong localStorage
+    const existing = JSON.parse(localStorage.getItem("userBookings") || "[]");
+    const updated = [...existing, newBooking];
+    localStorage.setItem("userBookings", JSON.stringify(updated));
+  
+    setBookings(updated);
     alert(`Đặt lịch thành công cho ${name} vào ${date} lúc ${time}`);
     setFormData({ name: "", email: "", date: "", time: "" });
   };
+  
 
   return (
     <div className="booking-page-container-bookonl">

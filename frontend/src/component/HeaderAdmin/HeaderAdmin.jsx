@@ -35,6 +35,10 @@ const HeaderAdmin = () => {
                         <IoPerson />
                         <span className="sidebar-text">Users</span>
                     </li>
+                    <li className={location.pathname === "/admin/manage_booking" ? "active" : ""} onClick={() => navigate("/admin/manage_booking")}>
+                        <FaBook />
+                        <span className="sidebar-text">Manage booking</span>
+                    </li> 
                     <li className={location.pathname === "/admin/test_results" ? "active" : ""} onClick={() => navigate("/admin/test_results")}>
                         <BiCategoryAlt />
                         <span className="sidebar-text">Test Results</span>
@@ -59,13 +63,9 @@ const HeaderAdmin = () => {
                         <FaRocketchat />
                         <span className="sidebar-text">Speaking Practice</span>
                     </li>
-                    {/* <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
+                    {/* {/* <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
                         <RiBook2Fill />
                         <span className="sidebar-text">Skill-Based Tests</span>
-                    </li>
-                    <li className={location.pathname === "/admin/full_test" ? "active" : ""} onClick={() => navigate("/admin/full_test")}>
-                        <FaBook />
-                        <span className="sidebar-text">Full IELTS Test</span>
                     </li> */}
                     <li className="logout-item" onClick={() => console.log("Logging out...")}>
                         <FaSignOutAlt />

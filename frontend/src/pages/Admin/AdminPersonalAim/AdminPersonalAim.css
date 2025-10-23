@@ -1,0 +1,125 @@
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap");
+
+/* ==== MAIN LAYOUT ==== */
+.main-content-usermanage {
+  flex: 1;
+  padding: 20px;
+  margin-top: 40px;
+  margin-left: 240px;
+  font-family: "Baloo 2", cursive, sans-serif;
+  transition: margin-left 0.3s ease;
+}
+
+.page-title-usermanage {
+  color: #d5a30a;
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
+.user-table-wrapper-usermanage {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+/* ==== TABLE ==== */
+.user-table-usermanage {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  min-width: 700px;
+}
+
+.user-table-usermanage thead {
+  background-color: #fffbde;
+  color: #ff7221;
+}
+
+.user-table-usermanage th,
+.user-table-usermanage td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap;
+}
+
+
+/* ==== MODAL ==== */
+.admin-aim-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.45); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; 
+}
+
+.admin-aim-modal-content {
+  background: #fffef4;
+  padding: 25px 30px;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  text-align: left;
+  font-family: "Baloo 2", cursive;
+}
+
+.modal-title {
+  color: #d5a30a;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.btn-back-usermanage {
+  background: #d5a30a;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 15px;
+  width: 100%;
+  transition: 0.3s;
+}
+
+.btn-back-usermanage:hover {
+  background: #ffb700;
+}
+
+/* ==== EMPTY TEXT ==== */
+.no-goal-text {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 768px) {
+  .main-content-usermanage {
+    margin-left: 60px;
+    padding: 10px;
+  }
+
+  .control-buttons-usermanage {
+    flex-direction: column;
+  }
+
+  .user-table-usermanage {
+    font-size: 14px;
+    min-width: 0;
+  }
+
+  .admin-aim-modal-content {
+    width: 90%;
+  }
+}
