@@ -41,6 +41,9 @@ import BookOnline from "../pages/BookOnline/BookOnline";
 import GoalSetup from "../pages/GoalSetup/GoalSetup";
 import Wishlist from "../pages/Wishlist/Wishlist";
 import CoursePage from "../pages/CoursePage/CoursePage";
+import AdminClass from "../pages/Admin/AdminClass/AdminClass"
+import AdminEditClass from "../pages/Admin/AdminClass/AdminEditClass"
+import AdminAddClass from "../pages/Admin/AdminClass/AdminAddClass"
 import AdminPersonalAim from "../pages/Admin/AdminPersonalAim/AdminPersonalAim";
 import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBooking";
 
@@ -251,6 +254,16 @@ export const routes = [
         isShowFooter: true
     },
     {
+        path: '/admin/manage_class',
+        page: AdminClass,
+    },
+    {
+        path: '/admin/manage_class/edit/:id',
+        page: AdminEditClass,
+    },
+    {
+        path: '/admin/manage_class/add',
+        page: AdminAddClass,
         path: '/admin/manage_booking',
         page: AdminManageBooking,
     },

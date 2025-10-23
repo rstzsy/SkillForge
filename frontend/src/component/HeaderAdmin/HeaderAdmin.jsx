@@ -4,7 +4,7 @@ import { IoIosSearch } from "react-icons/io";
 import { FaUserCircle, FaHome, FaSignOutAlt } from "react-icons/fa";
 import { IoPerson, IoLogInOutline } from "react-icons/io5";
 import { BiCategoryAlt } from "react-icons/bi";
-import { FaRocketchat } from "react-icons/fa6";
+import { FaRocketchat, FaBookOpen  } from "react-icons/fa6";
 import { MdLibraryBooks } from "react-icons/md";
 import { RiBook2Fill } from "react-icons/ri";
 import { FaBook } from "react-icons/fa";
@@ -63,7 +63,12 @@ const HeaderAdmin = () => {
                         <FaRocketchat />
                         <span className="sidebar-text">Speaking Practice</span>
                     </li>
-                    {/* {/* <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
+                    <li className={location.pathname === "/admin/manage_class" ? "active" : ""} onClick={() => navigate("/admin/manage_class")}>
+                        <FaBookOpen />
+                        <span className="sidebar-text">Manage Classes</span>
+                    </li>
+                    {/* <li className={location.pathname === "/admin/skill_tests" ? "active" : ""} onClick={() => navigate("/admin/skill_tests")}>
+
                         <RiBook2Fill />
                         <span className="sidebar-text">Skill-Based Tests</span>
                     </li> */}

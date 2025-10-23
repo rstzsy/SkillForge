@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HeaderTeacher from "../../../component/HeaderTeacher/HeaderTeacher";
+import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faEye,
@@ -8,15 +8,16 @@ import {
   faTrash,
   faLink,
 } from "@fortawesome/free-solid-svg-icons";
-import "./TeacherClass.css";
+import "./AdminClass.css";
 
-const TeacherClass = () => {
+const AdminClass = () => {
   const [classes, setClasses] = useState([
     {
       id: "S101",
       name: "Speaking 101",
       subject: "Speaking",
       studentCount: 25,
+      teacher: { id: "T01", name: "Mr. John" },
       schedule: "Mon 8:00-10:00",
       students: [
         { id: "ST01", name: "Nguyen Van A" },
@@ -30,6 +31,7 @@ const TeacherClass = () => {
       name: "Reading 101",
       subject: "Reading",
       studentCount: 30,
+      teacher: { id: "T02", name: "Ms. Mary" },
       schedule: "Tue 10:00-12:00",
       students: [
         { id: "ST03", name: "Tran Van C" },
@@ -43,28 +45,33 @@ const TeacherClass = () => {
   const [filter, setFilter] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
-  // const handleDelete = (id) => {
-  //   if (window.confirm("Are you sure to delete this class?")) {
-  //     setClasses(classes.filter((c) => c.id !== id));
-  //   }
-  // };
+  // Xử lý xóa lớp học
+  const handleDelete = (id) => {
+    if (window.confirm("Are you sure to delete this class?")) {
+      setClasses(classes.filter((c) => c.id !== id));
+    }
+  };
 
+  // Xử lý xem chi tiết
   const handleView = (cls) => {
     setSelectedClass(cls);
     setShowModal(true);
   };
-  const navigate = useNavigate();
 
+  // Xử lý chỉnh sửa
   const handleEdit = (id) => {
-    navigate(`/teacher/manage_class/edit/${id}`);
+    navigate(`/admin/manage_class/edit/${id}`);
   };
 
+  // Đóng modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedClass(null);
   };
 
+  // Lọc lớp học
   const filteredClasses = classes.filter(
     (c) =>
       c.id.toLowerCase().includes(filter.toLowerCase()) ||
@@ -72,29 +79,34 @@ const TeacherClass = () => {
   );
 
   return (
-    <HeaderTeacher>
-      <div className="class-container-teacherclass">
-        <h2 className="page-title-teacherclass">Manage Classes</h2>
+    <>
+      {/* Header & Sidebar */}
+      <AdminHeader />
+
+      {/* Main content */}
+      <div className="class-container-adminclass">
+        <h2 className="page-title-adminclass">Manage Classes</h2>
 
         {/* Filter */}
-        <div className="filter-section-teacherclass">
+        <div className="filter-section-adminclass">
           <input
             type="text"
             placeholder="Search by ID or Name..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="filter-input-teacherclass"
+            className="filter-input-adminclass"
           />
         </div>
 
         {/* Table */}
-        <div className="table-wrapper-teacherclass">
-          <table className="class-table-teacherclass">
+        <div className="table-wrapper-adminclass">
+          <table className="class-table-adminclass">
             <thead>
               <tr>
                 <th>Class ID</th>
                 <th>Name</th>
                 <th>Subject</th>
+                <th>Teacher</th> {/* Thêm cột giáo viên */}
                 <th>Students</th>
                 <th>Schedule</th>
                 <th>Action</th>
@@ -107,36 +119,37 @@ const TeacherClass = () => {
                     <td>{cls.id}</td>
                     <td>{cls.name}</td>
                     <td>{cls.subject}</td>
+                    <td>{cls.teacher ? cls.teacher.name : "N/A"}</td>{" "}
+                    {/* Hiển thị tên giáo viên */}
                     <td>{cls.studentCount}</td>
                     <td>{cls.schedule}</td>
                     <td>
-                      <div className="action-buttons-teacherclass">
+                      <div className="action-buttons-adminclass">
                         <button
-                          className="btn-view-teacherclass"
+                          className="btn-view-adminclass"
                           onClick={() => handleView(cls)}
                         >
                           <FontAwesomeIcon icon={faEye} />
                         </button>
                         <button
-                          className="btn-edit-teacherclass"
+                          className="btn-edit-adminclass"
                           onClick={() => handleEdit(cls.id)}
                         >
                           <FontAwesomeIcon icon={faPen} />
                         </button>
-
-                        {/* <button
-                          className="btn-delete-teacherclass"
+                        <button
+                          className="btn-delete-adminclass"
                           onClick={() => handleDelete(cls.id)}
                         >
                           <FontAwesomeIcon icon={faTrash} />
-                        </button> */}
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="no-data-teacherclass">
+                  <td colSpan="7" className="no-data-adminclass">
                     No classes found
                   </td>
                 </tr>
@@ -147,9 +160,9 @@ const TeacherClass = () => {
 
         {/* Modal View Detail */}
         {showModal && selectedClass && (
-          <div className="modal-overlay-teacherclass" onClick={closeModal}>
+          <div className="modal-overlay-adminclass" onClick={closeModal}>
             <div
-              className="modal-content-teacherclass"
+              className="modal-content-adminclass"
               onClick={(e) => e.stopPropagation()}
             >
               <h3>Class Detail</h3>
@@ -161,6 +174,9 @@ const TeacherClass = () => {
               </p>
               <p>
                 <strong>Subject:</strong> {selectedClass.subject}
+              </p>
+              <p>
+                <strong>Teacher:</strong> {selectedClass.teacher.name}
               </p>
               <p>
                 <strong>Schedule:</strong> {selectedClass.schedule}
@@ -205,9 +221,17 @@ const TeacherClass = () => {
             </div>
           </div>
         )}
+
+        {/* button add */}
+        <button
+          className="btn-add-class-adminclass"
+          onClick={() => navigate("/admin/manage_class/add")}
+        >
+          Add Class
+        </button>
       </div>
-    </HeaderTeacher>
+    </>
   );
 };
 
-export default TeacherClass;
+export default AdminClass;
