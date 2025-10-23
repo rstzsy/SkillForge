@@ -43,10 +43,10 @@ const HeaderAdmin = () => {
                         <BiCategoryAlt />
                         <span className="sidebar-text">Test Results</span>
                     </li>
-                    <li className={location.pathname === "/admin/learning_path" ? "active" : ""} onClick={() => navigate("/admin/learning_path")}>
+                    {/* <li className={location.pathname === "/admin/learning_path" ? "active" : ""} onClick={() => navigate("/admin/learning_path")}>
                         <MdLibraryBooks />
                         <span className="sidebar-text">Personal Learning Path</span>
-                    </li>
+                    </li> */}
                     <li className={location.pathname === "/admin/practice_listening" ? "active" : ""} onClick={() => navigate("/admin/practice_listening")}>
                         <RiBook2Fill />
                         <span className="sidebar-text">Listening Practice</span>
