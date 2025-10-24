@@ -17,7 +17,7 @@ const HeaderTeacher = ({ children }) => {
     { name: "Dashboard", icon: faHouse, link: "/teacher/dashboard" },
     { name: "Classes", icon: faBook, link: "/teacher/manage_class" },
     { name: "Students", icon: faUsers, link: "/teacher/manage_student" },
-    { name: "Courses", icon: faChartBar, link: "/teacher/manage_course" },
+    // { name: "Courses", icon: faChartBar, link: "/teacher/manage_course" },
     { name: "Records", icon: faVideo, link: "/teacher/manage_record" },
   ];
 
