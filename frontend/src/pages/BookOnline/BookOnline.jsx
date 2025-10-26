@@ -17,24 +17,44 @@ const BookOnline = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     const { name, email, date, time } = formData;
     if (!name || !email || !date || !time) {
       alert("Vui lòng điền đầy đủ thông tin!");
       return;
     }
-  
-    const newBooking = { ...formData, bookedAt: new Date().toISOString() };
-  
-    // Lấy dữ liệu cũ trong localStorage
-    const existing = JSON.parse(localStorage.getItem("userBookings") || "[]");
-    const updated = [...existing, newBooking];
-    localStorage.setItem("userBookings", JSON.stringify(updated));
-  
-    setBookings(updated);
-    alert(`Đặt lịch thành công cho ${name} vào ${date} lúc ${time}`);
-    setFormData({ name: "", email: "", date: "", time: "" });
+
+    const newBooking = {
+      name,
+      email,
+      date,
+      time,
+      status: "Scheduled",
+      bookedAt: new Date().toISOString(),
+    };
+
+    try {
+      const res = await fetch("http://localhost:3002/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newBooking),
+      });
+
+      if (res.ok) {
+        alert(`✅ Đặt lịch thành công cho ${name} vào ${date} lúc ${time}`);
+        setFormData({ name: "", email: "", date: "", time: "" });
+        setBookings([...bookings, newBooking]);
+      } else {
+        const err = await res.json();
+        console.error("❌ Lỗi backend:", err);
+        alert("Lỗi khi lưu dữ liệu lên server.");
+      }
+    } catch (error) {
+      console.error("❌ Lỗi kết nối:", error);
+      alert("Không thể kết nối tới server.");
+    }
   };
+
   
 
   return (

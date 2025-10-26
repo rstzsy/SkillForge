@@ -6,22 +6,50 @@ import "./AdminManageBooking.css";
 const AdminManageBooking = () => {
   const [bookings, setBookings] = useState([]);
 
-  // Lấy dữ liệu booking từ localStorage
   useEffect(() => {
-    const stored = localStorage.getItem("userBookings");
-    if (stored) {
-      setBookings(JSON.parse(stored));
-    }
+    const fetchBookings = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/bookings");
+        const data = await res.json();
+        console.log("📦 API returned:", data);
+
+        if (Array.isArray(data)) {
+          setBookings(data);
+        } else if (Array.isArray(data.bookings)) {
+          setBookings(data.bookings);
+        } else {
+          setBookings([]);
+          console.warn("API did not return an array:", data);
+        }
+      } catch (error) {
+        console.error("Error loading bookings:", error);
+      }
+    };
+
+    fetchBookings();
   }, []);
 
-  const handleDelete = (index) => {
+
+
+  const handleDelete = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this booking?");
-    if (confirmDelete) {
-      const updated = bookings.filter((_, i) => i !== index);
-      setBookings(updated);
-      localStorage.setItem("userBookings", JSON.stringify(updated));
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`http://localhost:3002/bookings/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setBookings(bookings.filter((b) => b.id !== id));
+        alert("Booking deleted successfully!");
+      } else {
+        alert("Failed to delete booking.");
+      }
+    } catch (error) {
+      console.error("Error deleting:", error);
     }
   };
+
 
   return (
     <div className="main-content-bookingadmin">
@@ -57,7 +85,7 @@ const AdminManageBooking = () => {
                   <td>
                     <button
                       className="btn-delete-bookingadmin"
-                      onClick={() => handleDelete(idx)}
+                      onClick={() => handleDelete(b.id)}
                     >
                       Delete
                     </button>
