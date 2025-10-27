@@ -1,33 +1,58 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './Header.css'
-import { FiSearch, FiUser, FiMenu, FiX, FiHeart } from 'react-icons/fi'
-import { Link } from 'react-router-dom'
+import { FiUser, FiMenu, FiX, FiHeart } from 'react-icons/fi'
+import { Link, useNavigate } from 'react-router-dom'
 
 const coupons = [
   { couponValue: 20, minOrderValue: 50, code: 'SAVE20' },
   { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-
+  { couponValue: 15, minOrderValue: 40, code: 'SALE15' },
 ]
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState(null)
   const scrollRef = useRef(null)
+  const navigate = useNavigate()
 
   const closeMenu = () => setMenuOpen(false)
 
   useEffect(() => {
-    if (!scrollRef.current) return
+    const checkLoginStatus = () => {
+      const storedUser = JSON.parse(localStorage.getItem('user'))
+      if (storedUser) {
+        setIsLoggedIn(true)
+        setUser(storedUser)
+      } else {
+        setIsLoggedIn(false)
+        setUser(null)
+      }
+    }
 
+    checkLoginStatus()
+
+    window.addEventListener('storage', checkLoginStatus)
+    return () => window.removeEventListener('storage', checkLoginStatus)
+  }, [])
+
+
+  const handleLogout = () => {
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    setIsLoggedIn(false)
+    setUser(null)
+    setIsUserMenuOpen(false)
+    navigate('/login')
+  }
+
+  useEffect(() => {
+    if (!scrollRef.current) return
     const wrapper = scrollRef.current
     const parentWidth = wrapper.parentElement.offsetWidth
     const contentWidth = wrapper.scrollWidth
 
-    
     if (contentWidth < parentWidth) {
       let html = wrapper.innerHTML
       while (wrapper.scrollWidth < parentWidth * 1.5) {
@@ -36,8 +61,7 @@ const Header = () => {
     }
 
     wrapper.style.setProperty('--scroll-width', `${wrapper.scrollWidth}px`)
-
-    const speed = 80 // px/giây
+    const speed = 80
     const duration = wrapper.scrollWidth / speed
     wrapper.style.animationDuration = `${duration}s`
   }, [coupons])
@@ -48,14 +72,11 @@ const Header = () => {
       <div className="top-strip">
         <div className="container-fluid">
           <p ref={scrollRef} className="mb-0 mt-0 scrolling-text">
-            {coupons.length > 0
-              ? coupons.map((coupon, idx) => (
-                  <span className="coupon-item" key={idx}>
-                    {coupon.couponValue}% OFF NOW FOR ORDER FROM $
-                    {coupon.minOrderValue} - Code: {coupon.code}
-                  </span>
-                ))
-              : 'Loading coupons...'}
+            {coupons.map((coupon, idx) => (
+              <span className="coupon-item" key={idx}>
+                {coupon.couponValue}% OFF NOW FOR ORDER FROM ${coupon.minOrderValue} - Code: {coupon.code}
+              </span>
+            ))}
           </p>
         </div>
       </div>
@@ -95,9 +116,34 @@ const Header = () => {
         </nav>
 
         <div className="header-icons">
-          {/* <FiSearch className="icon" /> */}
           <Link to="/wishlist" className="icon-wrapper"><FiHeart className="icon" /></Link>
-          <Link to="/account" className="icon-wrapper"><FiUser className="icon" /></Link>
+
+          {/* Avatar menu */}
+          <div
+            className="icon-wrapper user-menu"
+            onMouseEnter={() => setIsUserMenuOpen(true)}
+            onMouseLeave={() => setIsUserMenuOpen(false)}
+          >
+            <FiUser className="icon" />
+            {isUserMenuOpen && (
+              <div className="user-dropdown">
+                <ul>
+                  {isLoggedIn ? (
+                    <>
+                      <li><Link to="/account" onClick={() => setIsUserMenuOpen(false)}>Profile</Link></li>
+                      <li><button onClick={handleLogout}>Logout</button></li>
+                    </>
+                  ) : (
+                    <>
+                      <li><Link to="/login" onClick={() => setIsUserMenuOpen(false)}>Login</Link></li>
+                      <li><Link to="/register" onClick={() => setIsUserMenuOpen(false)}>Register</Link></li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            )}
+          </div>
+
           <div className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
             {menuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
           </div>

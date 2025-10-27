@@ -1,23 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Account.css";
 
 const AccountPage = () => {
-  // Dữ liệu gốc ban đầu
-  const initialData = {
-    username: "John Doe",
-    email: "johndoe@email.com",
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
     password: "********",
     src: "/assets/avatar.jpg",
-  };
+  });
 
-  const [formData, setFormData] = useState(initialData);
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      setFormData({
+        username:
+          storedUser.userName || 
+          storedUser.displayName || 
+          storedUser.name || 
+          "Unknown User",
+        email: storedUser.email || "",
+        password: "********",
+        src:
+          storedUser.avatar || 
+          storedUser.photoURL || 
+          "/assets/avatar.jpg",
+      });
+    }
+  }, []);
 
-  // Cập nhật text input
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Cập nhật avatar
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -26,23 +40,18 @@ const AccountPage = () => {
     }
   };
 
-  // Xử lý cập nhật
-  const handleUpdate = () => {
-    // So sánh dữ liệu thay đổi
-    const changedData = {};
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== initialData[key]) {
-        changedData[key] = formData[key];
-      }
-    });
-
-    console.log("Changed Data:", changedData);
-    alert("Thông tin đã được cập nhật!");
+  const handleUpdate = async () => {
+    try {
+      console.log("Updated User Info:", formData);
+      alert("Thông tin đã được cập nhật!");
+      localStorage.setItem("user", JSON.stringify(formData));
+    } catch (error) {
+      console.error("Update failed:", error);
+    }
   };
 
   return (
     <div className="account-wrapper">
-      {/* Left: Avatar */}
       <div className="account-left">
         <img
           src={formData.src}
@@ -61,7 +70,6 @@ const AccountPage = () => {
         />
       </div>
 
-      {/* Right: User Info */}
       <div className="account-right">
         <h2 className="account-title">User Information</h2>
 
@@ -80,6 +88,7 @@ const AccountPage = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
+            readOnly
           />
 
           <label>Password</label>

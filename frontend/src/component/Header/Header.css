@@ -354,6 +354,55 @@
         background-color: rgba(0, 0, 0, 0.05);
       }
   }
+
+
+.user-menu {
+  position: relative;
+  cursor: pointer;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: #FFFBDE;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  z-index: 1000;
+  min-width: 140px;
+  padding: 8px 0;
+}
+
+.user-dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  
+}
+
+.user-dropdown li {
+  padding: 8px 16px;
+  transition: background 0.2s;
+}
+
+.user-dropdown li:hover {
+  background: #d5a30a;
+}
+
+.user-dropdown a,
+.user-dropdown button {
+  text-decoration: none;
+  color: #333;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 17px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
   
 
 

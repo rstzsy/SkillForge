@@ -25,6 +25,9 @@ export default function Login() {
       if (res.status === 200) {
         const user = data.user;
 
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("token", data.token);
+
         // check role
         if (user.role === "Admin") {
           alert("Login to Admin successfully!");
@@ -52,21 +55,26 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
+      const googleUser = result.user;
 
-      console.log("Google User:", user);
+      console.log("Google User:", googleUser);
 
-      const idToken = await user.getIdToken(); 
+      const idToken = await googleUser.getIdToken();
 
       const res = await fetch("http://localhost:3002/api/users/google-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }), 
+        body: JSON.stringify({ idToken }),
       });
 
       const data = await res.json();
 
       if (res.status === 200) {
+        localStorage.setItem("user", JSON.stringify(data.user || googleUser));
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+        }
+
         alert("Login with Google successfully!");
         navigate("/");
       } else {
@@ -77,6 +85,7 @@ export default function Login() {
       alert("Google login failed");
     }
   };
+
 
 
 
