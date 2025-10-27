@@ -33,7 +33,7 @@ const GoalSetup = () => {
 
   const validateEmail = (e) => /\S+@\S+\.\S+/.test(e);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return setMessage("Please enter your name.");
     if (!validateEmail(email)) return setMessage("Please enter a valid email.");
@@ -42,17 +42,33 @@ const GoalSetup = () => {
     const payload = {
       name: name.trim(),
       email: email.trim(),
-      targetBand,
-      targetDate,
-      prioritySkills,
+      target_band: targetBand,
+      target_date: targetDate,
+      priority_skills: prioritySkills.join(","), 
       notes,
-      savedAt: new Date().toISOString(),
     };
 
-    localStorage.setItem("userGoal", JSON.stringify(payload));
-    setSavedAt(payload.savedAt);
-    setMessage("Your goal has been saved. Good luck!");
+    try {
+      const res = await fetch("http://localhost:3002/api/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save goal");
+
+      const data = await res.json();
+
+      localStorage.setItem("userGoal", JSON.stringify(data));
+      setSavedAt(data.saved_at || new Date().toISOString());
+
+      setMessage("Your goal has been saved successfully!");
+    } catch (error) {
+      console.error("Error saving goal:", error);
+      setMessage("Failed to save goal. Please try again later.");
+    }
   };
+
 
   const clearSaved = () => {
     localStorage.removeItem("userGoal");

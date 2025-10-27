@@ -20,7 +20,7 @@ const BookOnline = () => {
   const handleBooking = async () => {
     const { name, email, date, time } = formData;
     if (!name || !email || !date || !time) {
-      alert("Vui lòng điền đầy đủ thông tin!");
+      alert("Please fill in all the required information!");
       return;
     }
 
@@ -34,26 +34,32 @@ const BookOnline = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3002/create", {
+      const res = await fetch("http://localhost:3002/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newBooking),
       });
 
       if (res.ok) {
-        alert(`✅ Đặt lịch thành công cho ${name} vào ${date} lúc ${time}`);
+        alert(`Successfully booked for ${name} on ${date} at ${time}`);
+
+        const resBookings = await fetch("http://localhost:3002/api/bookings");
+        const updated = await resBookings.json();
+        setBookings(updated);
+
         setFormData({ name: "", email: "", date: "", time: "" });
-        setBookings([...bookings, newBooking]);
       } else {
         const err = await res.json();
-        console.error("❌ Lỗi backend:", err);
-        alert("Lỗi khi lưu dữ liệu lên server.");
+        console.error("Backend error:", err);
+        alert("Error saving booking data to the server.");
       }
     } catch (error) {
-      console.error("❌ Lỗi kết nối:", error);
-      alert("Không thể kết nối tới server.");
+      console.error("Connection error:", error);
+      alert("Unable to connect to the server.");
     }
   };
+
+
 
   
 
