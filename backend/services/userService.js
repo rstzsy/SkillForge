@@ -101,3 +101,38 @@ export async function loginWithGoogle(idToken) {
     throw new Error("Invalid Google token");
   }
 }
+
+// update information (customer)
+export const updateUserById = async (id, userData) => {
+  try {
+    const userRef = db.collection("users").doc(id);
+    const userDoc = await userRef.get();
+
+    if (!userDoc.exists) {
+      throw new Error("User not found");
+    }
+
+    const updateData = {
+      userName: userData.username,
+      email: userData.email,
+      avatar: userData.avatar || null,
+      updatedAt: new Date(),
+    };
+
+    // if change new pass
+    if (userData.password && userData.password !== "********") {
+      updateData.passwordHash = await bcrypt.hash(userData.password, 10);
+    }
+
+    // update firestore
+    await userRef.update(updateData);
+
+    // lay lai data sau khi update
+    const updatedDoc = await userRef.get();
+    return { id: updatedDoc.id, ...updatedDoc.data() };
+  } 
+  catch (error) {
+    console.error("Firestore update error:", error);
+    throw new Error("Failed to update user");
+  }
+};

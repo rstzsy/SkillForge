@@ -1,52 +1,132 @@
 import React, { useState, useEffect } from "react";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { app } from "../../firebase/config";
 import "./Account.css";
 
 const AccountPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    password: "********",
-    src: "/assets/avatar.jpg",
+    password: "", 
+    avatar: "/assets/avatar.jpg",
   });
 
+  const storage = getStorage(app);
+
+  // Load user from localStorage khi component mount
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setFormData({
         username:
-          storedUser.userName || 
-          storedUser.displayName || 
-          storedUser.name || 
+          storedUser.userName ||
+          storedUser.displayName ||
+          storedUser.name ||
           "Unknown User",
         email: storedUser.email || "",
-        password: "********",
-        src:
-          storedUser.avatar || 
-          storedUser.photoURL || 
-          "/assets/avatar.jpg",
+        password: "", 
+        avatar: storedUser.avatar || "/assets/avatar.jpg",
       });
     }
   }, []);
 
+  // Handle input change
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAvatarChange = (e) => {
+  // Handle avatar change
+  const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const newSrc = URL.createObjectURL(file);
-      setFormData({ ...formData, src: newSrc });
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Vui lòng chọn file ảnh!");
+      return;
+    }
+
+    try {
+      // Preview anh ngay lap tuc
+      const previewURL = URL.createObjectURL(file);
+      setFormData((prev) => ({ ...prev, avatar: previewURL }));
+
+      // Upload up Firebase
+      const fileName = `${Date.now()}_${file.name}`; 
+      const avatarRef = ref(storage, `avatars/${fileName}`);
+      await uploadBytes(avatarRef, file);
+      const downloadURL = await getDownloadURL(avatarRef);
+
+      // Cập nhật state với URL thật từ Firebase
+      setFormData((prev) => ({ ...prev, avatar: downloadURL }));
+
+      // Gửi lên backend
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (storedUser?.id) {
+        const response = await fetch(
+          `http://localhost:3002/api/users/${storedUser.id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ avatar: downloadURL }),
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Backend update failed:", errorData);
+          alert("Không thể lưu avatar vào database!");
+          return;
+        }
+
+        // Cập nhật localStorage
+        const updatedUser = { ...storedUser, avatar: downloadURL };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+
+        alert("Ảnh đại diện đã được cập nhật!");
+      }
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload ảnh thất bại!");
     }
   };
 
+  // Handle update user information
   const handleUpdate = async () => {
     try {
-      console.log("Updated User Info:", formData);
-      alert("Thông tin đã được cập nhật!");
-      localStorage.setItem("user", JSON.stringify(formData));
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser || !storedUser.id) {
+        alert("User not found!");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3002/api/users/${storedUser.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: formData.username,
+            email: formData.email,
+            password: formData.password, // backend hash pass neu co
+            avatar: formData.avatar,
+          }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Update failed");
+
+      // luu user moi vao local , khong luu pass vao local
+      const { password, ...userWithoutPassword } = data.updatedUser;
+      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+
+      // Reset password input
+      setFormData((prev) => ({ ...prev, password: "" }));
+
+      alert("Thông tin người dùng đã được cập nhật!");
     } catch (error) {
       console.error("Update failed:", error);
+      alert("Cập nhật thất bại!");
     }
   };
 
@@ -54,7 +134,7 @@ const AccountPage = () => {
     <div className="account-wrapper">
       <div className="account-left">
         <img
-          src={formData.src}
+          src={formData.avatar || "/assets/avatar.jpg"}
           alt="User Avatar"
           className="account-avatar"
         />
@@ -95,6 +175,7 @@ const AccountPage = () => {
           <input
             type="password"
             name="password"
+            placeholder="••••••"
             value={formData.password}
             onChange={handleChange}
           />
