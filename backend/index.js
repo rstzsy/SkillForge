@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { doc, deleteDoc, getDocs, collection, addDoc } from "firebase/firestore"; 
 import { db } from "./config.js"; 
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -47,6 +48,9 @@ app.delete("/bookings/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete booking" });
   }
 });
+
+//user
+app.use("/api/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is ready");
