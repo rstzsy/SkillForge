@@ -46,6 +46,7 @@ import AdminEditClass from "../pages/Admin/AdminClass/AdminEditClass"
 import AdminAddClass from "../pages/Admin/AdminClass/AdminAddClass"
 import AdminPersonalAim from "../pages/Admin/AdminPersonalAim/AdminPersonalAim";
 import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBooking";
+import PlacementTest from "../pages/PlacementTest/PlacementTest";
 
 export const routes = [
     {
@@ -268,5 +269,11 @@ export const routes = [
     {
         path: '/admin/manage_booking',
         page: AdminManageBooking,
+    },
+    {
+        path: '/placement_test',
+        page: PlacementTest,
+        isShowHeader: true,
+        isShowFooter: true
     },
 ]

@@ -235,6 +235,31 @@ const GoalSetup = () => {
         </div>
       </section>
 
+      {/* Level Check Section */}
+      <section className="goalsetup-levelcheck">
+        <div className="goalsetup-levelcheck-content">
+          <img
+            src="/assets/placementtest.png"
+            alt="Placement Test"
+            className="goalsetup-levelcheck-img"
+          />
+          <div className="goalsetup-levelcheck-text">
+            <h2>✨ Know your current level</h2>
+            <p>
+              Want to find out your current English proficiency and estimated IELTS band score?
+              Take our quick placement test now and get instant feedback!
+            </p>
+            <button
+              className="goalsetup-levelcheck-btn"
+              onClick={() => (window.location.href = "/placement_test")}
+            >
+              Take your placement test
+            </button>
+          </div>
+        </div>
+      </section>
+
+
       <section className="goalsetup-roadmap">
         <h2 className="goalsetup-roadmap-title">🎯 Suggested Roadmap</h2>
         <p className="goalsetup-roadmap-subtitle">

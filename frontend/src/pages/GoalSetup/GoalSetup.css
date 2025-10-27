@@ -592,3 +592,92 @@
     }
   }
   
+
+/* ===== LEVEL CHECK SECTION ===== */
+.goalsetup-levelcheck {
+  background: linear-gradient(135deg, #fff5eb, #fff0e1);
+  padding: 4rem 8%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 3rem;
+  box-shadow: 0 8px 28px rgba(254, 93, 1, 0.05);
+}
+
+.goalsetup-levelcheck-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1100px;
+  width: 100%;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.goalsetup-levelcheck-img {
+  width: 40%;
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow: 0 10px 25px rgba(254, 93, 1, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.goalsetup-levelcheck-img:hover {
+  transform: scale(1.04);
+  box-shadow: 0 12px 30px rgba(254, 93, 1, 0.25);
+}
+
+.goalsetup-levelcheck-text {
+  flex: 1;
+  text-align: left;
+  max-width: 520px;
+}
+
+.goalsetup-levelcheck-text h2 {
+  color: #fe5d01;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+}
+
+.goalsetup-levelcheck-text p {
+  color: #3b2e00;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.goalsetup-levelcheck-btn {
+  background: linear-gradient(135deg, #fe5d01, #ff8534);
+  color: white;
+  border: none;
+  border-radius: 40px;
+  padding: 12px 26px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.goalsetup-levelcheck-btn:hover {
+  background: linear-gradient(135deg, #ff7020, #ff9a4d);
+  transform: scale(1.05);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .goalsetup-levelcheck-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .goalsetup-levelcheck-img {
+    width: 100%;
+    max-width: 450px;
+  }
+
+  .goalsetup-levelcheck-text {
+    text-align: center;
+  }
+}
