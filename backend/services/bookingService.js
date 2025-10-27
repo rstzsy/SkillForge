@@ -1,4 +1,4 @@
-import { Booking } from "../models/bookingModel.js"
+import { Booking } from "../models/BookingModel.js"
 import { db } from "../config/firebase.js";
 
 const COLLECTION_NAME = "speaking_bookings";
@@ -11,8 +11,9 @@ export const createBooking = async (data) => {
     email: booking.email,
     date: booking.date,
     time: booking.time,
-    status: booking.status,
-    bookedAt: booking.bookedAt,
+    status: booking.status || "Scheduled",
+    bookedAt: booking.bookedAt || new Date().toISOString(),
+    userId: booking.userId || null,
   };
 
   const docRef = await db.collection(COLLECTION_NAME).add(bookingData);

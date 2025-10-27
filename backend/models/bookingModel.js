@@ -10,9 +10,10 @@ export class Booking {
     meeting_link = "",
     recording_url = "",
     bookedAt = new Date().toISOString(),
+    userId,
   }) {
-    this.student_id = student_id;
-    this.teacher_id = teacher_id;
+    this.student_id = student_id || null;
+    this.teacher_id = teacher_id || null;
     this.name = name;
     this.email = email;
     this.date = date;
@@ -21,5 +22,6 @@ export class Booking {
     this.meeting_link = meeting_link;
     this.recording_url = recording_url;
     this.bookedAt = bookedAt;
+    this.userId = userId || null;
   }
 }

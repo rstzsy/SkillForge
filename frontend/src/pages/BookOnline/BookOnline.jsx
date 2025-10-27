@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./BookOnline.css";
 
 const BookOnline = () => {
@@ -7,31 +7,54 @@ const BookOnline = () => {
     email: "",
     date: "",
     time: "",
+    userId: "",
   });
 
   const [bookings, setBookings] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    console.log("🔍 Stored user:", storedUser); 
+
+    if (storedUser) {
+      setFormData((prev) => ({
+        ...prev,
+        name: storedUser.userName,
+        email: storedUser.email,
+        userId: storedUser.id, 
+      }));
+
+      fetch(`http://localhost:3002/api/bookings/user/${storedUser.id}`) // ✅ đổi userId -> id
+        .then((res) => res.json())
+        .then((data) => setBookings(data))
+        .catch((err) => console.error("Error loading user bookings:", err));
+    }
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleBooking = async () => {
-    const { name, email, date, time } = formData;
+    const { name, email, date, time, userId } = formData;
     if (!name || !email || !date || !time) {
-      alert("Please fill in all the required information!");
+      alert("Please fill in all required fields!");
       return;
     }
 
     const newBooking = {
       name,
       email,
+      userId, // ✅ gửi userId lên backend
       date,
       time,
       status: "Scheduled",
       bookedAt: new Date().toISOString(),
     };
+
+    console.log("📤 Booking sent to backend:", newBooking); // 👈 thêm log kiểm tra
 
     try {
       const res = await fetch("http://localhost:3002/api/bookings", {
@@ -43,11 +66,13 @@ const BookOnline = () => {
       if (res.ok) {
         alert(`Successfully booked for ${name} on ${date} at ${time}`);
 
-        const resBookings = await fetch("http://localhost:3002/api/bookings");
+        const resBookings = await fetch(
+          `http://localhost:3002/api/bookings/user/${userId}`
+        );
         const updated = await resBookings.json();
         setBookings(updated);
 
-        setFormData({ name: "", email: "", date: "", time: "" });
+        setFormData((prev) => ({ ...prev, date: "", time: "" }));
       } else {
         const err = await res.json();
         console.error("Backend error:", err);
@@ -59,20 +84,16 @@ const BookOnline = () => {
     }
   };
 
-
-
-  
-
   return (
     <div className="booking-page-container-bookonl">
-      {/* left side */}
       <div className="booking-left-bookonl">
         <div className="decor-image-bookonl"></div>
       </div>
 
-      {/* right side */}
       <div className="booking-right-bookonl">
-        <h1 className="booking-title-bookonl">Schedule an Online Speaking Class</h1>
+        <h1 className="booking-title-bookonl">
+          Schedule an Online Speaking Class
+        </h1>
 
         <div className="booking-form-bookonl">
           <label>Username:</label>
@@ -114,9 +135,7 @@ const BookOnline = () => {
                     className={`time-slot-bookonl ${
                       formData.time === time ? "selected-bookonl" : ""
                     }`}
-                    onClick={() =>
-                      setFormData({ ...formData, time: time })
-                    }
+                    onClick={() => setFormData({ ...formData, time })}
                   >
                     {time}
                   </div>
