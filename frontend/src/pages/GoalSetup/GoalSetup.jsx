@@ -24,6 +24,19 @@ const GoalSetup = () => {
   const [notes, setNotes] = useState(saved?.notes || "");
   const [savedAt, setSavedAt] = useState(saved?.savedAt || null);
   const [message, setMessage] = useState("");
+  const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      console.log("Logged-in user:", storedUser);
+      setName(storedUser.userName || "");
+      setEmail(storedUser.email || "");
+      setUserId(storedUser.id || "");
+    } else {
+      console.warn("No user found in localStorage");
+    }
+  }, []);
 
   const toggleSkill = (skill) => {
     setPrioritySkills((prev) =>
@@ -40,11 +53,12 @@ const GoalSetup = () => {
     if (!targetDate) return setMessage("Please choose a target date.");
 
     const payload = {
+      user_id: userId,
       name: name.trim(),
       email: email.trim(),
       target_band: targetBand,
       target_date: targetDate,
-      priority_skills: prioritySkills.join(","), 
+      priority_skills: prioritySkills.join(","),
       notes,
     };
 
@@ -58,16 +72,15 @@ const GoalSetup = () => {
       if (!res.ok) throw new Error("Failed to save goal");
 
       const data = await res.json();
-
       localStorage.setItem("userGoal", JSON.stringify(data));
       setSavedAt(data.saved_at || new Date().toISOString());
-
       setMessage("Your goal has been saved successfully!");
     } catch (error) {
       console.error("Error saving goal:", error);
       setMessage("Failed to save goal. Please try again later.");
     }
   };
+
 
 
   const clearSaved = () => {
