@@ -1,4 +1,4 @@
-import { registerUser, loginUser } from "../services/userService.js";
+import { registerUser, loginUser, loginWithGoogle } from "../services/userService.js";
 
 export const handleRegister = async (req, res) => {
   try {
@@ -41,3 +41,25 @@ export const handleLogin = async (req, res) => {
     return res.status(400).json({ message: error.message });
   }
 };
+
+
+export const handleGoogleLogin = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "Missing Google ID token" });
+    }
+
+    const user = await loginWithGoogle(idToken);
+
+    return res.status(200).json({
+      message: "Google login successful",
+      user,
+    });
+  } catch (error) {
+    console.error("Google login failed:", error);
+    return res.status(400).json({ message: error.message });
+  }
+};
+

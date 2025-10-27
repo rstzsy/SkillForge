@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import { auth, googleProvider } from "../../firebase/config";
+import { signInWithPopup } from "firebase/auth";
 import "./Login.css";
 
 export default function Login() {
@@ -47,6 +49,37 @@ export default function Login() {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      console.log("Google User:", user);
+
+      const idToken = await user.getIdToken(); 
+
+      const res = await fetch("http://localhost:3002/api/users/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }), 
+      });
+
+      const data = await res.json();
+
+      if (res.status === 200) {
+        alert("Login with Google successfully!");
+        navigate("/");
+      } else {
+        alert(data.message || "Failed to save user data");
+      }
+    } catch (error) {
+      console.error("Error during Google login:", error);
+      alert("Google login failed");
+    }
+  };
+
+
+
   return (
     <div className="login-container">
       <img
@@ -58,8 +91,8 @@ export default function Login() {
         <div className="signin-card">
           <div className="signin-header">
             <h1>Sign in</h1>
-            <button className="google-btn">
-              <span>Sign with</span>
+            <button className="google-btn" onClick={handleGoogleLogin}>
+              <span>Sign in with Google</span>
               <svg width="20" height="20" viewBox="0 0 20 20">
                 <path
                   d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15.96-.74 2.31-2.04 3.22v2.45h3.16c1.89-1.73 2.98-4.3 2.98-7.34z"

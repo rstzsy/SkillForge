@@ -1,42 +1,37 @@
 import bcrypt from "bcrypt";
-import { db } from "../config/firebase.js"; 
+import { db } from "../config/firebase.js";
 import { User } from "../models/userModel.js";
+import admin from "firebase-admin";
 
 const userCollection = db.collection("users");
 
-// register
+// REGISTER
 export async function registerUser(userName, email, password) {
-  // check email
   const existingUser = await userCollection.where("email", "==", email).get();
   if (!existingUser.empty) {
     throw new Error("Email already registered");
   }
 
-  // hash pass
   const passwordHash = await bcrypt.hash(password, 10);
 
-  // create new user if not existed
   const newUser = new User({
     userName,
     email,
     passwordHash,
-    avatar: null,           
-    user_phone: null,         
-    role: "Customer",         
-    status: "Active",         
-    createdAt: new Date(),    
+    avatar: null,
+    user_phone: null,
+    role: "Customer",
+    status: "Active",
+    createdAt: new Date(),
   });
 
-  // save firebase
   const docRef = await userCollection.add(JSON.parse(JSON.stringify(newUser)));
   return { id: docRef.id, ...newUser };
 }
 
-// login
+// LOGIN
 export async function loginUser(email, password) {
-  // check user
   const userSnapshot = await userCollection.where("email", "==", email).get();
-
   if (userSnapshot.empty) {
     throw new Error("Email not found");
   }
@@ -44,12 +39,10 @@ export async function loginUser(email, password) {
   const userDoc = userSnapshot.docs[0];
   const userData = userDoc.data();
 
-  // check status
   if (userData.status !== "Active") {
     throw new Error("Account is inactive. Please contact admin.");
   }
 
-  // compare pass
   const isMatch = await bcrypt.compare(password, userData.passwordHash);
   if (!isMatch) {
     throw new Error("Invalid password");
@@ -62,4 +55,49 @@ export async function loginUser(email, password) {
     role: userData.role,
     status: userData.status,
   };
+}
+
+// 🔹 GOOGLE LOGIN
+export async function loginWithGoogle(idToken) {
+  try {
+    // Verify token từ client gửi lên
+    const decoded = await admin.auth().verifyIdToken(idToken);
+    const { uid, name, email, picture } = decoded;
+
+    // Kiểm tra xem user có tồn tại chưa
+    const existingUserSnap = await userCollection.where("email", "==", email).get();
+
+    if (!existingUserSnap.empty) {
+      // Nếu user đã tồn tại → trả về thông tin
+      const userDoc = existingUserSnap.docs[0];
+      const userData = userDoc.data();
+      return {
+        id: userDoc.id,
+        userName: userData.userName,
+        email: userData.email,
+        avatar: userData.avatar,
+        role: userData.role,
+        status: userData.status,
+      };
+    }
+
+    // Nếu chưa có → tạo mới user từ Google info
+    const newUser = new User({
+      userName: name || "Google User",
+      email,
+      passwordHash: null, // Google users không có mật khẩu
+      avatar: picture || null,
+      user_phone: null,
+      role: "Customer",
+      status: "Active",
+      createdAt: new Date(),
+    });
+
+    const docRef = await userCollection.add(JSON.parse(JSON.stringify(newUser)));
+
+    return { id: docRef.id, ...newUser };
+  } catch (error) {
+    console.error("Google login error:", error);
+    throw new Error("Invalid Google token");
+  }
 }
