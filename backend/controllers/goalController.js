@@ -23,3 +23,15 @@ export const getGoalsByUser = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch goals" });
   }
 };
+
+
+export const deleteGoal = async (req, res) => {
+  try {
+    const { goalId } = req.params;
+    const result = await GoalService.deleteGoal(goalId);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error deleting goal:", error);
+    res.status(500).json({ error: "Failed to delete goal" });
+  }
+};
