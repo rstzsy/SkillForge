@@ -35,7 +35,7 @@ export default function Login() {
         } 
         else if (user.role === "Teacher") {
           alert("Login to Teacher successfully!");
-          navigate("/teacher");
+          navigate("/teacher/dashboard");
         } 
         else {
           alert("Login successfully!");

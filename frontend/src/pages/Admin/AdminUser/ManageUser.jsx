@@ -1,41 +1,55 @@
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ManageUser.css";
 
 const ManageUser = () => {
-  const [users] = useState([
-    {
-      id: 1,
-      avatar: "/assets/avatar.jpg",
-      username: "John Doe",
-      email: "johndoe@email.com",
-      role: "user",
-      active: true,
-    },
-    {
-      id: 2,
-      avatar: "/assets/avatar.jpg",
-      username: "Jane Smith",
-      email: "janesmith@email.com",
-      role: "admin",
-      active: false,
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
+
+  // call api
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:3002/api/admin/users");
+        if (!response.ok) throw new Error("Failed to fetch users");
+
+        const data = await response.json();
+        console.log("Danh sách user:", data);
+        setUsers(data);
+      } catch (err) {
+        console.error("Lỗi khi lấy user:", err);
+        setError("Không thể tải danh sách người dùng.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleUpdate = (user) => {
     navigate(`/admin/manage_user/update/${user.id}`, { state: { user } });
   };
 
   const handleViewLearningPath = (user) => {
-    navigate(`/admin/manage_user/learning_path/${user.id}`, { state: { user } });
+    navigate(`/admin/manage_user/learning_path/${user.id}`, {
+      state: { user },
+    });
   };
 
   const handleViewPersonalAim = (user) => {
     navigate(`/admin/manage_user/personal_aim/${user.id}`, { state: { user } });
   };
+
+  // loading data
+  if (loading)
+    return <p style={{ textAlign: "center" }}>Đang tải dữ liệu...</p>;
+  if (error)
+    return <p style={{ color: "red", textAlign: "center" }}>{error}</p>;
 
   return (
     <div className="admin-container-usermanage">
@@ -52,36 +66,39 @@ const ManageUser = () => {
                 <th>Username</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Active</th>
+                <th>Status</th>
                 <th>Control</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
-                <tr key={user.id}>
-                  <td data-label="ID">{user.id}</td>
+              {users.map((user, index) => (
+                <tr key={user.id || index}>
+                  <td data-label="ID">{index + 1}</td> {/* auto id */}
                   <td>
                     <img
-                      src={user.avatar}
+                      src={user.avatar || "/assets/avatar.jpg"}
                       alt="avatar"
                       className="user-avatar-usermanage"
                     />
                   </td>
-                  <td data-label="Username">{user.username}</td>
+                  <td data-label="Username">{user.userName}</td>
                   <td data-label="Email">{user.email}</td>
                   <td data-label="Role">{user.role}</td>
-                  <td data-label="Active">
+                  <td data-label="Status">
                     <span
                       className={
-                        user.active
+                        user.status === "Active"
                           ? "active-usermanage"
                           : "inactive-usermanage"
                       }
                     >
-                      {user.active ? "Active" : "Inactive"}
+                      {user.status}
                     </span>
                   </td>
-                  <td data-label="Control" className="control-buttons-usermanage">
+                  <td
+                    data-label="Control"
+                    className="control-buttons-usermanage"
+                  >
                     <button
                       className="btn-update-usermanage"
                       onClick={() => handleUpdate(user)}

@@ -4,6 +4,7 @@ import cors from "cors";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import userRoutes from "./routes/userRoutes.js"; 
 import goalRoutes from "./routes/goalRoutes.js";
+import adminUserRoutes from "./routes/adminUserRoute.js";
 
 
 dotenv.config();
@@ -14,6 +15,7 @@ app.use(cors());
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes); 
 app.use("/api/goals", goalRoutes);
+app.use("/api/admin/users", adminUserRoutes);
 
 
 app.get("/", (req, res) => {
