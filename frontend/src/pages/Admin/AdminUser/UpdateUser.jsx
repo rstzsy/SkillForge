@@ -3,54 +3,65 @@ import { useParams, useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import "./UpdateUser.css";
 
-const mockUsers = [
-  {
-    id: 1,
-    avatar: "/assets/avatar.jpg",
-    username: "John Doe",
-    email: "johndoe@email.com",
-    role: "user",
-    active: true,
-  },
-  {
-    id: 2,
-    avatar: "/assets/avatar.jpg",
-    username: "Jane Smith",
-    email: "janesmith@email.com",
-    role: "admin",
-    active: false,
-  },
-];
-
 const UpdateUserPage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Lấy id from route
   const navigate = useNavigate();
 
-  const userData = mockUsers.find((u) => u.id === Number(id));
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [formData, setFormData] = useState(userData || {});
-
+  // fetch data by id
   useEffect(() => {
-    if (!userData) {
-      alert("User không tồn tại!");
-      navigate("/admin/manage_user");
-    }
-  }, [userData, navigate]);
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(`http://localhost:3002/api/admin/users/${id}`);
+        if (!response.ok) throw new Error("Không tìm thấy user");
+        const data = await response.json();
+        setUserData(data);
+      } 
+      catch (err) {
+        console.error("Lỗi lấy user:", err);
+        setError(err.message);
+      } 
+      finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, [id]);
 
+  // change role and status
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    const { name, value } = e.target;
+    setUserData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // Submit form
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Dữ liệu đã thay đổi:", formData);
-    alert(`Cập nhật thành công cho user: ${formData.username}`);
-    navigate("/admin/manage_user");
+    try {
+      const response = await fetch(`http://localhost:3002/api/admin/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: userData.role,
+          status: userData.status,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Cập nhật thất bại");
+      alert("Cập nhật thành công!");
+      navigate("/admin/manage_user"); 
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
+
+  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!userData) return null;
 
   return (
     <div className="admin-container-updateuser">
@@ -58,68 +69,47 @@ const UpdateUserPage = () => {
       <div className="main-content-updateuser">
         <h2 className="page-title-updateuser">Update User</h2>
         <form className="update-user-form-updateuser" onSubmit={handleSubmit}>
+          {/* Avatar */}
           <div className="form-group-updateuser">
-            <label></label>
             <img
-              src={formData.avatar}
+              src={userData.avatar || "/assets/avatar.jpg"}
               alt="avatar"
               className="update-user-avatar-updateuser"
             />
           </div>
 
+          {/* Username */}
           <div className="form-group-updateuser">
             <label>Username:</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username || ""}
-              onChange={handleChange}
-              required
-              readOnly
-            />
+            <input type="text" name="username" value={userData.userName} readOnly />
           </div>
 
+          {/* Email */}
           <div className="form-group-updateuser">
             <label>Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email || ""}
-              onChange={handleChange}
-              required
-              readOnly
-            />
+            <input type="email" name="email" value={userData.email} readOnly />
           </div>
 
+          {/* Role */}
           <div className="form-group-updateuser">
             <label>Role:</label>
-            <select
-              name="role"
-              value={formData.role || "user"}
-              onChange={handleChange}
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+            <select name="role" value={userData.role} onChange={handleChange}>
+              <option value="Customer">Customer</option>
+              <option value="Admin">Admin</option>
+              <option value="Teacher">Teacher</option>
             </select>
           </div>
 
+          {/* Status */}
           <div className="form-group-updateuser">
-            <label>Active:</label>
-            <select
-              name="active"
-              value={formData.active ? "true" : "false"}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  active: e.target.value === "true",
-                })
-              }
-            >
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
+            <label>Status:</label>
+            <select name="status" value={userData.status} onChange={handleChange}>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
             </select>
           </div>
 
+          {/* Buttons */}
           <div className="button-group-updateuser">
             <button type="submit" className="btn-save-updateuser">
               Save Changes
