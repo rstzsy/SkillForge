@@ -54,6 +54,7 @@ export async function loginUser(email, password) {
     email: userData.email,
     role: userData.role,
     status: userData.status,
+    avatar: userData.avatar || null,
   };
 }
 
