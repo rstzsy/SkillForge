@@ -1,110 +1,107 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import "./AdminEditClass.css";
 
 const AdminAddClass = () => {
   const navigate = useNavigate();
-
-  // Danh sách sinh viên và giảng viên demo
-  const allStudents = [
-    { id: "ST001", name: "Alice" },
-    { id: "ST002", name: "Bob" },
-    { id: "ST003", name: "Charlie" },
-    { id: "ST004", name: "David" },
-  ];
-
-  const allTeachers = [
-    { id: "T001", name: "Mr. John" },
-    { id: "T002", name: "Ms. Sarah" },
-    { id: "T003", name: "Mr. David" },
-  ];
+  const [teachers, setTeachers] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [classData, setClassData] = useState({
-    id: "",
     name: "",
     subject: "",
     schedule: "",
     driveLink: "",
     zoomLink: "",
     teacherId: "",
-    teacherName: "",
-    students: [],
+    students: [], // {id, name}
   });
 
-  // Thay đổi input lớp
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const teacherRes = await fetch("http://localhost:3002/api/admin/classes/teachers");
+        const teacherData = await teacherRes.json();
+        setTeachers(teacherData);
+
+        const studentRes = await fetch("http://localhost:3002/api/admin/classes/students");
+        const studentData = await studentRes.json();
+        setStudents(studentData);
+      } catch (err) {
+        console.error(err);
+        setError("Không thể tải danh sách giáo viên hoặc học sinh");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const handleChange = (e) => {
     setClassData({ ...classData, [e.target.name]: e.target.value });
   };
 
-  // Chọn giảng viên
   const handleSelectTeacher = (teacherId) => {
-    const teacher = allTeachers.find((t) => t.id === teacherId);
-    setClassData({
-      ...classData,
-      teacherId: teacher.id,
-      teacherName: teacher.name,
-    });
+    setClassData({ ...classData, teacherId });
   };
 
-  // Chỉnh sửa student name
-  const handleStudentNameChange = (index, newName) => {
-    const updatedStudents = [...classData.students];
-    updatedStudents[index].name = newName;
-    setClassData({ ...classData, students: updatedStudents });
+  const handleSelectStudent = (index, studentId) => {
+    const student = students.find((s) => s.id === studentId);
+    const updated = [...classData.students];
+    updated[index] = { id: student.id, name: student.userName };
+    setClassData({ ...classData, students: updated });
   };
 
-  // Chọn mã sinh viên từ danh sách
-  const handleSelectStudentId = (index, newId) => {
-    const student = allStudents.find((s) => s.id === newId);
-    const updatedStudents = [...classData.students];
-    updatedStudents[index] = {
-      id: student.id,
-      name: student.name,
-    };
-    setClassData({ ...classData, students: updatedStudents });
-  };
-
-  // Thêm student mới
   const handleAddStudent = () => {
-    setClassData({
-      ...classData,
-      students: [...classData.students, { id: "", name: "" }],
-    });
+    setClassData({ ...classData, students: [...classData.students, { id: "", name: "" }] });
   };
 
-  // Xóa student
   const handleRemoveStudent = (index) => {
-    const updatedStudents = classData.students.filter((_, i) => i !== index);
-    setClassData({ ...classData, students: updatedStudents });
+    const updated = classData.students.filter((_, i) => i !== index);
+    setClassData({ ...classData, students: updated });
   };
 
-  // Lưu dữ liệu
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("New class info:", classData);
-    alert("Class added successfully!");
-    navigate("/admin/manage_class");
+    try {
+      // convert schedule sang ISO string
+      const payload = {
+        ...classData,
+        schedule: new Date(classData.schedule).toISOString(),
+      };
+
+      const res = await fetch("http://localhost:3002/api/admin/classes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Thêm lớp thất bại");
+      }
+
+      alert("Class added successfully!");
+      navigate("/admin/manage_class");
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
+
+  if (loading) return <p>Đang tải dữ liệu...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <>
       <AdminHeader />
-
       <div className="admineditclass-container">
         <h2 className="admineditclass-title">Add New Class</h2>
 
         <form onSubmit={handleSubmit} className="admineditclass-form">
-          <label>
-            Class ID:
-            <input
-              type="text"
-              name="id"
-              value={classData.id}
-              onChange={handleChange}
-            />
-          </label>
-
           <label>
             Name:
             <input
@@ -112,6 +109,7 @@ const AdminAddClass = () => {
               name="name"
               value={classData.name}
               onChange={handleChange}
+              required
             />
           </label>
 
@@ -122,6 +120,7 @@ const AdminAddClass = () => {
               name="subject"
               value={classData.subject}
               onChange={handleChange}
+              required
             />
           </label>
 
@@ -132,6 +131,7 @@ const AdminAddClass = () => {
               name="schedule"
               value={classData.schedule}
               onChange={handleChange}
+              required
             />
           </label>
 
@@ -155,28 +155,22 @@ const AdminAddClass = () => {
             />
           </label>
 
-          {/* Chọn giảng viên */}
+          {/* Chọn giáo viên */}
           <label>
             Teacher:
             <select
               value={classData.teacherId}
               onChange={(e) => handleSelectTeacher(e.target.value)}
+              required
             >
               <option value="">-- Select Teacher --</option>
-              {allTeachers.map((t) => (
+              {teachers.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.id} - {t.name}
+                  {t.userName}
                 </option>
               ))}
             </select>
           </label>
-
-          <input
-            type="text"
-            value={classData.teacherName}
-            disabled
-            className="teacher-name-display"
-          />
 
           {/* Danh sách sinh viên */}
           <div className="student-list-admineditclass">
@@ -185,19 +179,20 @@ const AdminAddClass = () => {
               <div key={index} className="student-item-admineditclass">
                 <select
                   value={student.id}
-                  onChange={(e) => handleSelectStudentId(index, e.target.value)}
+                  onChange={(e) => handleSelectStudent(index, e.target.value)}
+                  required
                 >
-                  <option value="">-- Select Student ID --</option>
-                  {allStudents.map((s) => (
+                  <option value="">-- Select Student --</option>
+                  {students.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.id}
+                      {s.userName}
                     </option>
                   ))}
                 </select>
                 <input
                   type="text"
                   value={student.name}
-                  onChange={(e) => handleStudentNameChange(index, e.target.value)}
+                  disabled
                   placeholder="Student Name"
                 />
                 <button
