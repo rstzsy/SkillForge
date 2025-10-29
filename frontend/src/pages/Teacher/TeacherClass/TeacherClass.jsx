@@ -1,63 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderTeacher from "../../../component/HeaderTeacher/HeaderTeacher";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEye,
-  faPen,
-  faTrash,
-  faLink,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye, faLink } from "@fortawesome/free-solid-svg-icons";
 import "./TeacherClass.css";
 
 const TeacherClass = () => {
-  const [classes, setClasses] = useState([
-    {
-      id: "S101",
-      name: "Speaking 101",
-      subject: "Speaking",
-      studentCount: 25,
-      schedule: "Mon 8:00-10:00",
-      students: [
-        { id: "ST01", name: "Nguyen Van A" },
-        { id: "ST02", name: "Le Thi B" },
-      ],
-      driveLink: "https://drive.google.com/speaking101",
-      zoomLink: "https://zoom.us/j/123456789",
-    },
-    {
-      id: "R101",
-      name: "Reading 101",
-      subject: "Reading",
-      studentCount: 30,
-      schedule: "Tue 10:00-12:00",
-      students: [
-        { id: "ST03", name: "Tran Van C" },
-        { id: "ST04", name: "Pham Thi D" },
-      ],
-      driveLink: "https://drive.google.com/reading101",
-      zoomLink: "https://zoom.us/j/987654321",
-    },
-  ]);
-
+  const [classes, setClasses] = useState([]);
   const [filter, setFilter] = useState("");
   const [selectedClass, setSelectedClass] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
-  // const handleDelete = (id) => {
-  //   if (window.confirm("Are you sure to delete this class?")) {
-  //     setClasses(classes.filter((c) => c.id !== id));
-  //   }
-  // };
+  // Lấy danh sách lớp theo teacherId
+  useEffect(() => {
+    const fetchClasses = async () => {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser?.id) return;
+
+      try {
+        const response = await fetch(
+          `http://localhost:3002/api/admin/classes/teacher/${storedUser.id}`
+        );
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.message || "Failed to fetch classes");
+
+        // Format classes: thêm fakeId và formattedSchedule
+        const formatted = data.map((cls, index) => {
+          // Fake ID
+          const fakeId = `S${String(index + 1).padStart(4, "0")}`;
+
+          // Format schedule
+          let formattedSchedule = "";
+          if (cls.schedule) {
+            const date = new Date(cls.schedule);
+            const options = {
+              weekday: "short",
+              hour: "2-digit",
+              minute: "2-digit",
+            };
+            formattedSchedule = date.toLocaleString("en-US", options);
+          }
+
+          return {
+            ...cls,
+            fakeId,
+            formattedSchedule,
+            studentCount: cls.students?.length || 0,
+          };
+        });
+
+        setClasses(formatted);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   const handleView = (cls) => {
     setSelectedClass(cls);
     setShowModal(true);
-  };
-  const navigate = useNavigate();
-
-  const handleEdit = (id) => {
-    navigate(`/teacher/manage_class/edit/${id}`);
   };
 
   const closeModal = () => {
@@ -67,7 +72,7 @@ const TeacherClass = () => {
 
   const filteredClasses = classes.filter(
     (c) =>
-      c.id.toLowerCase().includes(filter.toLowerCase()) ||
+      c.fakeId.toLowerCase().includes(filter.toLowerCase()) ||
       c.name.toLowerCase().includes(filter.toLowerCase())
   );
 
@@ -104,11 +109,11 @@ const TeacherClass = () => {
               {filteredClasses.length > 0 ? (
                 filteredClasses.map((cls) => (
                   <tr key={cls.id}>
-                    <td>{cls.id}</td>
+                    <td>{cls.fakeId}</td>
                     <td>{cls.name}</td>
                     <td>{cls.subject}</td>
                     <td>{cls.studentCount}</td>
-                    <td>{cls.schedule}</td>
+                    <td>{cls.formattedSchedule}</td>
                     <td>
                       <div className="action-buttons-teacherclass">
                         <button
@@ -117,19 +122,6 @@ const TeacherClass = () => {
                         >
                           <FontAwesomeIcon icon={faEye} />
                         </button>
-                        <button
-                          className="btn-edit-teacherclass"
-                          onClick={() => handleEdit(cls.id)}
-                        >
-                          <FontAwesomeIcon icon={faPen} />
-                        </button>
-
-                        {/* <button
-                          className="btn-delete-teacherclass"
-                          onClick={() => handleDelete(cls.id)}
-                        >
-                          <FontAwesomeIcon icon={faTrash} />
-                        </button> */}
                       </div>
                     </td>
                   </tr>
@@ -154,7 +146,7 @@ const TeacherClass = () => {
             >
               <h3>Class Detail</h3>
               <p>
-                <strong>ID:</strong> {selectedClass.id}
+                <strong>ID:</strong> {selectedClass.fakeId}
               </p>
               <p>
                 <strong>Name:</strong> {selectedClass.name}
@@ -163,20 +155,28 @@ const TeacherClass = () => {
                 <strong>Subject:</strong> {selectedClass.subject}
               </p>
               <p>
-                <strong>Schedule:</strong> {selectedClass.schedule}
+                <strong>Schedule:</strong>{" "}
+                {selectedClass.schedule
+                  ? new Date(selectedClass.schedule).toLocaleString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "N/A"}
               </p>
-
               <div className="modal-student-list">
                 <strong>Students:</strong>
                 <ul>
                   {selectedClass.students.map((s) => (
                     <li key={s.id}>
-                      {s.id} - {s.name}
+                      {s.name}
                     </li>
                   ))}
                 </ul>
               </div>
-
               <p>
                 <strong>Drive Link: </strong>
                 <a
@@ -187,7 +187,6 @@ const TeacherClass = () => {
                   <FontAwesomeIcon icon={faLink} /> Open Drive
                 </a>
               </p>
-
               <p>
                 <strong>Zoom Link: </strong>
                 <a
@@ -198,7 +197,6 @@ const TeacherClass = () => {
                   <FontAwesomeIcon icon={faLink} /> Join Zoom
                 </a>
               </p>
-
               <button className="btn-close-modal" onClick={closeModal}>
                 Close
               </button>
