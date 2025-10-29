@@ -1,44 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeaderTeacher from "../../../component/HeaderTeacher/HeaderTeacher";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import "./TeacherStudent.css";
 
 const TeacherStudent = () => {
-  const [students, setStudents] = useState([
-    {
-      id: "S001",
-      avatar: "/assets/avatar.jpg",
-      name: "Nguyen Van A",
-      email: "a@student.com",
-      classId: "S101",
-    },
-    {
-      id: "S002",
-      avatar: "/assets/avatar.jpg",
-      name: "Tran Thi B",
-      email: "b@student.com",
-      classId: "R101",
-    },
-    {
-      id: "S003",
-      avatar: "/assets/avatar.jpg",
-      name: "Le Van C",
-      email: "c@student.com",
-      classId: "L102",
-    },
-  ]);
-
+  const [students, setStudents] = useState([]);
   const [filterClass, setFilterClass] = useState("");
 
-  const handleDelete = (id) => {
-    if (window.confirm("Remove this student?")) {
-      setStudents(students.filter((s) => s.id !== id));
-    }
-  };
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (!storedUser?.id) return;
 
-  const filteredStudents = students.filter((s) =>
-    s.classId.toLowerCase().includes(filterClass.toLowerCase())
+      try {
+        const res = await fetch(
+          `http://localhost:3002/api/admin/users/teacher/students/${storedUser.id}`
+        );
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch students");
+        setStudents(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchStudents();
+  }, []);
+
+  const filteredStudents = students.filter(
+    s => (s.className || "").toLowerCase().includes(filterClass.toLowerCase())
   );
 
   return (
@@ -46,20 +35,18 @@ const TeacherStudent = () => {
       <div className="student-container-teacherstudent">
         <h2 className="page-title-teacherstudent">Manage Students</h2>
 
-        {/* Filter */}
         <div className="filter-section-teacherstudent">
-          <label htmlFor="classId">Class ID:</label>
+          <label htmlFor="classId">Class Name:</label>
           <input
             type="text"
             id="classId"
-            placeholder="Enter Class ID..."
+            placeholder="Enter Class Name..."
             value={filterClass}
             onChange={(e) => setFilterClass(e.target.value)}
             className="filter-input-teacherstudent"
           />
         </div>
 
-        {/* Table */}
         <div className="table-wrapper-teacherstudent">
           <table className="student-table-teacherstudent">
             <thead>
@@ -68,38 +55,29 @@ const TeacherStudent = () => {
                 <th>Avatar</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Class ID</th>
-                <th>Control</th>
+                <th>Class Name</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length > 0 ? (
-                filteredStudents.map((stu) => (
-                  <tr key={stu.id}>
-                    <td>{stu.id}</td>
+                filteredStudents.map((stu, index) => (
+                  <tr key={`${stu.id}-${stu.classId}`}> {/* key for class */}
+                    <td>{`S${(index + 1).toString().padStart(4, "0")}`}</td>
                     <td>
                       <img
-                        src={stu.avatar}
+                        src={stu.avatar || "/assets/avatar.jpg"}
                         alt={stu.name}
                         className="student-avatar-teacherstudent"
                       />
                     </td>
                     <td>{stu.name}</td>
                     <td>{stu.email}</td>
-                    <td>{stu.classId}</td>
-                    <td>
-                      <button
-                        className="btn-delete-teacherstudent"
-                        onClick={() => handleDelete(stu.id)}
-                      >
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </td>
+                    <td>{stu.className}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="no-data-teacherstudent">
+                  <td colSpan="5" className="no-data-teacherstudent">
                     No students found
                   </td>
                 </tr>
