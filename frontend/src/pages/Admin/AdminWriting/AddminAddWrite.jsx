@@ -1,113 +1,157 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db, storage } from "../../../firebase/config";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import "../AdminListen/AdminAddListen.css";
 
 const AdminAddWrite = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
+    section: "",
     title: "",
-    section: "Task 1",
-    type: "Academic",
-    questionText: "",
-    image: "",
-    timeLimit: 40, // phút
+    type: "",
+    question_text: "",
+    image_url: "",
+    time_limit: "",
+    attempts: 0,
+    status: "Not Started",
   });
+  const [uploading, setUploading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  // Upload ảnh (nếu có)
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const storageRef = ref(storage, `writing_images/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      setFormData((prev) => ({ ...prev, image_url: url }));
+      alert("✅ Image uploaded successfully!");
+    } catch (error) {
+      console.error("❌ Upload error:", error);
+      alert("Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleSubmit = (e) => {
+  // Gửi form thêm mới
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // ✅ Ở đây bạn có thể thêm API POST sau khi có backend
-    console.log("Writing task added:", form);
-    alert("New Writing Task has been added!");
-    navigate("/admin/practice_writing");
+    try {
+      await addDoc(collection(db, "writing_practices"), {
+        ...formData,
+        created_at: serverTimestamp(),
+      });
+      alert("✅ Writing task added!");
+      navigate("/admin/practice_writing");
+    } catch (error) {
+      console.error("❌ Add failed:", error);
+      alert("Failed to add writing task.");
+    }
   };
 
   return (
     <div className="addlisten-container">
       <AdminHeader />
-      <h1 className="addlisten-title">Add New Writing Practice</h1>
+      <h1 className="addlisten-title">Add Writing Task</h1>
 
-      <form onSubmit={handleSubmit} className="addlisten-form">
-        {/* Title */}
-        <div>
-          <label>Task Title</label>
-          <input
-            type="text"
-            name="title"
-            placeholder="e.g., Describing Bar Chart - Internet Users"
-            value={form.title}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <form className="addlisten-form" onSubmit={handleSubmit}>
+        <label>Section</label>
+        <select
+          name="section"
+          value={formData.section}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, section: e.target.value }))
+          }
+        >
+          <option value="">Select Section</option>
+          <option value="Task 1">Task 1</option>
+          <option value="Task 2">Task 2</option>
+        </select>
 
-        {/* Section */}
-        <div>
-          <label>Section</label>
-          <select name="section" value={form.section} onChange={handleChange}>
-            <option value="Task 1">Task 1</option>
-            <option value="Task 2">Task 2</option>
-          </select>
-        </div>
+        <label>Title</label>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, title: e.target.value }))
+          }
+        />
 
-        {/* Type */}
-        <div>
-          <label>Type</label>
-          <select name="type" value={form.type} onChange={handleChange}>
-            <option value="Academic">Academic</option>
-            <option value="Essay">Essay</option>
-            <option value="General Training">General Training</option>
-          </select>
-        </div>
+        <label>Type</label>
+        <select
+          name="type"
+          value={formData.type}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, type: e.target.value }))
+          }
+        >
+          <option value="">Select Type</option>
+          <option value="Academic">Academic</option>
+          <option value="Essay">Essay</option>
+        </select>
 
-        {/* Question Text */}
-        <div>
-          <label>Question Description</label>
-          <textarea
-            name="questionText"
-            placeholder="Write the IELTS question or description here..."
-            value={form.questionText}
-            onChange={handleChange}
-            required
-          ></textarea>
-        </div>
+        <label>Question Text</label>
+        <textarea
+          name="question_text"
+          value={formData.question_text}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, question_text: e.target.value }))
+          }
+        />
 
-        {/* Optional Image */}
-        <div>
-          <label>Question Image (optional)</label>
-          <input
-            type="text"
-            name="image"
-            placeholder="e.g., /assets/bargraph.png"
-            value={form.image}
-            onChange={handleChange}
-          />
-          <p className="addlisten-or">or upload image below</p>
-          <input type="file" accept="image/*" />
-        </div>
+        {/* Ẩn upload ảnh nếu là Task 2 */}
+        {formData.section !== "Task 2" && (
+          <>
+            <label>Image</label>
+            <input type="file" accept="image/*" onChange={handleImageUpload} />
+            {uploading ? (
+              <p>Uploading image...</p>
+            ) : (
+              formData.image_url && (
+                <img
+                  src={formData.image_url}
+                  alt="Preview"
+                  width="150"
+                  style={{ marginTop: "10px", borderRadius: "8px" }}
+                />
+              )
+            )}
+          </>
+        )}
 
-        {/* Time Limit */}
-        <div>
-          <label>Time Limit (minutes)</label>
-          <input
-            type="number"
-            name="timeLimit"
-            min="10"
-            max="90"
-            value={form.timeLimit}
-            onChange={handleChange}
-          />
-        </div>
+        <label>Time Limit (minutes)</label>
+        <input
+          type="number"
+          name="time_limit"
+          value={formData.time_limit}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, time_limit: e.target.value }))
+          }
+        />
 
-        {/* Submit Button */}
-        <button type="submit" className="addlisten-btn">
-          Save Writing Task
+        <label>Status</label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, status: e.target.value }))
+          }
+        >
+          <option value="Not Started">Not Started</option>
+          <option value="Active">Active</option>
+          <option value="Archived">Archived</option>
+        </select>
+
+        <button type="submit" className="addlisten-btn" disabled={uploading}>
+          {uploading ? "Uploading..." : "Add Writing Task"}
         </button>
       </form>
     </div>

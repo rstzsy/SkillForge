@@ -95,6 +95,8 @@ export const routes = [
     {
         path: '/write/:id',
         page: WriteDetail,
+        isShowHeader: true,
+        isShowFooter: true
     },
     {
         path: '/speak',

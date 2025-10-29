@@ -171,3 +171,30 @@
     grid-template-columns: 1fr; /* Mobile */
   }
 }
+
+/* Upload button */
+.lesson-upload-label-listenadmin {
+  background: #d5a30a;
+  color: #fffbde;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  transition: 0.2s;
+}
+
+.lesson-upload-label-listenadmin:hover {
+  background: #c48f09;
+}
+
+.lesson-uploaded-file-listenadmin {
+  font-size: 14px;
+  margin-bottom: 16px;
+  color: #4b5563;
+}
+

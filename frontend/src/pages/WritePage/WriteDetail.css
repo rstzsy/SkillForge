@@ -21,8 +21,9 @@
   }
   
   .question-text {
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.5;
+    text-align: left;
   }
   
   .question-image {

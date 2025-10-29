@@ -6,6 +6,8 @@ import userRoutes from "./routes/userRoutes.js";
 import goalRoutes from "./routes/goalRoutes.js";
 import adminUserRoutes from "./routes/adminUserRoute.js";
 import classRoutes from "./routes/classRoute.js";
+import writingRoutes from "./routes/writingRoutes.js";
+
 
 
 dotenv.config();
@@ -18,6 +20,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/classes", classRoutes);
+app.use("/api/writing", writingRoutes);
 
 
 app.get("/", (req, res) => {
