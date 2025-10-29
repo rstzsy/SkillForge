@@ -1,81 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenNib, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/config"; // đường dẫn tới file firebase.js
 import "./WritePage.css";
-
-export const mockWriteData = [
-  {
-    id: 1,
-    section: "Task 1",
-    title: "Bar Chart - International Students",
-    type: "Report",
-    attempts: 742,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 20,
-  },
-  {
-    id: 2,
-    section: "Task 2",
-    title: "Essay - Technology & Education",
-    type: "Opinion Essay",
-    attempts: 589,
-    img: "/assets/listpic.jpg",
-    completed: true,
-    timeLimit: 40,
-  },
-  {
-    id: 3,
-    section: "Task 2",
-    title: "Essay - Environment Issues",
-    type: "Discussion Essay",
-    attempts: 921,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 40,
-  },
-  {
-    id: 4,
-    section: "Full Test",
-    title: "Cambridge 16 Test 4",
-    type: "Task 1 + Task 2",
-    attempts: 318,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 60,
-  },
-  {
-    id: 5,
-    section: "Full Test",
-    title: "Cambridge 16 Test 4",
-    type: "Task 1 + Task 2",
-    attempts: 318,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 60,
-  },
-  {
-    id: 6,
-    section: "Full Test",
-    title: "Cambridge 16 Test 4",
-    type: "Task 1 + Task 2",
-    attempts: 318,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 60,
-  },
-  {
-    id: 7,
-    section: "Full Test",
-    title: "Cambridge 16 Test 4",
-    type: "Task 1 + Task 2",
-    attempts: 318,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 60,
-  }
-];
 
 const sectionColors = {
   "Task 1": "#fcd5ce",
@@ -87,20 +16,38 @@ const WritePage = () => {
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [writingData, setWritingData] = useState([]); // 🔹 dữ liệu từ Firebase
   const navigate = useNavigate();
 
   const sections = ["Task 1", "Task 2", "Full Test"];
 
-  const filteredData = mockWriteData.filter((item) => {
+  // 🔹 Load dữ liệu từ Firestore
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "writing_practices"));
+        const items = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setWritingData(items);
+      } catch (err) {
+        console.error("Error loading writings:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // 🔹 Bộ lọc dữ liệu
+  const filteredData = writingData.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
     const sectionMatch = selectedSection ? item.section === selectedSection : true;
-    const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchMatch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
     return statusMatch && sectionMatch && searchMatch;
   });
 
   return (
     <div className="writing-page">
-      {/* Sidebar */}
       <aside className="sidebar-write">
         <h3>
           <FontAwesomeIcon icon={faPenNib} size="x" /> Writing Practise
@@ -129,9 +76,7 @@ const WritePage = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="content-write">
-        {/* Tabs + Search */}
         <div className="tabs-search-write">
           <div className="tabs-write">
             <button
@@ -159,33 +104,33 @@ const WritePage = () => {
           </div>
         </div>
 
-        {/* Card list */}
         <div className="cards-write">
-          {filteredData.map((item) => (
-            <div
-              className="card-write"
-              key={item.id}
-              onClick={() => navigate(`/write/${item.id}`)} // chuyển sang trang chi tiết Writing
-              style={{ cursor: "pointer" }}
-            >
-              <img src={item.img} alt={item.title} />
-              <div className="card-info-write">
-                <span
-                  className="section-write"
-                  style={{ backgroundColor: sectionColors[item.section] }}
-                >
-                  {item.section}
-                </span>
-                <h4>{item.title}</h4>
-                <p className="type-write">{item.type}</p>
-                <p className="attempts-write">{item.attempts} attempts</p>
-                {item.completed && (
-                  <span className="completed-label">Completed</span>
-                )}
+          {filteredData.length > 0 ? (
+            filteredData.map((item) => (
+              <div
+                className="card-write"
+                key={item.id}
+                onClick={() => navigate(`/write/${item.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <img src={"/assets/listpic.jpg"} alt={item.title} />
+                <div className="card-info-write">
+                  <span
+                    className="section-write"
+                    style={{ backgroundColor: sectionColors[item.section] }}
+                  >
+                    {item.section}
+                  </span>
+                  <h4>{item.title}</h4>
+                  <p className="type-write">{item.type}</p>
+                  <p className="attempts-write">{item.attempts || 0} attempts</p>
+                  {item.completed && <span className="completed-label">Completed</span>}
+                </div>
               </div>
-            </div>
-          ))}
-          {filteredData.length === 0 && <p>No tasks found.</p>}
+            ))
+          ) : (
+            <p>No tasks found.</p>
+          )}
         </div>
       </main>
     </div>

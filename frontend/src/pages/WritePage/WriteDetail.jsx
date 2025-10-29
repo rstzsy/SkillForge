@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { mockWriteData } from "./WritePage"; 
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/config";
 import "./WriteDetail.css";
 
 const WriteDetail = () => {
-  const { id } = useParams(); 
-  const task = mockWriteData.find((item) => item.id === Number(id));
-
+  const { id } = useParams();
+  const [task, setTask] = useState(null);
   const [wordCount, setWordCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(task?.timeLimit * 60 || 40 * 60); 
+  const [timeLeft, setTimeLeft] = useState(0);
   const [sections, setSections] = useState({
     introduction: "",
     body1: "",
@@ -16,7 +16,25 @@ const WriteDetail = () => {
     conclusion: "",
   });
 
-  // Countdown timer
+  useEffect(() => {
+    const fetchTask = async () => {
+      try {
+        const docRef = doc(db, "writing_practices", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setTask(data);
+          setTimeLeft((data.time_limit || 40) * 60);
+        } else {
+          console.warn("Task not found");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchTask();
+  }, [id]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -24,96 +42,59 @@ const WriteDetail = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Format time mm:ss
-  const formatTime = (secs) => {
-    const m = String(Math.floor(secs / 60)).padStart(2, "0");
-    const s = String(secs % 60).padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
-  // Count words from all sections
   useEffect(() => {
     const text = Object.values(sections).join(" ");
-    const count = text.trim().split(/\s+/).filter(Boolean).length;
-    setWordCount(count);
+    setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
   }, [sections]);
 
   const handleChange = (section, value) => {
     setSections((prev) => ({ ...prev, [section]: value }));
   };
 
-  if (!task) {
-    return <p>Task not found</p>;
-  }
+  const formatTime = (secs) => {
+    const m = String(Math.floor(secs / 60)).padStart(2, "0");
+    const s = String(secs % 60).padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  if (!task) return <p>Loading task...</p>;
 
   return (
     <div className="write-page">
-      {/* Left Side - Question */}
       <div className="write-left">
         <div className="question-box">
-          <p className="question-text">
-            The diagram below shows how geothermal energy is used to produce
-            electricity. Summarise the information by selecting and reporting
-            the main features and make comparisons where relevant.
-          </p>
-          <img
-            src="/assets/diargam.png"
-            alt="Geothermal Power Plant"
-            className="question-image"
-          />
+          <p className="question-text">{task.question_text}</p>
+          {task.image_url && (
+            <img src={task.image_url} alt={task.title} className="question-image" />
+          )}
         </div>
       </div>
 
-      {/* Right Side */}
       <div className="write-right">
         <div className="write-header">
           <h3>{task.title}</h3>
           <span className="word-count">Word count: {wordCount}</span>
         </div>
 
-        {/* Writing Form */}
         <div className="write-form">
-          <div className="form-section">
-            <label>Introduction</label>
-            <textarea
-              placeholder="Write your introduction here..."
-              value={sections.introduction}
-              onChange={(e) => handleChange("introduction", e.target.value)}
-            />
-          </div>
-          <div className="form-section">
-            <label>Body 1</label>
-            <textarea
-              placeholder="Write your first body paragraph..."
-              value={sections.body1}
-              onChange={(e) => handleChange("body1", e.target.value)}
-            />
-          </div>
-          <div className="form-section">
-            <label>Body 2</label>
-            <textarea
-              placeholder="Write your second body paragraph..."
-              value={sections.body2}
-              onChange={(e) => handleChange("body2", e.target.value)}
-            />
-          </div>
-          <div className="form-section">
-            <label>Conclusion</label>
-            <textarea
-              placeholder="Write your conclusion here..."
-              value={sections.conclusion}
-              onChange={(e) => handleChange("conclusion", e.target.value)}
-            />
-          </div>
+          {["introduction", "body1", "body2", "conclusion"].map((sec) => (
+            <div className="form-section" key={sec}>
+              <label>{sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
+              <textarea
+                placeholder={`Write your ${sec} here...`}
+                value={sections[sec]}
+                onChange={(e) => handleChange(sec, e.target.value)}
+              />
+            </div>
+          ))}
         </div>
 
-        {/* Footer */}
         <div className="write-footer">
-            <span className="timeCountdown">Time left: {formatTime(timeLeft)}</span>
-            <div className="buttons">
-                <button className="back-btn">Back</button>
-                <button className="ai-btn">Check with AI</button>
-            </div>
+          <span className="timeCountdown">Time left: {formatTime(timeLeft)}</span>
+          <div className="buttons">
+            <button className="back-btn">Back</button>
+            <button className="ai-btn">Check with AI</button>
+          </div>
         </div>
       </div>
     </div>
