@@ -1,7 +1,7 @@
 import express from "express";
 import { getTeachersController, getStudentsController, 
          addClassController, getClassesController, 
-         getClassByIdController, handleUpdateClass, handleDeleteClass } from "../controllers/classController.js";
+         getClassByIdController, handleUpdateClass, handleDeleteClass, getClassesByTeacherController } from "../controllers/classController.js";
 
 const router = express.Router();
 
@@ -16,4 +16,5 @@ router.get("/", getClassesController);
 router.get("/:id", getClassByIdController);
 router.put("/:id", handleUpdateClass);
 router.delete("/:id", handleDeleteClass);
+router.get("/teacher/:teacherId", getClassesByTeacherController);
 export default router;

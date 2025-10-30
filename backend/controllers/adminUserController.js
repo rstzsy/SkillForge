@@ -1,4 +1,4 @@
-import { getAllUsers, getUserByIdService, updateUserByIdService } from "../services/adminUserService.js";
+import { getAllUsers, getUserByIdService, updateUserByIdService, getStudentsByTeacherId } from "../services/adminUserService.js";
 
 export const getAllUsersController = async (req, res) => {
   try {
@@ -37,6 +37,18 @@ export const updateUserController = async (req, res) => {
   } catch (err) {
     console.error("Lỗi update user:", err);
     return res.status(500).json({ message: "Cập nhật thất bại" });
+  }
+};
+
+// teacher
+export const getStudentsByTeacherController = async (req, res) => {
+  try {
+    const { teacherId } = req.params;
+    const students = await getStudentsByTeacherId(teacherId);
+    return res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
   }
 };
 

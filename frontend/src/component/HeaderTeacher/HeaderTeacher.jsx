@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   faRightFromBracket,
   faHouse,
@@ -12,12 +12,21 @@ import "./HeaderTeacher.css";
 
 const HeaderTeacher = ({ children }) => {
   const [isOpen, setIsOpen] = useState(true);
+  const [userName, setUserName] = useState("Teacher"); // default
+  const [avatar, setAvatar] = useState("/assets/avatar.jpg"); // default avatar
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      if (storedUser.userName) setUserName(storedUser.userName);
+      if (storedUser.avatar) setAvatar(storedUser.avatar);
+    }
+  }, []);
 
   const menuItems = [
     { name: "Dashboard", icon: faHouse, link: "/teacher/dashboard" },
     { name: "Classes", icon: faBook, link: "/teacher/manage_class" },
     { name: "Students", icon: faUsers, link: "/teacher/manage_student" },
-    // { name: "Courses", icon: faChartBar, link: "/teacher/manage_course" },
     { name: "Records", icon: faVideo, link: "/teacher/manage_record" },
   ];
 
@@ -34,11 +43,11 @@ const HeaderTeacher = ({ children }) => {
           {/* Thông tin user */}
           <div className="teacher-user">
             <img
-              src="/assets/avatar.jpg"
-              alt="teacher"
+              src={avatar || "/assets/avatar.jpg"}
+              alt={userName}
               className="avatar"
             />
-            <span className="username">Teacher Name</span>
+            <span className="username">{userName}</span>
           </div>
 
           {/* Logout */}

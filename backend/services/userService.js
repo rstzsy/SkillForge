@@ -113,14 +113,16 @@ export const updateUserById = async (id, userData) => {
       throw new Error("User not found");
     }
 
+    // tranh loi undefine
     const updateData = {
-      userName: userData.username,
-      email: userData.email,
-      avatar: userData.avatar || null,
       updatedAt: new Date(),
     };
 
-    // if change new pass
+    if (userData.username !== undefined) updateData.userName = userData.username;
+    if (userData.email !== undefined) updateData.email = userData.email;
+    if (userData.avatar !== undefined) updateData.avatar = userData.avatar;
+
+    // change password
     if (userData.password && userData.password !== "********") {
       updateData.passwordHash = await bcrypt.hash(userData.password, 10);
     }
@@ -128,11 +130,10 @@ export const updateUserById = async (id, userData) => {
     // update firestore
     await userRef.update(updateData);
 
-    // lay lai data sau khi update
+    // get new data
     const updatedDoc = await userRef.get();
     return { id: updatedDoc.id, ...updatedDoc.data() };
-  } 
-  catch (error) {
+  } catch (error) {
     console.error("Firestore update error:", error);
     throw new Error("Failed to update user");
   }

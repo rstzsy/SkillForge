@@ -164,3 +164,26 @@ export const deleteClass = async (classId) => {
   }
 };
 
+// teacher
+export const getClassesByTeacherId = async (teacherId) => {
+  const snapshot = await db.collection("classes")
+    .where("teacherId", "==", teacherId)
+    .get();
+
+  const classes = snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      subject: data.subject,
+      schedule: data.schedule ? data.schedule.toDate().toISOString() : null,
+      students: data.students || [],
+      driveLink: data.driveLink || "",
+      zoomLink: data.zoomLink || "",
+      studentCount: data.students?.length || 0
+    };
+  });
+
+  return classes;
+};
+
