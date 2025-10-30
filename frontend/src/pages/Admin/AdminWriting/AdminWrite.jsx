@@ -113,9 +113,15 @@ const AdminWrite = () => {
           onChange={(e) => setFilterType(e.target.value)}
           className="lesson-select-listenadmin"
         >
-          <option value="">Types</option>
+          <option value="">Select Type</option>
           <option value="Academic">Academic</option>
           <option value="Essay">Essay</option>
+          <option value="Line Graph">Line Graph</option>
+          <option value="Process">Process</option>
+          <option value="Table">Table</option>
+          <option value="Pie Chart">Pie Chart</option>
+          <option value="Bar Chart">Bar Chart</option>
+          <option value="Pie Chart">Mixed Graph</option>
         </select>
 
         {/* Upload button */}

@@ -47,6 +47,7 @@ import AdminAddClass from "../pages/Admin/AdminClass/AdminAddClass"
 import AdminPersonalAim from "../pages/Admin/AdminPersonalAim/AdminPersonalAim";
 import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBooking";
 import PlacementTest from "../pages/PlacementTest/PlacementTest";
+import ScoreWritePage from "../pages/WritePage/ScoreWritePage";
 
 export const routes = [
     {
@@ -77,6 +78,12 @@ export const routes = [
     {
         path: '/score/:id',
         page: Score,
+        isShowHeader: true,
+        isShowFooter: true
+    },
+    {
+        path: '/score/write/:id',
+        page: ScoreWritePage,
         isShowHeader: true,
         isShowFooter: true
     },

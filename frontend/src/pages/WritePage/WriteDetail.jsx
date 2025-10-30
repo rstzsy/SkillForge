@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import "./WriteDetail.css";
 
 const WriteDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [task, setTask] = useState(null);
   const [wordCount, setWordCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const [sections, setSections] = useState({
     introduction: "",
     body1: "",
@@ -16,6 +18,7 @@ const WriteDetail = () => {
     conclusion: "",
   });
 
+  // 🔹 Lấy dữ liệu từ Firestore
   useEffect(() => {
     const fetchTask = async () => {
       try {
@@ -35,6 +38,7 @@ const WriteDetail = () => {
     fetchTask();
   }, [id]);
 
+  // 🔹 Đếm ngược thời gian
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -42,13 +46,21 @@ const WriteDetail = () => {
     return () => clearInterval(timer);
   }, []);
 
+  // 🔹 Đếm từ
   useEffect(() => {
     const text = Object.values(sections).join(" ");
     setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
   }, [sections]);
 
+  // 🔹 Xử lý thay đổi nội dung
   const handleChange = (section, value) => {
     setSections((prev) => ({ ...prev, [section]: value }));
+  };
+
+  // 🔹 Xử lý nộp bài
+  const handleSubmit = () => {
+    console.log("User writing:", sections);
+    setShowModal(true);
   };
 
   const formatTime = (secs) => {
@@ -60,43 +72,69 @@ const WriteDetail = () => {
   if (!task) return <p>Loading task...</p>;
 
   return (
-    <div className="write-page">
-      <div className="write-left">
-        <div className="question-box">
-          <p className="question-text">{task.question_text}</p>
+    <div className="write-detail-container">
+      <h2 className="write-detail-title">{task.title}</h2>
+
+      <div className="write-detail-main">
+        {/* Left side */}
+        <div className="write-detail-left">
+          <p className="write-detail-question">{task.question_text}</p>
           {task.image_url && (
-            <img src={task.image_url} alt={task.title} className="question-image" />
+            <img src={task.image_url} alt={task.title} className="write-detail-image" />
           )}
         </div>
-      </div>
 
-      <div className="write-right">
-        <div className="write-header">
-          <h3>{task.title}</h3>
-          <span className="word-count">Word count: {wordCount}</span>
-        </div>
+        {/* Right side */}
+        <div className="write-detail-right">
+          <div className="write-detail-top-info">
+            <span className="write-detail-word-count">Word count: {wordCount}</span>
+            <span className="write-detail-timer">{formatTime(timeLeft)}</span>
+          </div>
 
-        <div className="write-form">
-          {["introduction", "body1", "body2", "conclusion"].map((sec) => (
-            <div className="form-section" key={sec}>
-              <label>{sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
-              <textarea
-                placeholder={`Write your ${sec} here...`}
-                value={sections[sec]}
-                onChange={(e) => handleChange(sec, e.target.value)}
-              />
-            </div>
-          ))}
-        </div>
+          <div className="write-detail-form">
+            {["introduction", "body1", "body2", "conclusion"].map((sec) => (
+              <div className="write-detail-section" key={sec}>
+                <label>{sec.charAt(0).toUpperCase() + sec.slice(1)}</label>
+                <textarea
+                  placeholder={`Write your ${sec} here...`}
+                  value={sections[sec]}
+                  onChange={(e) => handleChange(sec, e.target.value)}
+                />
+              </div>
+            ))}
+          </div>
 
-        <div className="write-footer">
-          <span className="timeCountdown">Time left: {formatTime(timeLeft)}</span>
-          <div className="buttons">
-            <button className="back-btn">Back</button>
-            <button className="ai-btn">Check with AI</button>
+          <div className="write-detail-buttons">
+            <button className="write-detail-back" onClick={() => navigate(-1)}>
+              Back
+            </button>
+            <button className="write-detail-submit" onClick={handleSubmit}>
+              Submit
+            </button>
           </div>
         </div>
       </div>
+
+      {/* 🔹 Modal */}
+      {showModal && (
+        <div className="write-detail-modal">
+          <div className="write-detail-modal-content">
+            <h3>Your writing has been submitted!</h3>
+            <div className="write-detail-modal-buttons">
+              <button onClick={() => navigate("/")}>Return to Course Page</button>
+              <button
+                onClick={() =>
+                  navigate(`/score/write/${id}`, {
+                    state: { userWriting: sections },
+                  })
+                }
+              >
+                View Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
