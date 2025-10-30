@@ -1,119 +1,165 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
-import "./AdminAddListen.css"; 
-
-const lessonsData = [
-  { 
-    id: 1,
-    section: "Section 1",
-    title: "Gap Filling - Daily Routine",
-    type: "Gap Filling",
-    image: "/assets/listpic.jpg",
-    attempts: 120,
-    content: "Passage about daily routine...",
-    correctAnswer: "morning",
-    audio: "/assets/audio1.mp3",
-    timeLimit: "30"
-  },
-  { 
-    id: 2,
-    section: "Section 2",
-    title: "Map Reading Task",
-    type: "Map",
-    image: "/assets/listpic.jpg",
-    attempts: 95,
-    content: "Instructions for map reading...",
-    correctAnswer: "A-B-C",
-    audio: "/assets/audio2.mp3",
-    timeLimit: "45"
-  },
-  { 
-    id: 3,
-    section: "Section 3",
-    title: "Listening Practice Quiz",
-    type: "True/False",
-    image: "/assets/listpic.jpg",
-    attempts: 75,
-    content: "Listen to the audio and answer True or False.",
-    correctAnswer: "True",
-    audio: "/assets/audio3.mp3",
-    timeLimit: "45"
-  },
-  { 
-    id: 4,
-    section: "Section 4",
-    title: "Video - Grammar Explanation",
-    type: "Filling",
-    image: "/assets/listpic.jpg",
-    attempts: 40,
-    content: "Watch the video and fill in the blanks.",
-    correctAnswer: "verb",
-    audio: "/assets/audio4.mp3",
-    timeLimit: "20"
-  },
-  { 
-    id: 5,
-    section: "Section 1",
-    title: "Audio Conversation",
-    type: "Audio",
-    image: "/assets/listpic.jpg",
-    attempts: 60,
-    content: "Listen to the conversation and answer the questions.",
-    correctAnswer: "Yes",
-    audio: "/assets/audio5.mp3",
-    timeLimit: "45"
-  }
-];
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../../../firebase/config"; // import storage from config Firebase
+import "./AdminAddListen.css";
 
 const AdminEditListen = () => {
-  const { id } = useParams(); 
-  const lesson = lessonsData.find((item) => item.id === Number(id));
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     section: "",
     title: "",
     type: "",
-    image: "",
+    image: null,
+    imageURL: "",
     content: "",
     correctAnswer: "",
-    audio: "",
+    audio: null,
+    audioURL: "",
     timeLimit: "",
   });
 
+  const [loading, setLoading] = useState(true);
+
+  // Fetch lesson from backend
   useEffect(() => {
-    if (lesson) {
-      setFormData({
-        section: lesson.section || "",
-        title: lesson.title || "",
-        type: lesson.type || "",
-        image: lesson.image || "",
-        content: lesson.content || "",
-        correctAnswer: lesson.correctAnswer || "",
-        audio: lesson.audio || "",
-        timeLimit: lesson.timeLimit || "",
-      });
-    }
-  }, [lesson]);
-  const navigate = useNavigate();
+    const fetchLesson = async () => {
+      try {
+        const res = await fetch(`http://localhost:3002/api/listening/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch lesson");
+        const data = await res.json();
+        const lesson = data.data; // backend return { data: lesson }
+
+        setFormData({
+          section: lesson.section || "",
+          title: lesson.title || "",
+          type: lesson.type || "",
+          image: null,
+          imageURL: lesson.image_url || "",
+          content: lesson.content_text || "",
+          correctAnswer: lesson.correct_answer || "",
+          audio: null,
+          audioURL: lesson.audio_url || "",
+          timeLimit: lesson.time_limit || "",
+        });
+
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        alert("Error loading lesson data");
+        setLoading(false);
+      }
+    };
+
+    fetchLesson();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
+
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      if (
+        name === "file" &&
+        (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))
+      ) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          // read sheet "Tasks" hoặc first sheet 
+          const tasksSheet =
+            workbook.Sheets["Tasks"] || workbook.Sheets[workbook.SheetNames[0]];
+          const tasksJson = XLSX.utils.sheet_to_json(tasksSheet);
+
+          // read sheet "Blanks" neu co
+          const blanksSheet = workbook.Sheets["Blanks"];
+          const blanksJson = blanksSheet
+            ? XLSX.utils.sheet_to_json(blanksSheet)
+            : [];
+
+          if (tasksJson.length > 0) {
+            const task = tasksJson[0];
+
+            const blanksForTask = blanksJson.filter(
+              (b) => b.taskId === task.taskId
+            );
+            const correctAnswersStr = blanksForTask
+              .map((b) => b.correctAnswer)
+              .join(", ");
+
+            setFormData((prev) => ({
+              ...prev,
+              section: task.section || "",
+              title: task.title || "",
+              type: task.type || "",
+              content: task.passage || "",
+              timeLimit: task.timeLimit || "",
+              correctAnswer: correctAnswersStr,
+              file, 
+            }));
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      } else if (name === "image" || name === "audio") {
+        // Upload image/audio up Firebase
+        const folder = name === "image" ? "images" : "audios";
+        const fileName = `${Date.now()}_${file.name}`;
+        const fileRef = ref(storage, `${folder}/${fileName}`);
+
+        uploadBytes(fileRef, file)
+          .then(() => getDownloadURL(fileRef))
+          .then((url) => {
+            setFormData((prev) => ({
+              ...prev,
+              [name]: file,
+              [`${name}URL`]: url,
+            }));
+          })
+          .catch((err) => {
+            console.error(`Upload ${name} failed:`, err);
+            alert(`Upload ${name} failed!`);
+          });
+      }
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated data: ", formData);
-    alert("Lesson updated! (check console)");
+
+    try {
+      const data = new FormData();
+
+      // Append fields
+      Object.entries(formData).forEach(([key, val]) => {
+        if (val) data.append(key, val);
+      });
+
+      const res = await fetch(`http://localhost:3002/api/listening/${id}`, {
+        method: "PUT",
+        body: data,
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Update failed");
+
+      alert("Lesson updated successfully!");
+      navigate("/admin/practice_listening");
+    } catch (err) {
+      console.error("Update error:", err);
+      alert("Failed to update lesson");
+    }
   };
 
-  if (!lesson) return <p>Lesson not found</p>;
+  if (loading) return <p>Loading lesson data...</p>;
 
   return (
     <div className="addlisten-container">
@@ -129,6 +175,7 @@ const AdminEditListen = () => {
           <option value="Section 2">Section 2</option>
           <option value="Section 3">Section 3</option>
           <option value="Section 4">Section 4</option>
+          <option value="Test">Test</option>
         </select>
 
         {/* Title */}
@@ -148,14 +195,23 @@ const AdminEditListen = () => {
           <option value="Map">Map</option>
           <option value="Filling">Filling</option>
           <option value="True/False">True/False</option>
-          <option value="Audio">Audio</option>
         </select>
 
         {/* Image */}
         <label>Image</label>
-        <input type="file" name="image" accept="image/*" onChange={handleChange} />
-        {formData.image && typeof formData.image === "string" && (
-          <img src={formData.image} alt="preview" width="120" style={{ marginTop: "10px", borderRadius: "8px" }} />
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+        />
+        {formData.imageURL && (
+          <img
+            src={formData.imageURL}
+            alt="preview"
+            width="120"
+            style={{ marginTop: "10px", borderRadius: "8px" }}
+          />
         )}
 
         {/* Content */}
@@ -164,7 +220,13 @@ const AdminEditListen = () => {
           name="content"
           value={formData.content}
           onChange={handleChange}
-          placeholder="Edit passage here..."
+        />
+        <p className="addlisten-or">OR</p>
+        <input
+          type="file"
+          name="file"
+          accept=".xlsx,.xls"
+          onChange={handleChange}
         />
 
         {/* Correct Answer */}
@@ -178,11 +240,27 @@ const AdminEditListen = () => {
 
         {/* Audio */}
         <label>Audio</label>
-        <input type="file" name="audio" accept="audio/*" onChange={handleChange} />
+        <input
+          type="file"
+          name="audio"
+          accept="audio/*"
+          onChange={handleChange}
+        />
+        {formData.audioURL && (
+          <audio
+            controls
+            src={formData.audioURL}
+            style={{ marginTop: "10px" }}
+          />
+        )}
 
         {/* Time Limit */}
         <label>Time Limit</label>
-        <select name="timeLimit" value={formData.timeLimit} onChange={handleChange}>
+        <select
+          name="timeLimit"
+          value={formData.timeLimit}
+          onChange={handleChange}
+        >
           <option value="">Select Time</option>
           <option value="20">20 minutes</option>
           <option value="30">30 minutes</option>
@@ -190,8 +268,7 @@ const AdminEditListen = () => {
           <option value="45">45 minutes</option>
         </select>
 
-        {/* Submit */}
-        <button type="submit" className="addlisten-btn" onClick={() => navigate("/admin/practice_listening")}>
+        <button type="submit" className="addlisten-btn">
           Update Task
         </button>
       </form>

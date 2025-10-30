@@ -1,59 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 import "./AdminListen.css";
 
-const lessonsData = [
-  {
-    id: 1,
-    section: "Section 1",
-    title: "Gap Filling - Daily Routine",
-    type: "Gap Filling",
-    image: "/assets/listpic.jpg",
-    attempts: 120,
-  },
-  {
-    id: 2,
-    section: "Section 2",
-    title: "Map Reading Task",
-    type: "Map",
-    image: "/assets/listpic.jpg",
-    attempts: 95,
-  },
-  {
-    id: 3,
-    section: "Section 3",
-    title: "Listening Practice Quiz",
-    type: "True/False",
-    image: "/assets/listpic.jpg",
-    attempts: 75,
-  },
-  {
-    id: 4,
-    section: "Section 4",
-    title: "Video - Grammar Explanation",
-    type: "Filling",
-    image: "/assets/listpic.jpg",
-    attempts: 40,
-  },
-  {
-    id: 5,
-    section: "Section 1",
-    title: "Audio Conversation",
-    type: "Audio",
-    image: "/assets/listpic.jpg",
-    attempts: 60,
-  },
-];
-
 const AdminListen = () => {
-  const [lessons, setLessons] = useState(lessonsData);
+  const [lessons, setLessons] = useState([]);
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState("");
   const [filterType, setFilterType] = useState("");
   const navigate = useNavigate();
+
+  // --- Fetch data from backend ---
+  useEffect(() => {
+    const fetchLessons = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/api/listening");
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || "Failed to fetch lessons");
+
+        // backend send data array
+        setLessons(data.data || []);
+      } catch (err) {
+        console.error("Error fetching lessons:", err);
+        alert("Error fetching listening practices. See console for details.");
+      }
+    };
+
+    fetchLessons();
+  }, []);
 
   const filteredLessons = lessons.filter((lesson) => {
     return (
@@ -63,10 +40,23 @@ const AdminListen = () => {
     );
   });
 
-  // Hàm xoa bai
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this lesson?")) {
-      setLessons(lessons.filter((lesson) => lesson.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this lesson?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3002/api/listening/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to delete");
+
+      // update after delete successfully
+      setLessons((prev) => prev.filter((lesson) => lesson.id !== id));
+      alert("Lesson deleted successfully!");
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Failed to delete lesson. See console for details.");
     }
   };
 
@@ -95,6 +85,7 @@ const AdminListen = () => {
           <option value="Section 2">Section 2</option>
           <option value="Section 3">Section 3</option>
           <option value="Section 4">Section 4</option>
+          <option value="Test">Test</option>
         </select>
 
         <select
@@ -105,9 +96,8 @@ const AdminListen = () => {
           <option value="">Types</option>
           <option value="Gap Filling">Gap Filling</option>
           <option value="Map">Map</option>
-          <option value="Filling">Quiz</option>
-          <option value="True/False">Video</option>
-          <option value="Audio">Audio</option>
+          <option value="Filling">Filling</option>
+          <option value="True/False">True/False</option>
         </select>
       </div>
 
@@ -116,28 +106,23 @@ const AdminListen = () => {
         {filteredLessons.map((lesson) => (
           <div key={lesson.id} className="lesson-card-listenadmin">
             <img
-              src={lesson.image}
+              src={lesson.image_url || "/assets/listpic.jpg"}
               alt={lesson.title}
               className="lesson-image-listenadmin"
             />
 
-            {/* Section tag */}
             <span className="lesson-section-badge-listenadmin">
               {lesson.section}
             </span>
 
-            {/* Title */}
             <h2 className="lesson-card-title-listenadmin">{lesson.title}</h2>
 
-            {/* Type */}
             <p className="lesson-type-listenadmin">{lesson.type}</p>
 
-            {/* Attempts */}
             <p className="lesson-attempts-listenadmin">
-              {lesson.attempts} attempts
+              {lesson.attempts || 0} attempts
             </p>
 
-            {/* Control buttons */}
             <div className="lesson-control-listenadmin">
               <button
                 className="lesson-btn-edit-listenadmin"
@@ -158,7 +143,6 @@ const AdminListen = () => {
         ))}
       </div>
 
-      {/* add button */}
       <button
         className="lesson-btn-add-listadmin"
         onClick={() => navigate("/admin/practice_listening/add")}
