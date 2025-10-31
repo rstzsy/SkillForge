@@ -7,53 +7,20 @@ const ScoreWritePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🧠 Dữ liệu truyền từ trang trước (userWriting)
+  // 🧠 Nhận dữ liệu từ WriteDetail
+  const aiResult = location.state?.aiResult;
   const userWriting = location.state?.userWriting;
-  const user = JSON.parse(localStorage.getItem("user"));
-  const userId = user?.id;
 
   const [loading, setLoading] = useState(true);
-  const [aiResult, setAiResult] = useState(null);
 
   useEffect(() => {
-    if (!userWriting || !userId) {
+    if (!userWriting || !aiResult) {
+      // Nếu thiếu dữ liệu thì quay lại trang chính
       navigate("/");
       return;
     }
-
-    const essayText = Object.values(userWriting).join("\n\n");
-
-    // 🔹 Gửi bài viết tới backend để chấm điểm bằng Gemini AI
-    const evaluateEssay = async () => {
-      try {
-        const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            practiceId: id,
-            essayText,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          setAiResult(data);
-        } else {
-          console.error("AI Evaluation failed:", data);
-          alert("AI evaluation failed: " + data.message);
-        }
-      } catch (error) {
-        console.error("❌ Error calling AI:", error);
-        alert("Server error during AI evaluation.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    evaluateEssay();
-  }, [userWriting, id, navigate, userId]);
+    setLoading(false);
+  }, [userWriting, aiResult, navigate]);
 
   if (loading) return <p className="loading">Analyzing your writing with Gemini AI...</p>;
   if (!aiResult) return <p>No AI result available.</p>;

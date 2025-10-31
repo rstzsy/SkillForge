@@ -21,4 +21,3 @@ export const evaluateEssay = async (req, res) => {
     res.status(500).json({ message: "Failed to evaluate essay", error: error.message });
   }
 };
-

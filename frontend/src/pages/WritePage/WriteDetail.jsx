@@ -78,7 +78,9 @@ const WriteDetail = () => {
       const data = await res.json();
 
       if (res.status === 200) {
-        navigate(`/score/write/${id}`, { state: { aiResult: data, userWriting: sections } });
+        navigate(`/score/write/${id}`, {
+          state: { aiResult: data, userWriting: sections },
+        });
       } else {
         alert("AI evaluation failed: " + data.message);
       }
