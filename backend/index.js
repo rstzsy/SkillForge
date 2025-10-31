@@ -8,6 +8,7 @@ import adminUserRoutes from "./routes/adminUserRoute.js";
 import classRoutes from "./routes/classRoute.js";
 import writingRoutes from "./routes/writingRoutes.js";
 import listeningRoutes from "./routes/listeningRoute.js";
+import readingRoutes from "./routes/readingRoute.js";
 
 
 
@@ -23,6 +24,7 @@ app.use("/api/admin/users", adminUserRoutes);
 app.use("/api/admin/classes", classRoutes);
 app.use("/api/writing", writingRoutes);
 app.use("/api/listening", listeningRoutes);
+app.use("/api/reading", readingRoutes);
 
 app.get("/", (req, res) => {
   res.send("Server is ready");
