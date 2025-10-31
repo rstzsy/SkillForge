@@ -6,55 +6,64 @@ const ScoreWritePage = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // 🧠 Dữ liệu truyền từ trang trước (userWriting)
   const userWriting = location.state?.userWriting;
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;
 
   const [loading, setLoading] = useState(true);
-  const [mockResult, setMockResult] = useState(null);
+  const [aiResult, setAiResult] = useState(null);
 
   useEffect(() => {
-    if (!userWriting) {
+    if (!userWriting || !userId) {
       navigate("/");
       return;
     }
 
-    // 🔹 Giả lập AI chấm điểm (2 giây)
-    setTimeout(() => {
-      setMockResult({
-        overall_band: 7.0,
-        task_achievement: 7.5,
-        coherence: 6.5,
-        lexical: 7.0,
-        grammar: 6.0,
-        feedback:
-          "Your essay demonstrates a clear understanding of the topic with good organization. However, some grammatical mistakes and limited vocabulary range reduce clarity.",
-        errors: [
-          {
-            sentence: "The chart show the number of people who travel abroad.",
-            correction: "The chart shows the number of people who travel abroad.",
-          },
-          {
-            sentence: "People is more interested in traveling now.",
-            correction: "People are more interested in traveling now.",
-          },
-        ],
-        suggestions: [
-          "Use a wider range of complex sentence structures.",
-          "Pay more attention to subject–verb agreement.",
-          "Include more linking words to improve cohesion.",
-        ],
-      });
-      setLoading(false);
-    }, 2000);
-  }, [userWriting, navigate]);
+    const essayText = Object.values(userWriting).join("\n\n");
 
-  if (loading) return <p className="loading">Analyzing your writing...</p>;
-  if (!mockResult) return <p>No result available.</p>;
+    // 🔹 Gửi bài viết tới backend để chấm điểm bằng Gemini AI
+    const evaluateEssay = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            practiceId: id,
+            essayText,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setAiResult(data);
+        } else {
+          console.error("AI Evaluation failed:", data);
+          alert("AI evaluation failed: " + data.message);
+        }
+      } catch (error) {
+        console.error("❌ Error calling AI:", error);
+        alert("Server error during AI evaluation.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    evaluateEssay();
+  }, [userWriting, id, navigate, userId]);
+
+  if (loading) return <p className="loading">Analyzing your writing with Gemini AI...</p>;
+  if (!aiResult) return <p>No AI result available.</p>;
 
   // 🔹 Ghép toàn bộ bài viết
   const fullWriting = Object.values(userWriting).join("\n\n");
 
-  // 🔹 Highlight lỗi trong bài viết
-  const highlightedWriting = mockResult.errors.reduce((text, err) => {
+  // 🔹 Highlight lỗi trong bài viết (nếu có)
+  const errors = aiResult.errors || [];
+  const highlightedWriting = errors.reduce((text, err) => {
     const escapedSentence = err.sentence.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(escapedSentence, "g");
     return text.replace(
@@ -67,36 +76,36 @@ const ScoreWritePage = () => {
     <div className="score-page-container">
       <h2 className="score-title">AI Writing Feedback</h2>
 
-      {/* 🔹 Tổng điểm */}
+      {/* Tổng điểm */}
       <div className="score-summary">
-        <h3>Overall Band: {mockResult.overall_band}</h3>
+        <h3>Overall Band: {aiResult.overall_band || "N/A"}</h3>
         <div className="score-grid">
           <div className="score-item">
             <span>Task Achievement</span>
-            <strong>{mockResult.task_achievement}</strong>
+            <strong>{aiResult.task_achievement || "-"}</strong>
           </div>
           <div className="score-item">
             <span>Coherence & Cohesion</span>
-            <strong>{mockResult.coherence}</strong>
+            <strong>{aiResult.coherence || "-"}</strong>
           </div>
           <div className="score-item">
             <span>Lexical Resource</span>
-            <strong>{mockResult.lexical}</strong>
+            <strong>{aiResult.lexical || "-"}</strong>
           </div>
           <div className="score-item">
             <span>Grammar Accuracy</span>
-            <strong>{mockResult.grammar}</strong>
+            <strong>{aiResult.grammar || "-"}</strong>
           </div>
         </div>
       </div>
 
-      {/* 🔹 Feedback tổng */}
+      {/* Feedback tổng */}
       <div className="score-feedback">
         <h3>General Feedback</h3>
-        <p>{mockResult.feedback}</p>
+        <p>{aiResult.feedback}</p>
       </div>
 
-      {/* 🔹 Bài viết của người dùng */}
+      {/* Bài viết người dùng */}
       <div className="score-user-writing">
         <h3>Your Writing (with highlighted errors)</h3>
         <div
@@ -105,28 +114,32 @@ const ScoreWritePage = () => {
         ></div>
       </div>
 
-      {/* 🔹 Lỗi chi tiết */}
-      <div className="score-errors">
-        <h3>Detected Mistakes</h3>
-        {mockResult.errors.map((err, i) => (
-          <div key={i} className="error-item">
-            <p className="error-wrong">❌ {err.sentence}</p>
-            <p className="error-correct">✅ {err.correction}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* 🔹 Gợi ý cải thiện */}
-      <div className="score-suggestions">
-        <h3>Suggestions for Improvement</h3>
-        <ul>
-          {mockResult.suggestions.map((sug, i) => (
-            <li key={i}>{sug}</li>
+      {/* Lỗi chi tiết */}
+      {errors.length > 0 && (
+        <div className="score-errors">
+          <h3>Detected Mistakes</h3>
+          {errors.map((err, i) => (
+            <div key={i} className="error-item">
+              <p className="error-wrong">❌ {err.sentence}</p>
+              <p className="error-correct">✅ {err.correction}</p>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
+      )}
 
-      {/* 🔹 Nút điều hướng */}
+      {/* Gợi ý */}
+      {aiResult.suggestions && (
+        <div className="score-suggestions">
+          <h3>Suggestions for Improvement</h3>
+          <ul>
+            {aiResult.suggestions.map((sug, i) => (
+              <li key={i}>{sug}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Nút điều hướng */}
       <div className="score-buttons">
         <button onClick={() => navigate("/")}>Return to Course</button>
         <button onClick={() => navigate(-1)}>Write Again</button>

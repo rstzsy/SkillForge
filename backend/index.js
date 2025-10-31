@@ -9,6 +9,8 @@ import classRoutes from "./routes/classRoute.js";
 import writingRoutes from "./routes/writingRoutes.js";
 import listeningRoutes from "./routes/listeningRoute.js";
 import readingRoutes from "./routes/readingRoute.js";
+import aiWritingRoutes from "./routes/aiWritingRoutes.js";
+
 
 
 
@@ -25,6 +27,8 @@ app.use("/api/admin/classes", classRoutes);
 app.use("/api/writing", writingRoutes);
 app.use("/api/listening", listeningRoutes);
 app.use("/api/reading", readingRoutes);
+app.use("/api/ai-writing", aiWritingRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Server is ready");

@@ -58,10 +58,36 @@ const WriteDetail = () => {
   };
 
   // 🔹 Xử lý nộp bài
-  const handleSubmit = () => {
-    console.log("User writing:", sections);
-    setShowModal(true);
+  const handleSubmit = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
+
+    const essayText = Object.values(sections).join("\n\n");
+
+    try {
+      const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          practiceId: id,
+          essayText,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 200) {
+        navigate(`/score/write/${id}`, { state: { aiResult: data, userWriting: sections } });
+      } else {
+        alert("AI evaluation failed: " + data.message);
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      alert("Server error during submission");
+    }
   };
+
 
   const formatTime = (secs) => {
     const m = String(Math.floor(secs / 60)).padStart(2, "0");
