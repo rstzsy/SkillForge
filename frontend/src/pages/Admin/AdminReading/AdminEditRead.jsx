@@ -1,102 +1,158 @@
+import * as XLSX from "xlsx";
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
-import "../AdminListen/AdminAddListen.css"; 
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { app } from "../../../firebase/config";
+import "../AdminListen/AdminAddListen.css";
 
-const lessonsData = [
-  { 
-    id: 1,
-    section: "Section 1",
-    title: "Gap Filling - Daily Routine",
-    type: "Gap Filling",
-    image: "/assets/listpic.jpg",
-    attempts: 120,
-    content: "Passage about daily routine...",
-    correctAnswer: "morning",
-    timeLimit: "30"
-  },
-  { 
-    id: 2,
-    section: "Section 2",
-    title: "Map Reading Task",
-    type: "Map",
-    image: "/assets/listpic.jpg",
-    attempts: 95,
-    content: "Instructions for map reading...",
-    correctAnswer: "A-B-C",
-    audio: "/assets/audio2.mp3",
-    timeLimit: "45"
-  },
-  { 
-    id: 3,
-    section: "Section 3",
-    title: "Listening Practice Quiz",
-    type: "True/False",
-    image: "/assets/listpic.jpg",
-    attempts: 75,
-    content: "Listen to the audio and answer True or False.",
-    correctAnswer: "True",
-    timeLimit: "45"
-  },
-  { 
-    id: 4,
-    section: "Section 1",
-    title: "Audio Conversation",
-    type: "Audio",
-    image: "/assets/listpic.jpg",
-    attempts: 60,
-    content: "Listen to the conversation and answer the questions.",
-    correctAnswer: "Yes",
-    timeLimit: "45"
-  }
-];
+const storage = getStorage(app);
 
-const AdminEditListen = () => {
-  const { id } = useParams(); 
-  const lesson = lessonsData.find((item) => item.id === Number(id));
+const AdminEditRead = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     section: "",
     title: "",
     type: "",
-    image: "",
+    image: null,
+    imageURL: "",
+    passage: "",
     content: "",
     correctAnswer: "",
     timeLimit: "",
   });
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    if (lesson) {
-      setFormData({
-        section: lesson.section || "",
-        title: lesson.title || "",
-        type: lesson.type || "",
-        image: lesson.image || "",
-        content: lesson.content || "",
-        correctAnswer: lesson.correctAnswer || "",
-        timeLimit: lesson.timeLimit || "",
-      });
-    }
-  }, [lesson]);
-  const navigate = useNavigate();
+    const fetchReading = async () => {
+      try {
+        const res = await fetch(`http://localhost:3002/api/reading/${id}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch reading");
+
+        const r = data.data || data;
+        setFormData({
+          section: r.section || "",
+          title: r.title || "",
+          type: r.type || "",
+          image: null,
+          imageURL: r.image_url || "",
+          passage: r.content || "",
+          content: r.content_text || "",
+          correctAnswer: r.correct_answer || "",
+          timeLimit: r.time_limit || "",
+        });
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load reading task");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReading();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (files) {
-      setFormData({ ...formData, [name]: files[0] });
+
+    if (files && files.length > 0) {
+      const file = files[0];
+
+      // excel
+      if (name === "file" && (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: "array" });
+
+          const tasksSheet = workbook.Sheets["Tasks"] || workbook.Sheets[workbook.SheetNames[0]];
+          const tasksJson = XLSX.utils.sheet_to_json(tasksSheet);
+
+          const blanksSheet = workbook.Sheets["Blanks"];
+          const blanksJson = blanksSheet ? XLSX.utils.sheet_to_json(blanksSheet) : [];
+
+          if (tasksJson.length > 0) {
+            const task = tasksJson[0];
+
+            const blanksForTask = blanksJson.filter((b) => b.taskId === task.taskId);
+            const correctAnswersStr = blanksForTask.map((b) => b.correctAnswer).join(", ");
+
+            setFormData((prev) => ({
+              ...prev,
+              section: task.section || "",
+              title: task.title || "",
+              type: task.type || "",
+              passage: task.passageText || "",
+              content: task.passage || "",
+              timeLimit: task.timeLimit || "",
+              correctAnswer: correctAnswersStr,
+            }));
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      // image urrl
+      else if (name === "image") {
+        const folder = "reading_images";
+        const fileName = `${Date.now()}_${file.name}`;
+        const fileRef = ref(storage, `${folder}/${fileName}`);
+
+        uploadBytes(fileRef, file)
+          .then(() => getDownloadURL(fileRef))
+          .then((url) => {
+            setFormData((prev) => ({
+              ...prev,
+              image: file,
+              imageURL: url,
+            }));
+          })
+          .catch((err) => {
+            console.error("Upload image failed:", err);
+            alert("Upload image failed!");
+          });
+      }
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Updated data: ", formData);
-    alert("Lesson updated! (check console)");
+
+    try {
+      const payload = {
+        section: formData.section,
+        title: formData.title,
+        type: formData.type,
+        passage: formData.passage,
+        content: formData.content,
+        correctAnswer: formData.correctAnswer,
+        timeLimit: formData.timeLimit,
+        imageURL: formData.imageURL,
+      };
+
+      const res = await fetch(`http://localhost:3002/api/reading/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to update");
+
+      alert("Reading task updated!");
+      navigate("/admin/practice_reading");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update reading task");
+    }
   };
 
-  if (!lesson) return <p>Lesson not found</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div className="addlisten-container">
@@ -106,25 +162,21 @@ const AdminEditListen = () => {
       <form className="addlisten-form" onSubmit={handleSubmit}>
         {/* Section */}
         <label>Section</label>
-        <select name="section" value={formData.section} onChange={handleChange}>
+        <select name="section" value={formData.section} onChange={handleChange} required>
           <option value="">Select Section</option>
           <option value="Section 1">Section 1</option>
           <option value="Section 2">Section 2</option>
           <option value="Section 3">Section 3</option>
+          <option value="Section 4">Section 4</option>
         </select>
 
         {/* Title */}
         <label>Title</label>
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-        />
+        <input type="text" name="title" value={formData.title} onChange={handleChange} required />
 
         {/* Type */}
         <label>Type</label>
-        <select name="type" value={formData.type} onChange={handleChange}>
+        <select name="type" value={formData.type} onChange={handleChange} required>
           <option value="">Select Type</option>
           <option value="Gap Filling">Gap Filling</option>
           <option value="Map">Map</option>
@@ -134,27 +186,24 @@ const AdminEditListen = () => {
         {/* Image */}
         <label>Image</label>
         <input type="file" name="image" accept="image/*" onChange={handleChange} />
-        {formData.image && typeof formData.image === "string" && (
-          <img src={formData.image} alt="preview" width="120" style={{ marginTop: "10px", borderRadius: "8px" }} />
+        {formData.imageURL && (
+          <img src={formData.imageURL} alt="preview" width="120" style={{ marginTop: "10px", borderRadius: "8px" }} />
         )}
 
-        {/* Content */}
+        {/* Passage */}
         <label>Content Passage</label>
-        <textarea
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          placeholder="Edit passage here..."
-        />
+        <textarea name="passage" value={formData.passage} onChange={handleChange} placeholder="Edit passage here..." />
+
+        {/* Content */}
+        <label>Content Text</label>
+        <textarea name="content" value={formData.content} onChange={handleChange} placeholder="Edit content here..." />
+
+        <p className="addlisten-or">OR</p>
+        <input type="file" name="file" accept=".xlsx,.xls" onChange={handleChange} />
 
         {/* Correct Answer */}
         <label>Correct Answer</label>
-        <input
-          type="text"
-          name="correctAnswer"
-          value={formData.correctAnswer}
-          onChange={handleChange}
-        />
+        <input type="text" name="correctAnswer" value={formData.correctAnswer} onChange={handleChange} />
 
         {/* Time Limit */}
         <label>Time Limit</label>
@@ -166,13 +215,10 @@ const AdminEditListen = () => {
           <option value="45">45 minutes</option>
         </select>
 
-        {/* Submit */}
-        <button type="submit" className="addlisten-btn" onClick={() => navigate("/admin/practice_reading")}>
-          Update Task
-        </button>
+        <button type="submit" className="addlisten-btn">Update Task</button>
       </form>
     </div>
   );
 };
 
-export default AdminEditListen;
+export default AdminEditRead;
