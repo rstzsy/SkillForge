@@ -4,29 +4,25 @@ import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import "../AdminListen/AdminAddListen.css";
 
 const AdminAddSpeak = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     part: "",
     topic: "",
     type: "",
-    image: "",
     questions: [""],
   });
 
-  // Xử lý thay đổi input
+  // ✅ Hàm xử lý thay đổi input cơ bản
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "image" && files && files[0]) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setFormData((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(files[0]);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // Thêm câu hỏi mới
+  // ✅ Thêm câu hỏi mới
   const handleAddQuestion = () => {
     setFormData((prev) => ({
       ...prev,
@@ -34,26 +30,48 @@ const AdminAddSpeak = () => {
     }));
   };
 
-  // Xóa câu hỏi
+  // ✅ Xóa câu hỏi
   const handleRemoveQuestion = (index) => {
     const updated = [...formData.questions];
     updated.splice(index, 1);
     setFormData((prev) => ({ ...prev, questions: updated }));
   };
 
-  // Sửa nội dung câu hỏi
+  // ✅ Sửa nội dung câu hỏi
   const handleQuestionChange = (index, value) => {
     const updated = [...formData.questions];
     updated[index] = value;
     setFormData((prev) => ({ ...prev, questions: updated }));
   };
 
-  // Submit form
-  const handleSubmit = (e) => {
+  // ✅ Submit form để gọi API
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("New Speaking Task:", formData);
-    alert("Speaking task added successfully!");
-    // Bạn có thể gọi API POST tại đây để lưu vào DB
+
+    try {
+      const res = await fetch("http://localhost:3002/api/speaking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section: formData.part,
+          topic: formData.topic,
+          type: formData.type,
+          time_limit: 2,
+          questions: formData.questions,
+        }),
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        alert("✅ Speaking topic added successfully!");
+        navigate("/admin/practice_speaking");
+      } else {
+        alert("❌ " + result.message);
+      }
+    } catch (error) {
+      console.error("❌ Error adding speaking:", error);
+      alert("Failed to add speaking topic.");
+    }
   };
 
   return (
@@ -100,30 +118,6 @@ const AdminAddSpeak = () => {
           <option value="Cue Card">Cue Card</option>
           <option value="Discussion">Discussion</option>
         </select>
-
-        {/* Image */}
-        <label>Image</label>
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          onChange={handleChange}
-        />
-        {formData.image && typeof formData.image === "string" && (
-          <img
-            src={formData.image}
-            alt="preview"
-            style={{
-              width: "100px",
-              height: "100px",
-              borderRadius: "10px",
-              marginTop: "10px",
-              objectFit: "cover",
-              border: "1px solid #ddd",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-            }}
-          />
-        )}
 
         {/* Questions */}
         <label>Questions</label>

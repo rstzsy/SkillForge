@@ -62,6 +62,102 @@ export const SpeakingController = {
       });
     }
   },
+  // ✅ Thêm speaking thủ công
+async createSpeaking(req, res) {
+  try {
+    const { section, topic, type, time_limit = 2, questions = [] } = req.body;
+
+    const practiceRef = db.collection("speaking_practices").doc();
+    const speakingData = {
+      speaking_practices_id: practiceRef.id,
+      section,
+      topic,
+      type,
+      time_limit,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    await practiceRef.set(speakingData);
+
+    // Lưu subcollection questions
+    for (let i = 0; i < questions.length; i++) {
+      const q = {
+        question_text: questions[i],
+        question_order: i + 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      await practiceRef.collection("questions").add(q);
+    }
+
+    res.json({
+      success: true,
+      message: "Speaking topic created successfully",
+      speaking_practices_id: practiceRef.id,
+    });
+  } catch (error) {
+    console.error("🔥 Error creating speaking:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create speaking topic",
+      error: error.message,
+    });
+  }
+},
+
+// ✅ Cập nhật speaking
+async updateSpeaking(req, res) {
+  try {
+    const { id } = req.params;
+    const { section, topic, type, time_limit, questions = [] } = req.body;
+
+    const ref = db.collection("speaking_practices").doc(id);
+
+    // Kiểm tra tồn tại
+    const docSnap = await ref.get();
+    if (!docSnap.exists)
+      return res.status(404).json({ message: "Speaking topic not found" });
+
+    await ref.update({
+      section,
+      topic,
+      type,
+      time_limit,
+      updated_at: new Date(),
+    });
+
+    // Xóa toàn bộ questions cũ
+    const questionsSnap = await ref.collection("questions").get();
+    const batch = db.batch();
+    questionsSnap.docs.forEach((doc) => batch.delete(doc.ref));
+    await batch.commit();
+
+    // Tạo lại questions mới
+    for (let i = 0; i < questions.length; i++) {
+      const q = {
+        question_text: questions[i],
+        question_order: i + 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+      await ref.collection("questions").add(q);
+    }
+
+    res.json({
+      success: true,
+      message: "Speaking topic updated successfully",
+    });
+  } catch (error) {
+    console.error("🔥 Error updating speaking:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update speaking topic",
+      error: error.message,
+    });
+  }
+},
+
 };
 
 // ✅ Import Excel từ file (phần bạn đã có)

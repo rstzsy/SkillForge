@@ -8,5 +8,8 @@ const upload = multer({ dest: "uploads/" });
 router.get("/", SpeakingController.getAllSpeaking);
 router.post("/import-excel", upload.single("file"), importSpeakingExcel);
 router.delete("/:id", SpeakingController.deleteSpeaking);
+router.post("/", SpeakingController.createSpeaking);     // ➕ Add
+router.put("/:id", SpeakingController.updateSpeaking);   // ✏️ Edit
+
 
 export default router;
