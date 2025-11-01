@@ -1,51 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./SpeakPage.css";
-
-export const mockSpeakData = [
-  {
-    id: 1,
-    section: "Part 1",
-    title: "Introduce Yourself",
-    type: "General Questions",
-    attempts: 652,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 5,
-  },
-  {
-    id: 2,
-    section: "Part 2",
-    title: "Describe a Place You Love",
-    type: "Cue Card",
-    attempts: 489,
-    img: "/assets/listpic.jpg",
-    completed: true,
-    timeLimit: 2,
-  },
-  {
-    id: 3,
-    section: "Part 3",
-    title: "Discussion on Tourism",
-    type: "Follow-up Questions",
-    attempts: 371,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 4,
-  },
-  {
-    id: 4,
-    section: "Full Test",
-    title: "Cambridge 17 Speaking Test 2",
-    type: "Part 1 + 2 + 3",
-    attempts: 210,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    timeLimit: 15,
-  },
-];
 
 const sectionColors = {
   "Part 1": "#fcd5ce",
@@ -58,23 +15,56 @@ const SpeakPage = () => {
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [speakData, setSpeakData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const sections = ["Part 1", "Part 2", "Part 3", "Full Test"];
 
-  const filteredData = mockSpeakData.filter((item) => {
-    const statusMatch = tab === "completed" ? item.completed : !item.completed;
+  // 🔹 Lấy dữ liệu từ Firestore qua API
+  useEffect(() => {
+    const fetchSpeaking = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/api/speaking");
+        const data = await res.json();
+
+        // Định dạng lại dữ liệu
+        const formatted = data.map((item) => ({
+          id: item.speaking_practices_id,
+          section: item.section,
+          title: item.topic,
+          type: item.type || "General",
+          attempts: item.attempts || 0,
+          img: "/assets/listpic.jpg",
+          completed: false, // ✅ tạm thời luôn là chưa hoàn thành
+          timeLimit: item.time_limit || 2,
+        }));
+
+        setSpeakData(formatted);
+      } catch (err) {
+        console.error("❌ Error loading speaking data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSpeaking();
+  }, []);
+
+  // 🔹 Lọc theo section & search term
+  const filteredData = speakData.filter((item) => {
     const sectionMatch = selectedSection ? item.section === selectedSection : true;
     const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return statusMatch && sectionMatch && searchMatch;
+    return sectionMatch && searchMatch;
   });
+
+  if (loading) return <p>Loading Speaking Data...</p>;
 
   return (
     <div className="speaking-page">
       {/* Sidebar */}
       <aside className="sidebar-speak">
         <h3>
-          <FontAwesomeIcon icon={faMicrophone} size="x" /> Speaking Practise
+          <FontAwesomeIcon icon={faMicrophone} size="x" /> Speaking Practice
         </h3>
         <div className="filter-group-speak">
           {sections.map((sec) => (
@@ -109,13 +99,13 @@ const SpeakPage = () => {
               className={tab === "uncompleted" ? "active" : ""}
               onClick={() => setTab("uncompleted")}
             >
-              Uncomplete Task
+              Uncompleted Task
             </button>
             <button
               className={tab === "completed" ? "active" : ""}
               onClick={() => setTab("completed")}
             >
-              Complete Task
+              Completed Task
             </button>
           </div>
 
@@ -150,9 +140,6 @@ const SpeakPage = () => {
                 <h4>{item.title}</h4>
                 <p className="type-speak">{item.type}</p>
                 <p className="attempts-speak">{item.attempts} attempts</p>
-                {item.completed && (
-                  <span className="completed-label">Completed</span>
-                )}
               </div>
             </div>
           ))}

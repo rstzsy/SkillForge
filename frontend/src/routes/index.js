@@ -114,6 +114,8 @@ export const routes = [
     {
         path: '/speak/:id',
         page: SpeakDetail,
+        isShowHeader: true,
+        isShowFooter: false
     },
     {
         path: '/read/:id',

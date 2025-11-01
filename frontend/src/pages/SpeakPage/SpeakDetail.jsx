@@ -1,59 +1,68 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMicrophone,
   faVolumeUp,
   faChevronLeft,
   faChevronRight,
-  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
 import "./SpeakDetail.css";
 
-const mockTopics = [
-  {
-    id: 1,
-    title: "[FC T9-12] Plants 0/4",
-    questions: [
-      "Do you keep plants at home?",
-      "What kind of plants do people usually grow in your country?",
-      "Do you think plants are important for the environment?",
-      "Would you like to have a garden in the future?",
-    ],
-  },
-  {
-    id: 2,
-    title: "[FC T9-12] Art 0/4",
-    questions: [
-      "Do you like art?",
-      "What kind of art do you enjoy?",
-      "Have you ever visited an art gallery?",
-      "Do you think art is important in education?",
-    ],
-  },
-];
-
 const SpeakDetail = () => {
-  const [selectedTopic, setSelectedTopic] = useState(mockTopics[0]);
+  const { id } = useParams();
+  const [topics, setTopics] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [note, setNote] = useState("");
-  const [showMicroPopup, setShowMicroPopup] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
+  const [showMicroPopup, setShowMicroPopup] = useState(false);
+  const [recordedQuestions, setRecordedQuestions] = useState([]); // ✅ Câu hỏi đã ghi âm
+  const [loading, setLoading] = useState(true);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
+  // 🔹 Lấy dữ liệu Speaking từ Firestore qua backend
+  useEffect(() => {
+    const fetchSpeaking = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/api/speaking");
+        const data = await res.json();
+        setTopics(data);
+
+        const found = data.find((item) => item.speaking_practices_id === id);
+        if (found) {
+          const formattedTopic = {
+            id: found.speaking_practices_id,
+            title: found.topic,
+            section: found.section,
+            questions: found.questions?.map((q) => q.question_text) || [],
+          };
+          setSelectedTopic(formattedTopic);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching speaking topics:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSpeaking();
+  }, [id]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!selectedTopic) return <p>Topic not found.</p>;
+
   const currentQuestion = selectedTopic.questions[currentQuestionIndex];
 
   // Điều khiển câu hỏi
-  const handlePrev = () => {
-    if (currentQuestionIndex > 0)
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-  };
-  const handleNext = () => {
-    if (currentQuestionIndex < selectedTopic.questions.length - 1)
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-  };
+  const handlePrev = () =>
+    setCurrentQuestionIndex((i) => Math.max(i - 1, 0));
+  const handleNext = () =>
+    setCurrentQuestionIndex((i) =>
+      Math.min(i + 1, selectedTopic.questions.length - 1)
+    );
 
   // Đọc câu hỏi bằng giọng nói
   const handleSpeak = () => {
@@ -62,7 +71,7 @@ const SpeakDetail = () => {
     speechSynthesis.speak(utterance);
   };
 
-  // Bắt đầu thu âm
+  // Ghi âm
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -77,12 +86,18 @@ const SpeakDetail = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         const url = URL.createObjectURL(audioBlob);
         setAudioURL(url);
+
+        // ✅ Đánh dấu câu hỏi này là đã ghi âm
+        setRecordedQuestions((prev) =>
+          prev.includes(currentQuestionIndex)
+            ? prev
+            : [...prev, currentQuestionIndex]
+        );
       };
 
       mediaRecorderRef.current.start();
       setRecording(true);
 
-      // Tự dừng sau 20s
       setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           mediaRecorderRef.current.stop();
@@ -95,7 +110,6 @@ const SpeakDetail = () => {
     }
   };
 
-  // Dừng thu âm thủ công
   const handleStopRecording = () => {
     if (mediaRecorderRef.current && recording) {
       mediaRecorderRef.current.stop();
@@ -105,25 +119,19 @@ const SpeakDetail = () => {
 
   return (
     <div className="speak-detail-page">
-      {/* Sidebar left */}
+      {/* Sidebar trái */}
       <aside className="sidebar-left">
-        <div className="search-topic">
-          <FontAwesomeIcon icon={faMagnifyingGlass} color="#dc9f36" />
-          <input type="text" placeholder="Search by topic/question" />
-          <button className="search-btn">Search</button>
-        </div>
-
-        <div className="topics-list">
-          {mockTopics.map((topic) => (
+        <h3 className="sidebar-title">{selectedTopic.title}</h3>
+        <div className="questions-list">
+          {selectedTopic.questions.map((q, index) => (
             <div
-              key={topic.id}
-              className={`topic-item ${topic.id === selectedTopic.id ? "active" : ""}`}
-              onClick={() => {
-                setSelectedTopic(topic);
-                setCurrentQuestionIndex(0);
-              }}
+              key={index}
+              className={`question-item ${
+                index === currentQuestionIndex ? "active" : ""
+              } ${recordedQuestions.includes(index) ? "recorded" : ""}`}
+              onClick={() => setCurrentQuestionIndex(index)}
             >
-              {topic.title}
+              Q{index + 1}. {q}
             </div>
           ))}
         </div>
@@ -144,43 +152,17 @@ const SpeakDetail = () => {
           </button>
           <button
             onClick={handleNext}
-            disabled={currentQuestionIndex === selectedTopic.questions.length - 1}
+            disabled={
+              currentQuestionIndex === selectedTopic.questions.length - 1
+            }
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
       </main>
 
-      {/* Sidebar right */}
+      {/* Sidebar phải */}
       <aside className="sidebar-right">
-        <div
-          className="micro-check"
-          onClick={() => setShowMicroPopup(!showMicroPopup)}
-          style={{ cursor: "pointer", position: "relative" }}
-        >
-          <FontAwesomeIcon icon={faMicrophone} /> Micro check
-          {showMicroPopup && (
-            <div className="modal-overlay" onClick={() => setShowMicroPopup(false)}>
-                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h3>CHECK YOUR MICROPHONE</h3>
-                <ul>
-                    <li>You have 20 seconds to speak</li>
-                    <li>Please allow the system to access your microphone to perform this step</li>
-                    <li>Click the “Check Microphone” button below to start testing</li>
-                </ul>
-                <button
-                    className="check-mic-btn"
-                    onClick={handleStartRecording}
-                    disabled={recording}
-                >
-                    <FontAwesomeIcon icon={faMicrophone} />{" "}
-                    {recording ? "Recording..." : "Check Microphone"}
-                </button>
-                </div>
-            </div>
-            )}
-        </div>
-
         <div className="note-box">
           <div className="note-header">
             Note <span>{note.length}/1000</span>
@@ -194,11 +176,11 @@ const SpeakDetail = () => {
         </div>
       </aside>
 
-      {/* Bottom bar */}
+      {/* Thanh ghi âm */}
       <div className="bottom-bar">
         {!recording ? (
           <button className="record-btn" onClick={handleStartRecording}>
-            <FontAwesomeIcon icon={faMicrophone} /> Start recording your answer
+            <FontAwesomeIcon icon={faMicrophone} /> Record your answer
           </button>
         ) : (
           <button className="record-btn stop" onClick={handleStopRecording}>
@@ -207,7 +189,7 @@ const SpeakDetail = () => {
         )}
       </div>
 
-      {/* Audio playback */}
+      {/* Phát lại audio */}
       {audioURL && (
         <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
           <h4>🔊 Listen to your answer:</h4>
@@ -215,6 +197,8 @@ const SpeakDetail = () => {
         </div>
       )}
     </div>
+
+    
   );
 };
 
