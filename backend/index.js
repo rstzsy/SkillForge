@@ -11,7 +11,8 @@ import listeningRoutes from "./routes/listeningRoute.js";
 import readingRoutes from "./routes/readingRoute.js";
 import aiWritingRoutes from "./routes/aiWritingRoutes.js";
 import speakingRoutes from "./routes/speakingRoutes.js";
-
+import userListeningRoutes from "./routes/userListeningRoute.js";
+import userListeningSubmissionRoutes from "./routes/listeningSubmissionRoute.js";
 
 
 
@@ -30,6 +31,8 @@ app.use("/api/listening", listeningRoutes);
 app.use("/api/reading", readingRoutes);
 app.use("/api/ai-writing", aiWritingRoutes);
 app.use("/api/speaking", speakingRoutes);
+app.use("/api/user/listening", userListeningRoutes);
+app.use("/api/user/listen/submit", userListeningSubmissionRoutes);
 
 
 app.get("/", (req, res) => {

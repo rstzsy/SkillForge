@@ -1,28 +1,55 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate  } from "react-router-dom";
-import { mockData } from "../ListenPage/ListenPage";
+import { useParams, useNavigate } from "react-router-dom";
 import "./ListenDetail.css";
 
 const ListenDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // Firestore doc ID of listen task
   const navigate = useNavigate();
-  const test = mockData.find((t) => t.id === Number(id));
-
-  // State
+  const [test, setTest] = useState(null);
   const [answers, setAnswers] = useState({});
-  const initialTime = test?.timeLimit ? test.timeLimit * 60 : 0; // thoi gian tinh bang giay
-  const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [durationSeconds, setDurationSeconds] = useState(0); // time tested
 
-  // Countdown Timer
+  // get usedid in local
+  const userId = localStorage.getItem("userId") || 1;
+
+  // get detail task
+  useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3002/api/user/listening/${id}`
+        );
+        const data = await res.json();
+        if (res.ok || res.status === 200) {
+          setTest(data.data);
+
+          // Khởi tạo countdown
+          const initialTime = data.data.time_limit
+            ? data.data.time_limit * 60
+            : 0;
+          setTimeLeft(initialTime);
+        } else {
+          console.error("Error:", data.message);
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+    fetchDetail();
+  }, [id]);
+
+  // countdown Timer
   useEffect(() => {
     if (!test || timeLeft <= 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
+        setDurationSeconds((prev) => prev + 1); // increase time do tesst
         if (prev <= 1) {
           clearInterval(timer);
-          alert("Time is up! Bài sẽ tự động nộp.");
+          alert("Time is up! The test will be submitted.");
           handleSubmit();
           return 0;
         }
@@ -33,25 +60,23 @@ const ListenDetail = () => {
     return () => clearInterval(timer);
   }, [test, timeLeft]);
 
-  if (!test) return <p>Test not found!</p>;
+  if (!test) return <p>Loading...</p>;
 
-  // Handle input change
   const handleChange = (blankId, value) => {
     setAnswers((prev) => ({ ...prev, [blankId]: value }));
   };
 
-  // Render passage with inline inputs
   const renderPassageInline = () => {
     const regex = /\((\d+)\) ___/g;
     const parts = [];
     let lastIndex = 0;
     let match;
 
-    while ((match = regex.exec(test.passage)) !== null) {
+    while ((match = regex.exec(test.content_text || "")) !== null) {
       const index = match.index;
       const blankId = Number(match[1]);
 
-      parts.push(test.passage.slice(lastIndex, index));
+      parts.push(test.content_text.slice(lastIndex, index));
 
       parts.push(
         <span key={`blank-${blankId}`} className="listen-detail-blank">
@@ -67,19 +92,63 @@ const ListenDetail = () => {
       lastIndex = index + match[0].length;
     }
 
-    parts.push(test.passage.slice(lastIndex));
-
+    parts.push(test.content_text.slice(lastIndex));
     return parts;
   };
 
+  // submit task
+  const handleSubmit = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser?.id) {
+      alert("User not found!");
+      return;
+    }
 
-  // Handle submit
-  const handleSubmit = () => {
-    console.log("User answers:", answers);
-    setShowModal(true);
+    if (!test || !test.id) {
+      alert("Test data not loaded yet!");
+      return;
+    }
+
+    const user_id = storedUser.id;
+    const practice_id = test.id;
+    const duration_seconds = test.time_limit
+      ? test.time_limit * 60 - timeLeft
+      : 0;
+
+    try {
+      const res = await fetch("http://localhost:3002/api/user/listen/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id,
+          practice_id,
+          user_answer: answers,
+          duration_seconds,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(
+          data.message || "Network error while submitting your test."
+        );
+
+      alert("Submission saved successfully!");
+      setShowModal(true);
+
+      // save submissionId
+      const submissionId = data.data.id;
+
+      // navigate to score page
+      navigate(`/score/${submissionId}`, {
+        state: { userAnswers: answers },
+      });
+    } catch (err) {
+      console.error("Error submitting test:", err);
+      alert("Error submitting test. See console.");
+    }
   };
 
-  // Format time MM:SS
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -91,10 +160,10 @@ const ListenDetail = () => {
       <h2 className="listen-detail-title">{test.title}</h2>
 
       {/* Audio Player */}
-      {test.audio && (
+      {test.audio_url && (
         <div className="listen-detail-audio">
           <audio controls>
-            <source src={test.audio} type="audio/mpeg" />
+            <source src={test.audio_url} type="audio/mpeg" />
             Your browser does not support the audio element.
           </audio>
         </div>
@@ -105,16 +174,14 @@ const ListenDetail = () => {
           <div className="listen-detail-passage">{renderPassageInline()}</div>
         </div>
 
-        {test.img && (
+        {test.image_url && (
           <div className="listen-detail-right">
-            {/* image */}
             <div className="listen-detail-right-inner">
               <img
-                src={test.img}
+                src={test.image_url}
                 alt={test.title}
                 className="listen-detail-image"
               />
-              {/* timer */}
               <div className="listen-detail-timer">
                 <strong>{formatTime(timeLeft)}</strong>
               </div>
@@ -126,7 +193,7 @@ const ListenDetail = () => {
         )}
       </div>
 
-      {/* Modal */}
+      {/* Modal submit task */}
       {showModal && (
         <div className="listen-detail-modal">
           <div className="listen-detail-modal-content">
@@ -135,12 +202,13 @@ const ListenDetail = () => {
               <button onClick={() => navigate("/")}>Return Course Page</button>
               <button
                 onClick={() =>
-                  navigate(`/score/${test.id}`, { state: { userAnswers: answers } })
+                  navigate(`/score/${test.id}`, {
+                    state: { userAnswers: answers },
+                  })
                 }
               >
                 View Score
               </button>
-
             </div>
           </div>
         </div>
