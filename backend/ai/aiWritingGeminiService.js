@@ -20,45 +20,64 @@ export const aiWritingGeminiService = {
     try {
       const model = "gemini-2.0-flash";
 
-      // 🧠 Optimized Prompt — more accurate IELTS evaluation
       const prompt = `
-      You are a professional IELTS Writing examiner with 10+ years of experience.
-      Evaluate the essay strictly according to the IELTS Writing Band Descriptors.
+        You are an expert IELTS Writing examiner with over 10 years of experience.
+        Your task is to analyze the student's essay in detail, identify exact strengths and weaknesses, and give clear, actionable feedback to help the student improve.
 
-      **Band Descriptors:**
-      - **Task Response:** How fully the essay addresses all parts of the question, presents a clear position, and supports it with examples.
-      - **Coherence and Cohesion:** Logical organization, paragraphing, and effective use of linking devices.
-      - **Lexical Resource:** Range, precision, and appropriacy of vocabulary.
-      - **Grammatical Range and Accuracy:** Sentence variety, complex structures, and accuracy.
+        Respond **ONLY in valid JSON format** with **no explanations or extra text**.
 
-      **Band Level Guide:**
-      - **Band 9:** Fully addresses all parts with sophistication; ideas well-developed; very rare errors.
-      - **Band 8:** Covers all parts very well; clear structure and vocabulary; occasional minor errors.
-      - **Band 7:** Addresses task well but may have small issues in grammar or cohesion.
-      - **Band 6:** Addresses task partially; limited development or frequent errors.
-      - **Band 5 or below:** Incomplete response, frequent errors, poor organization.
+        ---
 
-      You must analyze the essay carefully and respond **strictly in JSON format only** as follows:
-      {
-        "overall_band": number,
-        "task_achievement": number,
-        "coherence": number,
-        "lexical": number,
-        "grammar": number,
-        "feedback": "Overall feedback summarizing performance in 2-3 sentences.",
-        "errors": [
-          { "sentence": "Incorrect sentence", "correction": "Corrected version" }
-        ],
-        "suggestions": [
-          "1–3 short practical tips for improvement."
-        ]
-      }
+        ### EVALUATION CRITERIA:
+        - **Task Achievement:** Does the essay fully address the question and develop ideas with clear examples?
+        - **Coherence and Cohesion:** Are ideas logically organized and connected with appropriate linking devices?
+        - **Lexical Resource:** Is the vocabulary wide, accurate, and suitable for the context?
+        - **Grammatical Range and Accuracy:** Are there varied sentence structures and correct grammar usage?
 
-      Essay:
-      """
-      ${essayText}
-      """
+        ---
+
+        ### FEEDBACK REQUIREMENTS:
+        Your feedback and suggestions must be **based directly on the student's actual writing**.
+        You must:
+        - Quote or reference specific sentences from the essay when giving comments.
+        - Identify exactly what is weak or unclear (e.g. missing example, weak idea, poor transition, incorrect grammar, repetition, vague vocabulary).
+        - Give **specific improvement advice** (e.g. “Add a real-life example to support this idea”, “Replace repetitive words with synonyms”, “Use a complex sentence here to show range”).
+        - Avoid generic statements like “Improve grammar” or “Be more coherent”.
+
+        ---
+
+        ### OUTPUT FORMAT (MUST BE VALID JSON):
+
+        {
+          "overall_band": number,
+          "task_achievement": number,
+          "coherence": number,
+          "lexical": number,
+          "grammar": number,
+
+          // General evaluation based on this student's actual writing
+          "feedback": "3–5 sentences summarizing the student's organization, development of ideas, and grammar accuracy, directly referencing parts of their essay (quote short phrases if relevant).",
+
+          // Key sentence-level grammar or expression errors and their corrections
+          "errors": [
+            { "sentence": "Incorrect or weak sentence from essay", "correction": "Improved version with explanation if needed" }
+          ],
+
+          // 2–3 detailed and personalized suggestions to help the student improve next time
+          "suggestions": [
+            "Give 2–3 concrete, easy-to-follow recommendations based on this essay (e.g., 'Use more precise connectors such as however, therefore', 'Develop your second body paragraph by adding an example about ...', 'Avoid repeating the phrase ...')."
+          ]
+        }
+
+        ---
+
+        Essay submitted by student:
+        """
+        ${essayText}
+        """
       `;
+
+
 
       // ✅ Call Gemini
       const result = await ai.models.generateContent({
