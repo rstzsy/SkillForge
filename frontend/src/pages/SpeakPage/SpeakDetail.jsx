@@ -28,6 +28,16 @@ const SpeakDetail = () => {
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const getFullAudioURL = (audio_url) => {
+    if (!audio_url) return null;
+    return audio_url.startsWith("http")
+      ? audio_url
+      : audio_url.startsWith("/uploads/")
+        ? `http://localhost:3002${audio_url}`  // nối đúng
+        : `http://localhost:3002/uploads/audio/${audio_url}`; // trường hợp chỉ có tên file
+  };
+
   
   // ✅ FIX: Lấy userId từ localStorage thay vì hardcode
   const getUserId = () => {
@@ -74,6 +84,8 @@ const SpeakDetail = () => {
   }, [id]);
 
   // ✅ NEW: Load lịch sử bài làm của user
+  // ✅ NEW: Load lịch sử bài làm của user
+  // ✅ NEW: Load lịch sử bài làm của user
   useEffect(() => {
     const loadUserSubmissions = async () => {
       if (!selectedTopic || !userId) return;
@@ -92,13 +104,11 @@ const SpeakDetail = () => {
           const newRecordedQuestions = new Map();
           
           data.submissions.forEach((submission) => {
-            // Tìm index của câu hỏi dựa vào speaking_questions_id
             const questionIndex = selectedTopic.questions.findIndex(
               (q) => q.id === submission.speaking_questions_id
             );
 
             if (questionIndex !== -1) {
-              // Parse feedback JSON nếu cần
               let evaluation = submission;
               if (typeof submission.feedback === "string") {
                 try {
@@ -109,16 +119,30 @@ const SpeakDetail = () => {
                 }
               }
 
+              // ✅ Đảm bảo có audio_url từ server
+              if (submission.audio_url) {
+                evaluation.audio_url = submission.audio_url;
+              }
+
               newRecordedQuestions.set(questionIndex, evaluation);
             }
           });
+
 
           setRecordedQuestions(newRecordedQuestions);
 
           // Nếu có submission cho câu hỏi hiện tại, hiển thị feedback
           if (newRecordedQuestions.has(currentQuestionIndex)) {
-            setCurrentEvaluation(newRecordedQuestions.get(currentQuestionIndex));
+            const currentEval = newRecordedQuestions.get(currentQuestionIndex);
+            setCurrentEvaluation(currentEval);
             setShowFeedback(true);
+            
+            // ✅ FIX: Set audioURL ngay khi load submissions
+            if (currentEval?.audio_url) {
+              const fullURL = getFullAudioURL(currentEval.audio_url);
+              console.log("🔊 Setting audio URL on load:", fullURL);
+              setAudioURL(fullURL);
+            }
           }
 
           console.log("✅ Loaded submissions for questions:", Array.from(newRecordedQuestions.keys()));
@@ -131,7 +155,7 @@ const SpeakDetail = () => {
     if (selectedTopic) {
       loadUserSubmissions();
     }
-  }, [selectedTopic, userId, id]);
+  }, [selectedTopic, userId, id, currentQuestionIndex]);
 
   // 🔹 Kiểm tra xem đã hoàn thành hết chưa
   useEffect(() => {
@@ -244,7 +268,8 @@ const SpeakDetail = () => {
         // ✅ Gộp transcript vào evaluation object để dễ xử lý
         const evaluation = {
           ...result.evaluation,
-          transcript: result.transcript // Thêm transcript từ root level
+          transcript: result.transcript, // Thêm transcript từ root level
+          audio_url: result.audio_url
         };
         console.log("✅ AI Evaluation received:", evaluation);
         
@@ -298,15 +323,18 @@ const SpeakDetail = () => {
   const handleQuestionClick = (index) => {
     setCurrentQuestionIndex(index);
     const evaluation = recordedQuestions.get(index);
-    if (evaluation) {
+    if (evaluation && evaluation.audio_url) {
       setCurrentEvaluation(evaluation);
       setShowFeedback(true);
+      setAudioURL(getFullAudioURL(evaluation.audio_url));
     } else {
       setShowFeedback(false);
       setCurrentEvaluation(null);
+      setAudioURL(null);
     }
-    setAudioURL(null); // Clear audio playback khi chuyển câu
+
   };
+
 
   return (
     <div className="speak-detail-page">

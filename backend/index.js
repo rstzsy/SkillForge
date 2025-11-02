@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import userRoutes from "./routes/userRoutes.js"; 
 import goalRoutes from "./routes/goalRoutes.js";
@@ -20,6 +22,14 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// ✅ Fix đường dẫn khi dùng ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Public thư mục uploads để có thể truy cập file trực tiếp
+app.use("/uploads/audio", express.static(path.join(__dirname, "uploads/audio")));
+console.log("🗂️ Serving uploads from:", path.join(__dirname, "uploads/audio"));
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes); 
