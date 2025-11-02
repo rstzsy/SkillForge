@@ -132,26 +132,54 @@ export const aiSpeakingGeminiService = {
 
       console.log("💾 Saving to Firestore...");
 
-      // ✅ Lưu kết quả chi tiết từng câu hỏi
-      const submissionRef = db.collection("speaking_question_submissions").doc();
-      await submissionRef.set({
-        question_submission_id: submissionRef.id,
-        user_id: userId,
-        speaking_id: speakingId,
-        speaking_questions_id: questionId,
-        audio_url: audioUrl,
-        transcript,
-        ai_score: finalResult.overall_band,
-        pronunciation_score: finalResult.pronunciation_score,
-        fluency_score: finalResult.fluency_score,
-        grammar_score: finalResult.grammar_score,
-        vocab_score: finalResult.lexical_score,
-        feedback: JSON.stringify(finalResult),
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
+      // ✅ CHECK EXISTING SUBMISSION (CHỈ PHẦN NÀY ĐƯỢC SỬA)
+      const submissionsRef = db.collection("speaking_question_submissions");
+      const existingSnap = await submissionsRef
+        .where("user_id", "==", userId)
+        .where("speaking_id", "==", speakingId)
+        .where("speaking_questions_id", "==", questionId)
+        .limit(1)
+        .get();
 
-      console.log("✅ Speaking question evaluation saved:", submissionRef.id);
+      let submissionRef;
+
+      if (!existingSnap.empty) {
+        // 🔁 Nếu đã tồn tại → Cập nhật lại
+        submissionRef = existingSnap.docs[0].ref;
+        await submissionRef.update({
+          audio_url: audioUrl,
+          transcript,
+          ai_score: finalResult.overall_band,
+          pronunciation_score: finalResult.pronunciation_score,
+          fluency_score: finalResult.fluency_score,
+          grammar_score: finalResult.grammar_score,
+          vocab_score: finalResult.lexical_score,
+          feedback: JSON.stringify(finalResult),
+          updated_at: new Date(),
+        });
+        console.log("🔁 Updated existing speaking question submission:", submissionRef.id);
+      } else {
+        // 🆕 Nếu chưa có → Tạo mới
+        submissionRef = submissionsRef.doc();
+        await submissionRef.set({
+          question_submission_id: submissionRef.id,
+          user_id: userId,
+          speaking_id: speakingId,
+          speaking_questions_id: questionId,
+          audio_url: audioUrl,
+          transcript,
+          ai_score: finalResult.overall_band,
+          pronunciation_score: finalResult.pronunciation_score,
+          fluency_score: finalResult.fluency_score,
+          grammar_score: finalResult.grammar_score,
+          vocab_score: finalResult.lexical_score,
+          feedback: JSON.stringify(finalResult),
+          created_at: new Date(),
+          updated_at: new Date(),
+        });
+        console.log("✅ Created new speaking question submission:", submissionRef.id);
+      }
+
       return { ...finalResult, submission_id: submissionRef.id };
     } catch (error) {
       console.error("🔥 Error evaluating speaking:", error);
@@ -177,17 +205,13 @@ export const aiSpeakingGeminiService = {
       const submissions = snapshot.docs.map((doc) => doc.data());
 
       const avgPronunciation =
-        submissions.reduce((sum, s) => sum + s.pronunciation_score, 0) /
-        submissions.length;
+        submissions.reduce((sum, s) => sum + s.pronunciation_score, 0) / submissions.length;
       const avgFluency =
-        submissions.reduce((sum, s) => sum + s.fluency_score, 0) /
-        submissions.length;
+        submissions.reduce((sum, s) => sum + s.fluency_score, 0) / submissions.length;
       const avgGrammar =
-        submissions.reduce((sum, s) => sum + s.grammar_score, 0) /
-        submissions.length;
+        submissions.reduce((sum, s) => sum + s.grammar_score, 0) / submissions.length;
       const avgVocab =
-        submissions.reduce((sum, s) => sum + s.vocab_score, 0) /
-        submissions.length;
+        submissions.reduce((sum, s) => sum + s.vocab_score, 0) / submissions.length;
 
       const overallBand =
         (avgPronunciation + avgFluency + avgGrammar + avgVocab) / 4;
@@ -202,7 +226,6 @@ export const aiSpeakingGeminiService = {
         You have completed all questions in this topic. Keep practicing to improve!
       `;
 
-      // ✅ Lưu kết quả tổng
       const submissionRef = db.collection("speaking_submissions").doc();
       await submissionRef.set({
         submission_id: submissionRef.id,
@@ -218,7 +241,6 @@ export const aiSpeakingGeminiService = {
         submitted_at: new Date(),
       });
 
-      // ✅ FIX: dùng admin.firestore.FieldValue thay vì db.FieldValue
       await db.collection("speaking_practices").doc(speakingId).update({
         attempts: admin.firestore.FieldValue.increment(1),
         updated_at: new Date(),
