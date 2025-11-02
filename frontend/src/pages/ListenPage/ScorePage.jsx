@@ -1,57 +1,73 @@
-import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { mockData } from "../ListenPage/ListenPage";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import "./ScorePage.css";
 
 const ScorePage = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // submissionId
   const navigate = useNavigate();
-  const location = useLocation();
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const test = mockData.find((t) => t.id === Number(id));
-  if (!test) return <p>Test not found!</p>;
+  useEffect(() => {
+    const fetchGrade = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:3002/api/user/listen/submit/grade/${id}`
+        );
 
-  // dap an dung
-  const correctAnswers = test.correctAnswers || {};
-  // dap an cua user
-  const userAnswers = location.state?.userAnswers || {};
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.message || "Failed to fetch grade");
+        }
 
-  let score = 0;
-  const total = Object.keys(correctAnswers).length;
-  //tinh diem
-  Object.keys(correctAnswers).forEach((key) => {
-    if (
-      userAnswers[key] &&
-      userAnswers[key].trim().toLowerCase() ===
-        correctAnswers[key].trim().toLowerCase()
-    ) {
-      score++;
-    }
-  });
+        const data = await res.json();
+        setResult(data.data);
+      } catch (err) {
+        console.error("Error fetching grade:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // feedback AI 
-  const percent = (score / total) * 100;
-  let feedback = "";
+    fetchGrade();
+  }, [id]);
 
-  if (percent >= 80) {
-    feedback = "🔥 Xuất sắc! Bạn đọc hiểu rất tốt, chỉ cần luyện thêm để đạt độ chính xác tuyệt đối.";
-  } else if (percent >= 50) {
-    feedback = "👍 Khá ổn! Bạn đã nắm được ý chính, nhưng cần tập trung cải thiện chi tiết và từ vựng.";
-  } else {
-    feedback = "⚠️ Cần cải thiện! Bạn nên luyện kỹ năng scanning & skimming để bắt ý chính nhanh hơn.";
-  }
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
+  if (!result) return <p>No result found.</p>;
+
+  const {
+    score,
+    total,
+    userAnswers,
+    correctAnswers,
+    practiceTitle,
+    aiFeedback,
+  } = result;
+  const feedbackText = aiFeedback?.feedback || "No AI feedback available";
 
   return (
     <div className="score-page-layout">
       {/* left side */}
       <div className="ai-feedback-lis">
         <h3>AI Feedback</h3>
-        <p>{feedback}</p>
+        <p>{feedbackText}</p>
+        <div className="ai-detailed-feedback">
+          {aiFeedback?.detailed_feedback &&
+            Object.keys(aiFeedback.detailed_feedback).map((key) => (
+              <div key={key}>
+                <strong>Blank {key}:</strong>{" "}
+                {aiFeedback.detailed_feedback[key]}
+              </div>
+            ))}
+        </div>
       </div>
 
       {/* right side */}
       <div className="score-container-lis">
-        <h2 className="score-title-lis">{test.title} - Result</h2>
+        <h2 className="score-title-lis">{practiceTitle} - Result</h2>
 
         <div className="score-summary-lis">
           <p>
@@ -65,9 +81,8 @@ const ScorePage = () => {
               <span className="score-num-lis">({num})</span>
               <span
                 className={`score-user-lis ${
-                  userAnswers[num] &&
-                  userAnswers[num].trim().toLowerCase() ===
-                    correctAnswers[num].trim().toLowerCase()
+                  userAnswers[num]?.trim().toLowerCase() ===
+                  correctAnswers[num]?.trim().toLowerCase()
                     ? "correct-lis"
                     : "wrong-lis"
                 }`}

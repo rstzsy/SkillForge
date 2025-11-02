@@ -1,396 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeadphones } from "@fortawesome/free-solid-svg-icons";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHeadphones,
+  faMagnifyingGlass,
+} from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import "./ListenPage.css";
-
-export const mockData = [
-  {
-    id: 1,
-    section: "Section 4",
-    title: "VOL 6 Test 6 - Crocodile",
-    type: "Gap Filling",
-    attempts: 1716,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • Type of crocodile studied: crocodiles found in salt water
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 35
-  },
-  {
-    id: 2,
-    section: "Section 3",
-    title: "VOL 6 Test 6 - Taking part",
-    type: "Multiple Choice",
-    attempts: 946,
-    img: "/assets/listpic.jpg",
-    completed: true,
-    submissionFile: null,
-    passage: `
-      • Taking part in district 1
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 25
-  },
-  {
-    id: 3,
-    section: "Section 2",
-    title: "VOL 6 Test 6 - The Map",
-    type: "Map, Diagram Label, One Answer",
-    attempts: 887,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • The Map in Ho Chi Minh city
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 20
-  },
-  {
-    id: 4,
-    section: "Section 1",
-    title: "VOL 6 Test 6 - A Hotel",
-    type: "Gap Filling",
-    attempts: 1338,
-    img: "/assets/listpic.jpg",
-    completed: true,
-    submissionFile: null,
-    passage: `
-      • Hotel in Ba Na Hill
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 15
-  },
-  {
-    id: 5,
-    section: "Section 4",
-    title: "VOL 6 Test 6 - Crocodile",
-    type: "Gap Filling",
-    attempts: 1716,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • Type of crocodile studied: crocodiles found in salt water
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 40
-  },
-  {
-    id: 6,
-    section: "Full Test",
-    title: "VOL 6 Test 6 - Taking part",
-    type: "Map, Diagram Label, Multiple Choice",
-    attempts: 946,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • Taking part behind the tree
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 30
-  },
-  {
-    id: 7,
-    section: "Section 2",
-    title: "VOL 6 Test 6 - The Map",
-    type: "Map, Diagram Label, One Answer",
-    attempts: 887,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • TThe map in Ha Noi
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 20
-  },
-  {
-    id: 8,
-    section: "Section 1",
-    title: "VOL 6 Test 6 - A Hotel",
-    type: "Gap Filling",
-    attempts: 1338,
-    img: "/assets/listpic.jpg",
-    completed: false,
-    submissionFile: null,
-    passage: `
-      • Hotel in Area
-
-      • Location of study: Northern Territory, Australia
-
-      • Significance of study: unique because it was the first time a (1) ___ had been used to track crocodiles
-
-      Previous studies:
-      • Done using (2) ___
-      • Stressful method, also unreliable due to loss of the (3) ___
-
-      Reasons for study:
-      • The management of crocodiles by the government may not be effective
-
-      Research questions:
-      • How far can crocodiles travel?
-      • How easily can crocodiles (4) ___ ?
-
-      Challenge:
-      • Crocodiles are difficult to (5) ___ in the wild
-    `,
-    // blank de user nhap
-    blanks: [
-      { id: 1, answer: "" },
-      { id: 2, answer: "" },
-      { id: 3, answer: "" },
-      { id: 4, answer: "" },
-      { id: 5, answer: "" }
-    ],
-    correctAnswers: {
-      1: "satellite transmitter",
-      2: "tags",
-      3: "signal",
-      4: "adapt",
-      5: "observe"
-    },
-    audio: "/audio/test1.mp3",
-    timeLimit: 10
-  },
-];
 
 const sectionColors = {
   "Section 1": "#d2b5de",
@@ -401,10 +16,36 @@ const sectionColors = {
 };
 
 const ListeningPage = () => {
+  const [listeningData, setListeningData] = useState([]);
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+
+  // 🔹 Lấy danh sách bài nghe từ Firestore qua backend
+  useEffect(() => {
+    const fetchListening = async () => {
+      try {
+        const res = await fetch("http://localhost:3002/api/user/listening");
+        const result = await res.json();
+        setListeningData(result.data || []);
+      } catch (err) {
+        console.error("Error fetching listening:", err);
+      }
+    };
+    fetchListening();
+  }, []);
+
+  // filter
+  const filteredData = listeningData.filter((item) => {
+    const sectionMatch = selectedSection
+      ? item.section === selectedSection
+      : true;
+    const searchMatch = item.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    return sectionMatch && searchMatch;
+  });
 
   const sections = [
     "Section 1",
@@ -414,21 +55,14 @@ const ListeningPage = () => {
     "Full Test",
   ];
 
-  const filteredData = mockData.filter(item => {
-    const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const sectionMatch = selectedSection ? item.section === selectedSection : true;
-    const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    return statusMatch && sectionMatch && searchMatch;
-  });
-
   return (
     <div className="listening-page">
       {/* Sidebar */}
       <aside className="sidebar-lis">
         <h3>
-          <FontAwesomeIcon icon={faHeadphones} size="x" />Listening Practise
+          <FontAwesomeIcon icon={faHeadphones} /> Listening Practice
         </h3>
-        <div className="filter-group-lis active">
+        <div className="filter-group-lis">
           {sections.map((sec) => (
             <label key={sec}>
               <input
@@ -454,7 +88,6 @@ const ListeningPage = () => {
 
       {/* Main content */}
       <main className="content-lis">
-        {/* Tabs + Search */}
         <div className="tabs-search-lis">
           <div className="tabs-lis">
             <button
@@ -472,7 +105,7 @@ const ListeningPage = () => {
           </div>
 
           <div className="search-lis">
-            <FontAwesomeIcon icon={faMagnifyingGlass} size="x" color="#dc9f36" />
+            <FontAwesomeIcon icon={faMagnifyingGlass} color="#dc9f36" />
             <input
               type="text"
               placeholder="Search..."
@@ -482,15 +115,15 @@ const ListeningPage = () => {
           </div>
         </div>
 
+        {/* Cards */}
         <div className="cards-lis">
           {filteredData.map((item) => (
             <div
-              className="card-lis"
               key={item.id}
-              onClick={() => navigate(`/listen/${item.id}`)} // chuyen trang lam bai
-              style={{ cursor: "pointer" }}
+              className="card-lis"
+              onClick={() => navigate(`/listen/${item.id}`)}
             >
-              <img src={item.img} alt={item.title} />
+              <img src={item.image_url} alt={item.title} />
               <div className="card-info-lis">
                 <span
                   className="section-lis"
@@ -501,9 +134,6 @@ const ListeningPage = () => {
                 <h4>{item.title}</h4>
                 <p className="type-lis">{item.type}</p>
                 <p className="attempts-lis">{item.attempts} attempts</p>
-                {item.completed && (
-                  <span className="completed-label">Completed</span>
-                )}
               </div>
             </div>
           ))}
