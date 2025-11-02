@@ -1,59 +1,82 @@
-import React from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { mockData } from "../ReadPage/ReadPage";
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./ScoreReadPage.css";
 
 const ScoreReadPage = () => {
-  const { id } = useParams();
+  const { id: submissionId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const test = mockData.find((t) => t.id === Number(id));
-  if (!test) return <p>Test not found!</p>;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
 
-  // dap an dung
-  const correctAnswers = test.correctAnswers || {};
+  // score and ai feedback
+  useEffect(() => {
+    const fetchScore = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `http://localhost:3002/api/user/read/submit/grade/${submissionId}`
+        );
 
-  // dap an user
-  const userAnswers = location.state?.userAnswers || {};
+        const result = res.data.data;
+        setData(result);
+      } catch (err) {
+        console.error("Error fetching score:", err);
+        setError("Failed to load score.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // tinh diem
-  let score = 0;
-  const total = Object.keys(correctAnswers).length;
+    fetchScore();
+  }, [submissionId]);
 
-  Object.keys(correctAnswers).forEach((key) => {
-    if (
-      userAnswers[key] &&
-      userAnswers[key].trim().toLowerCase() ===
-        correctAnswers[key].trim().toLowerCase()
-    ) {
-      score++;
-    }
-  });
+  if (loading) return <p>Loading score...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!data) return <p>No data found.</p>;
 
-  // feedback AI 
-  const percent = (score / total) * 100;
-  let feedback = "";
-
-  if (percent >= 80) {
-    feedback = "🔥 Xuất sắc! Bạn đọc hiểu rất tốt, chỉ cần luyện thêm để đạt độ chính xác tuyệt đối.";
-  } else if (percent >= 50) {
-    feedback = "👍 Khá ổn! Bạn đã nắm được ý chính, nhưng cần tập trung cải thiện chi tiết và từ vựng.";
-  } else {
-    feedback = "⚠️ Cần cải thiện! Bạn nên luyện kỹ năng scanning & skimming để bắt ý chính nhanh hơn.";
-  }
+  const {
+    practiceTitle,
+    score,
+    total,
+    userAnswers,
+    correctAnswers,
+    aiFeedback,
+  } = data;
 
   return (
     <div className="score-page-layout-read">
-      {/* comment AI */}
+      {/* AI feedback */}
       <div className="ai-feedback-read">
         <h3>AI Feedback</h3>
-        <p>{feedback}</p>
+        <p>{aiFeedback?.feedback || "No feedback available"}</p>
+        {aiFeedback?.detailed_feedback && (
+          <div>
+            <h4>Detailed Feedback:</h4>
+            {Object.keys(aiFeedback.detailed_feedback).map((num) => (
+              <p key={num}>
+                ({num}): {aiFeedback.detailed_feedback[num]}
+              </p>
+            ))}
+          </div>
+        )}
+        {aiFeedback?.suggestions?.length > 0 && (
+          <div>
+            <h4>Suggestions:</h4>
+            <ul>
+              {aiFeedback.suggestions.map((s, idx) => (
+                <li key={idx}>{s}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
 
-      {/* result */}
+      {/* Result */}
       <div className="score-container-read">
-        <h2 className="score-title-read">{test.title} - Result</h2>
+        <h2 className="score-title-read">{practiceTitle} - Result</h2>
 
         <div className="score-summary-read">
           <p>

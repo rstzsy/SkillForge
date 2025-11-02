@@ -10,7 +10,7 @@ const router = express.Router();
 
 
 router.post("/", submitUserListening);
-router.get("/listening/:userId", getUserSubmissionsController);
+router.get("/listening/:user_id", getUserSubmissionsController);
 router.get("/listening/detail/:id", getSubmissionDetailController);
 router.get("/grade/:submissionId", gradeSubmissionController);
 
