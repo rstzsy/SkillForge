@@ -188,4 +188,194 @@
 }
 
 
+/* Thêm vào file SpeakDetail.css hiện tại */
+
+/* Câu hỏi đã ghi âm - màu xanh */
+.question-item.recorded {
+  background-color: #d4edda;
+  font-weight: 600;
+}
+
+.question-item.recorded:hover {
+  background-color: #c3e6cb;
+}
+
+/* AI Feedback Container */
+.ai-feedback {
+  margin-top: 20px;
+  padding: 20px;
+  color: #000000;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+
+  /* ✅ Cho phép cuộn khi nội dung dài */
+  max-height: 450px;       /* bạn có thể điều chỉnh theo giao diện */
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.ai-feedback h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-feedback .scores {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin: 15px 0;
+}
+
+.ai-feedback .scores span {
+  background: rgba(236, 163, 187, 0.2);
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.ai-feedback .feedback-text {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 15px;
+  border-radius: 8px;
+  line-height: 1.6;
+  margin: 15px 0;
+}
+
+/* Errors */
+.errors {
+  background: rgba(255, 59, 48, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.errors h4 {
+  margin-top: 0;
+  color: #000000;
+}
+
+.error-item {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.error-item strong {
+  color: #ffd700;
+}
+
+.error-item p {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Suggestions */
+.suggestions {
+  background: rgba(52, 199, 89, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.suggestions h4 {
+  margin-top: 0;
+  color: #000000;
+}
+
+.suggestions ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.suggestions li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* Finalize Button */
+.finalize-btn {
+  width: 100%;
+  padding: 15px;
+  margin-top: 20px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.finalize-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+}
+
+/* Overall Score Display */
+.overall-score {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.overall-score h4 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.overall-score p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+/* Recording States */
+.record-btn.evaluating {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.record-btn.stop {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* Playback Audio */
+.playback {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.playback h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.playback audio {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ai-feedback::-webkit-scrollbar {
+  width: 8px;
+}
+.ai-feedback::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 8px;
+}
+.ai-feedback::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+
   
