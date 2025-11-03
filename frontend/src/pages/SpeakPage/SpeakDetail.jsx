@@ -398,6 +398,14 @@ const SpeakDetail = () => {
           </button>
         </div>
 
+        {/* 🔊 Phát lại audio nằm trên AI Feedback */}
+        {audioURL && (
+          <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
+            <h4>🔊 Listen to your answer:</h4>
+            <audio src={audioURL} controls />
+          </div>
+        )}
+
         {/* AI Feedback */}
         {showFeedback && currentEvaluation && (
           <div className="ai-feedback">
@@ -476,13 +484,6 @@ const SpeakDetail = () => {
         )}
       </div>
 
-      {/* Phát lại audio */}
-      {audioURL && (
-        <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
-          <h4>🔊 Listen to your answer:</h4>
-          <audio src={audioURL} controls />
-        </div>
-      )}
     </div>
   );
 };
