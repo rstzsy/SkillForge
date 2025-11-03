@@ -1,26 +1,36 @@
 import { db } from "../config/firebase.js";
 import { Wishlist } from "../models/wishlistModel.js";
 
-// Mapping type => collection
 const typeToCollection = {
   listening: "listening_practices",
   reading: "reading_practices",
+  speaking: "speaking_practices",
+  writing: "writing_practices",
 };
 
-// add to wishlist
 export const addToWishlist = async (data) => {
-  const wishlistItem = new Wishlist(data);
+  const { user_id, practice_id, type } = data;
 
-  // luu practice_id = skill_id 
+  const existing = await db
+    .collection(Wishlist.collectionName)
+    .where("user_id", "==", user_id)
+    .where("practice_id", "==", practice_id)
+    .where("type", "==", type)
+    .get();
+
+  if (!existing.empty) {
+    return { duplicate: true };
+  }
+
+  const wishlistItem = new Wishlist(data);
   const docRef = await db.collection(Wishlist.collectionName).add({
     ...wishlistItem,
     practice_id: wishlistItem.practice_id || wishlistItem.speaking_practices_id,
   });
 
-  return { id: docRef.id, ...wishlistItem };
+  return { id: docRef.id, ...wishlistItem, duplicate: false };
 };
 
-// get by user
 export const getWishlistByUser = async (userId) => {
   const snapshot = await db
     .collection(Wishlist.collectionName)
@@ -36,42 +46,23 @@ export const getWishlistByUser = async (userId) => {
     wishlistDocs.map(async (item) => {
       const typeKey = item.type?.trim().toLowerCase();
 
-      // Listening & Reading
       if (typeKey === "listening" || typeKey === "reading") {
         const collection = typeToCollection[typeKey];
-        const practiceSnap = await db
-          .collection(collection)
-          .doc(item.practice_id)
-          .get();
+        const practiceSnap = await db.collection(collection).doc(item.practice_id).get();
         const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
         return { ...item, ...practiceData };
       }
 
-      // Writing
       if (typeKey === "writing") {
-        // Trong writing, document ID = wishlist.practice_id
-        const practiceSnap = await db
-          .collection("writing_practices")
-          .doc(item.practice_id)
-          .get();
+        const practiceSnap = await db.collection("writing_practices").doc(item.practice_id).get();
         const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
         return { ...item, ...practiceData };
       }
 
-      // Speaking
       if (typeKey === "speaking") {
-        const snap = await db.collection("speaking_practices").get();
-        const allSpeaking = snap.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-
-        const practiceData =
-          allSpeaking.find(
-            (sp) => sp.speaking_practices_id === item.practice_id
-          ) || {};
-
-        return { ...item, ...practiceData };
+        const practiceSnap = await db.collection("speaking_practices").doc(item.practice_id).get();
+        const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
+        return { ...item, ...practiceData, section: "Speaking", title: practiceData.topic || "Untitled Speaking" };
       }
 
       return { ...item };
@@ -81,7 +72,7 @@ export const getWishlistByUser = async (userId) => {
   return wishlistWithPractice;
 };
 
-// delete in wishlit
+// delete
 export const removeWishlistItem = async (id) => {
   await db.collection(Wishlist.collectionName).doc(id).delete();
   return true;

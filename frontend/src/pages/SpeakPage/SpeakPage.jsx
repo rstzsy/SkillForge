@@ -30,14 +30,12 @@ const SpeakPage = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
-  // 🔹 Lấy dữ liệu từ Firestore qua API
   useEffect(() => {
     const fetchSpeaking = async () => {
       try {
         const res = await fetch("http://localhost:3002/api/speaking");
         const data = await res.json();
 
-        // Định dạng lại dữ liệu
         const formatted = data.map((item) => ({
           id: item.speaking_practices_id,
           section: item.section,
@@ -45,7 +43,7 @@ const SpeakPage = () => {
           type: item.type || "General",
           attempts: item.attempts || 0,
           img: "/assets/listpic.jpg",
-          completed: false, // ✅ tạm thời luôn là chưa hoàn thành
+          completed: false, 
           timeLimit: item.time_limit || 2,
         }));
 
@@ -59,7 +57,6 @@ const SpeakPage = () => {
     fetchSpeaking();
   }, []);
 
-  // 🔹 Lọc theo section & search term
   const filteredData = speakData.filter((item) => {
     const sectionMatch = selectedSection
       ? item.section === selectedSection
@@ -70,21 +67,20 @@ const SpeakPage = () => {
     return sectionMatch && searchMatch;
   });
 
-  // wishlist
+ 
   const handleAddToWishlist = async (item) => {
     try {
-      const exists = wishlist.some((w) => w.id === item.id);
-      if (exists) {
-        setMessage("Task này đã có trong wishlist!");
-        setTimeout(() => setMessage(""), 2000);
-        return;
-      }
-
-      await axios.post("http://localhost:3002/api/user/wishlist", {
+      const response = await axios.post("http://localhost:3002/api/user/wishlist", {
         user_id: userId,
         practice_id: item.id,
         type: "speaking",
       });
+
+      if (response.data.duplicate) {
+        setMessage("Task này đã có trong wishlist!");
+        setTimeout(() => setMessage(""), 2000);
+        return;
+      }
 
       setWishlist([...wishlist, item]);
       setMessage("Đã thêm vào wishlist thành công!");
@@ -95,6 +91,7 @@ const SpeakPage = () => {
       setTimeout(() => setMessage(""), 2000);
     }
   };
+
 
   if (loading) return <p>Loading Speaking Data...</p>;
 

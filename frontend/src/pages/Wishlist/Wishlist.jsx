@@ -50,8 +50,8 @@ const Wishlist = () => {
 
   const filteredData = wishlist.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const searchMatch = item.title
-      ?.toLowerCase()
+    const searchMatch =
+      (item.title?.toLowerCase() || item.topic?.toLowerCase() || "")
       .includes(searchTerm.toLowerCase());
     return statusMatch && searchMatch;
   });
@@ -122,7 +122,7 @@ const Wishlist = () => {
                   >
                     {item.section || "General"}
                   </span>
-                  <h4>{item.title}</h4>
+                  <h4>{item.title  || item.topic}</h4>
                   <p className="type-wishlist">{item.type}</p>
                   <p className="attempts-wishlist">
                     {item.attempts || 0} learners

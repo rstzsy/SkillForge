@@ -9,22 +9,26 @@ export const addToWishlistController = async (req, res) => {
     const { user_id, practice_id, type } = req.body;
 
     if (!user_id || !practice_id || !type) {
-      return res
-        .status(400)
-        .json({ message: "Missing required fields: user_id, practice_id, type" });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     const result = await addToWishlist({ user_id, practice_id, type });
 
-    res.status(201).json({
+    if (result.duplicate) {
+      return res.status(200).json({ message: "Item already in wishlist", duplicate: true });
+    }
+
+    return res.status(201).json({
       message: "Added to wishlist successfully",
       wishlist: result,
+      duplicate: false,
     });
   } catch (error) {
     console.error("Error adding to wishlist:", error);
     res.status(500).json({ message: "Failed to add to wishlist", error: error.message });
   }
 };
+
 
 export const getWishlistByUserController = async (req, res) => {
   try {
