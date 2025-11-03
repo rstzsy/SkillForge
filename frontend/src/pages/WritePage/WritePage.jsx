@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPenNib, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faPenNib, faMagnifyingGlass, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/config"; // đường dẫn tới file firebase.js
+import axios from "axios"
 import "./WritePage.css";
 
 const sectionColors = {
@@ -17,15 +18,22 @@ const WritePage = () => {
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [writingData, setWritingData] = useState([]); // 🔹 dữ liệu từ Firebase
+  const [wishlist, setWishlist] = useState([]);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const sections = ["Task 1", "Task 2", "Full Test"];
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.id;
 
   // 🔹 Load dữ liệu từ Firestore
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "writing_practices"));
+        const querySnapshot = await getDocs(
+          collection(db, "writing_practices")
+        );
         const items = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
@@ -41,10 +49,40 @@ const WritePage = () => {
   // 🔹 Bộ lọc dữ liệu
   const filteredData = writingData.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const sectionMatch = selectedSection ? item.section === selectedSection : true;
-    const searchMatch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const sectionMatch = selectedSection
+      ? item.section === selectedSection
+      : true;
+    const searchMatch = item.title
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return statusMatch && sectionMatch && searchMatch;
   });
+
+  // wishlist
+  const handleAddToWishlist = async (item) => {
+    try {
+      const exists = wishlist.some((w) => w.id === item.id);
+      if (exists) {
+        setMessage("Task này đã có trong wishlist!");
+        setTimeout(() => setMessage(""), 2000);
+        return;
+      }
+
+      await axios.post("http://localhost:3002/api/user/wishlist", {
+        user_id: userId,
+        practice_id: item.id,
+        type: "writing",
+      });
+
+      setWishlist([...wishlist, item]);
+      setMessage("Đã thêm vào wishlist thành công!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      console.error("Lỗi khi thêm vào wishlist:", err);
+      setMessage("Không thể thêm vào wishlist.");
+      setTimeout(() => setMessage(""), 2000);
+    }
+  };
 
   return (
     <div className="writing-page">
@@ -94,7 +132,11 @@ const WritePage = () => {
           </div>
 
           <div className="search-write">
-            <FontAwesomeIcon icon={faMagnifyingGlass} size="x" color="#dc9f36" />
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              size="x"
+              color="#dc9f36"
+            />
             <input
               type="text"
               placeholder="Search Writing..."
@@ -111,8 +153,19 @@ const WritePage = () => {
                 className="card-write"
                 key={item.id}
                 onClick={() => navigate(`/write/${item.id}`)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", position: "relative" }}
               >
+                {/* Icon trái tim */}
+                <div
+                  className="wishlist-heart"
+                  onClick={(e) => {
+                    e.stopPropagation(); // tranh click vao card
+                    handleAddToWishlist(item);
+                  }}
+                  title="Add to wishlist"
+                >
+                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
+                </div>
                 <img src={"/assets/listpic.jpg"} alt={item.title} />
                 <div className="card-info-write">
                   <span
@@ -123,8 +176,12 @@ const WritePage = () => {
                   </span>
                   <h4>{item.title}</h4>
                   <p className="type-write">{item.type}</p>
-                  <p className="attempts-write">{item.attempts || 0} attempts</p>
-                  {item.completed && <span className="completed-label">Completed</span>}
+                  <p className="attempts-write">
+                    {item.attempts || 0} attempts
+                  </p>
+                  {item.completed && (
+                    <span className="completed-label">Completed</span>
+                  )}
                 </div>
               </div>
             ))
@@ -132,6 +189,7 @@ const WritePage = () => {
             <p>No tasks found.</p>
           )}
         </div>
+        {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>
   );

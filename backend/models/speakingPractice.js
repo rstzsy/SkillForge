@@ -1,4 +1,6 @@
 export class SpeakingPractice {
+  static collectionName = "speaking_practices";
+
   constructor({
     speaking_practices_id = null,
     section,

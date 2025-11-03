@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeadphones, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHeadphones,
+  faMagnifyingGlass,
+  faHeart,
+} from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ListenPage.css";
@@ -21,11 +25,20 @@ const ListeningPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [confirmItem, setConfirmItem] = useState(null);
+  const [wishlist, setWishlist] = useState([]);
+  const [message, setMessage] = useState("");
 
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
-  const sections = ["Section 1", "Section 2", "Section 3", "Section 4", "Full Test"];
+  const sections = [
+    "Section 1",
+    "Section 2",
+    "Section 3",
+    "Section 4",
+    "Full Test",
+  ];
 
   useEffect(() => {
     if (!userId) {
@@ -39,7 +52,9 @@ const ListeningPage = () => {
         setLoading(true);
 
         // get all tasks
-        const resListening = await axios.get("http://localhost:3002/api/user/listening");
+        const resListening = await axios.get(
+          "http://localhost:3002/api/user/listening"
+        );
         const listenings = resListening.data.data || [];
 
         // get all submission user
@@ -74,10 +89,43 @@ const ListeningPage = () => {
 
   const filteredData = listeningData.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const sectionMatch = selectedSection ? item.section === selectedSection : true;
-    const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const sectionMatch = selectedSection
+      ? item.section === selectedSection
+      : true;
+    const searchMatch = item.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return statusMatch && sectionMatch && searchMatch;
   });
+
+  // wishlist
+  const handleAddToWishlist = async (item) => {
+    try {
+      // neu da co trong wishlist thi khong can them
+      const exists = wishlist.some((w) => w.id === item.id);
+      if (exists) {
+        setMessage("Task này đã có trong wishlist!");
+        setTimeout(() => setMessage(""), 2000);
+        return;
+      }
+
+      // call api
+      await axios.post("http://localhost:3002/api/user/wishlist", {
+        user_id: userId,
+        practice_id: item.id,
+        type: "listening",
+      });
+
+      // cap nhap wishlist
+      setWishlist([...wishlist, item]);
+      setMessage("Đã thêm vào wishlist thành công!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      console.error("Lỗi khi thêm vào wishlist:", err);
+      setMessage("Không thể thêm vào wishlist.");
+      setTimeout(() => setMessage(""), 2000);
+    }
+  };
 
   return (
     <div className="listening-page">
@@ -151,13 +199,30 @@ const ListeningPage = () => {
                 key={item.id}
                 className="card-lis"
                 onClick={() => navigate(`/listen/${item.id}`)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", position: "relative" }} 
               >
-                <img src={item.image_url || "/assets/listpic.jpg"} alt={item.title} />
+                {/* Icon trái tim */}
+                <div
+                  className="wishlist-heart"
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleAddToWishlist(item);
+                  }}
+                  title="Add to wishlist"
+                >
+                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
+                </div>
+
+                <img
+                  src={item.image_url || "/assets/listpic.jpg"}
+                  alt={item.title}
+                />
                 <div className="card-info-lis">
                   <span
                     className="section-lis"
-                    style={{ backgroundColor: sectionColors[item.section] || "#ddd" }}
+                    style={{
+                      backgroundColor: sectionColors[item.section] || "#ddd",
+                    }}
                   >
                     {item.section}
                   </span>
@@ -165,9 +230,7 @@ const ListeningPage = () => {
                   <p className="type-lis">{item.type}</p>
                   <p className="attempts-lis">{item.attempts || 0} attempts</p>
                   {item.completed && item.submitted_at && (
-                    <span className="completed-label">
-                      Completed
-                    </span>
+                    <span className="completed-label">Completed</span>
                   )}
                 </div>
               </div>
@@ -175,6 +238,7 @@ const ListeningPage = () => {
             {filteredData.length === 0 && <p>No tasks found.</p>}
           </div>
         )}
+        {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>
   );
