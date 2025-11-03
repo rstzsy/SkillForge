@@ -1,55 +1,51 @@
 import { db } from "../config/firebase.js";
-import { getListeningPracticeById } from "./listeningService.js";
+import { getReadingPracticeById } from "./readingService.js";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const COLLECTION_NAME = "listening_submissions";
+const COLLECTION_NAME = "reading_submissions";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-// saving user tesst
-export const submitListeningPractice = async (submissionData) => {
+// save submission task in firestore
+export const submitReadingPractice = async (submissionData) => {
   const {
     user_id,
     practice_id,
-    user_answer,
-    correct_answer = "",
+    user_answers,
     score = 0,
-    duration_seconds = 0,
-    feedback = "",
+    time_spent = 0,
+    attempt_number = 1,
   } = submissionData;
 
-  // check data
-  if (!user_id || !practice_id || !user_answer) {
+  if (!user_id || !practice_id || !user_answers) {
     throw new Error(
-      "Missing required fields: user_id, practice_id, user_answer"
+      "Missing required fields: user_id, practice_id, user_answers"
     );
   }
 
   try {
-    // firestore khong chap nhan undefine
     const docRef = await db.collection(COLLECTION_NAME).add({
       user_id: String(user_id),
       practice_id: String(practice_id),
-      user_answer: JSON.stringify(user_answer), 
-      correct_answer: String(correct_answer),
+      user_answers: JSON.stringify(user_answers),
       score: Number(score),
-      duration_seconds: Number(duration_seconds),
-      status: "submitted",
+      time_spent: Number(time_spent),
+      attempt_number: Number(attempt_number),
       submitted_at: new Date(),
-      feedback: String(feedback),
+      updated_at: new Date(),
     });
 
     return { id: docRef.id, ...submissionData };
   } catch (err) {
-    console.error("Error saving submission:", err);
+    console.error("Error saving reading submission:", err);
     throw new Error(err.message);
   }
 };
 
-// submission list
-export const getUserSubmissions = async (user_id) => {
+// get all user submission
+export const getUserReadingSubmissions = async (user_id) => {
   if (!user_id) throw new Error("Missing user_id");
   try {
     const snapshot = await db
@@ -57,44 +53,43 @@ export const getUserSubmissions = async (user_id) => {
       .where("user_id", "==", String(user_id))
       .get();
 
-    const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return data;
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
-    console.error("Error fetching user submissions:", err);
+    console.error("Error fetching reading submissions:", err);
     throw new Error(err.message);
   }
 };
 
-// submission by id
-export const getSubmissionById = async (id) => {
+// get submission by id
+export const getReadingSubmissionById = async (id) => {
   if (!id) throw new Error("Missing submission ID");
   try {
-    const doc = await db.collection(COLLECTION_NAME).doc(id).get();
-    if (!doc.exists) throw new Error("Submission not found");
-    return { id: doc.id, ...doc.data() };
+    const doc = await db.collection("reading_submissions").doc(id).get();
+    if (!doc.exists) throw new Error("Reading submission not found");
+    return { submission_id: doc.id, ...doc.data() };
   } catch (err) {
-    console.error("Error fetching submission:", err);
+    console.error("Error fetching reading submission:", err);
     throw new Error(err.message);
   }
 };
 
-// cham diem submission theo id
-export const gradeListeningSubmission = async (submissionId) => {
+// score and ai feedback
+export const gradeReadingSubmission = async (submissionId) => {
   if (!submissionId) throw new Error("Missing submission ID");
 
-  // get submission id
-  const submission = await getSubmissionById(submissionId);
+  // get submission
+  const submission = await getReadingSubmissionById(submissionId);
 
-  // Parse user_answer
+  // Parse user_answers
   let userAnswers = {};
   try {
-    userAnswers = JSON.parse(submission.user_answer || "{}");
+    userAnswers = JSON.parse(submission.user_answers || "{}");
   } catch (err) {
-    console.warn("Cannot parse user_answer:", err);
+    console.warn("Cannot parse user_answers:", err);
   }
 
-  // get practice to get correct answer
-  const practice = await getListeningPracticeById(submission.practice_id);
+  // get reading practice to compare answer
+  const practice = await getReadingPracticeById(submission.practice_id);
   const correctAnswerString = practice.correct_answer || "";
 
   const correctAnswers = {};
@@ -102,7 +97,7 @@ export const gradeListeningSubmission = async (submissionId) => {
     correctAnswers[index + 1] = ans.trim();
   });
 
-  // tinh diem
+  // score
   const total = Object.keys(correctAnswers).length;
   let score = 0;
   Object.keys(correctAnswers).forEach((key) => {
@@ -116,33 +111,34 @@ export const gradeListeningSubmission = async (submissionId) => {
   });
   const percent = total > 0 ? (score / total) * 100 : 0;
 
-  await db.collection("listening_submissions").doc(submissionId).update({
+  // luu diem vao firestore
+  await db.collection("reading_submissions").doc(submissionId).update({
     score,
     updated_at: new Date(),
   });
 
-  // call api gemini to get feedback about score
+  // Sinh feedback AI
   let aiFeedback = {};
   try {
     const prompt = `
-Bạn là giáo viên tiếng Anh chuyên về Listening. Hãy phân tích bài làm của học viên một cách chi tiết.
+Bạn là giáo viên tiếng Anh chuyên về Reading. Hãy phân tích bài làm đọc hiểu của học viên chi tiết.
 
 User Answers: ${JSON.stringify(userAnswers)}
 Correct Answers: ${JSON.stringify(correctAnswers)}
 
 Yêu cầu:
 - Đánh giá từng câu trả lời đúng/sai
-- Phân tích chi tiết từng blank
+- Phân tích lý do sai (ví dụ do từ vựng, ngữ pháp, hiểu sai đoạn)
 - Đưa ra các gợi ý cải thiện
 - Phản hồi bắt buộc ở **JSON format** như sau:
 {
   "feedback": "Tóm tắt nhận xét 2-3 câu",
   "detailed_feedback": {
-    "1": "Nhận xét blank 1",
-    "2": "Nhận xét blank 2"
+    "1": "Nhận xét câu 1",
+    "2": "Nhận xét câu 2"
   },
   "suggestions": [
-    "1–3 gợi ý ngắn gọn cải thiện kỹ năng listening"
+    "1–3 gợi ý ngắn gọn cải thiện kỹ năng reading"
   ]
 }
 `;
@@ -159,7 +155,6 @@ Yêu cầu:
 
     if (text) {
       try {
-        // Parse JSON
         const match = text.match(/\{[\s\S]*\}/);
         aiFeedback = match ? JSON.parse(match[0]) : null;
       } catch (err) {
@@ -171,30 +166,30 @@ Yêu cầu:
     if (!aiFeedback) {
       aiFeedback = {
         feedback:
-          "Your listening is partially correct. Focus on keywords and vocabulary.",
+          "Your reading is partially correct. Focus on comprehension and inference.",
         detailed_feedback: {},
         suggestions: [
-          "Listen carefully to keywords.",
-          "Practice with similar exercises.",
-          "Review vocabulary for common topics.",
+          "Practice identifying main ideas.",
+          "Improve vocabulary comprehension.",
+          "Read articles and summarize key points.",
         ],
       };
     }
   } catch (err) {
-    console.error("Error fetching AI feedback:", err);
+    console.error("Error generating AI feedback:", err);
     aiFeedback = {
       feedback:
-        "Your listening is partially correct. Focus on keywords and vocabulary.",
+        "Your reading is partially correct. Focus on comprehension and inference.",
       detailed_feedback: {},
       suggestions: [
-        "Listen carefully to keywords.",
-        "Practice with similar exercises.",
-        "Review vocabulary for common topics.",
+        "Practice identifying main ideas.",
+        "Improve vocabulary comprehension.",
+        "Read articles and summarize key points.",
       ],
     };
   }
 
-  // Return result
+  // return result
   return {
     submissionId,
     score,

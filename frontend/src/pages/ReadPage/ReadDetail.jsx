@@ -1,18 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate  } from "react-router-dom";
-import { mockData } from "../ReadPage/ReadPage";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "./ReadDetail.css";
 
 const ReadDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const test = mockData.find((t) => t.id === Number(id));
 
-  // State
+  const [test, setTest] = useState(null);
   const [answers, setAnswers] = useState({});
-  const initialTime = test?.timeLimit ? test.timeLimit * 60 : 0; // thoi gian tinh bang giay
-  const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Fetch reading detail from backend
+  useEffect(() => {
+    const fetchReading = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `http://localhost:3002/api/user/reading/${id}`
+        );
+        const data = res.data.data;
+
+        if (!data) {
+          setError("Reading not found");
+          return;
+        }
+
+        setTest(data);
+        setTimeLeft((data.time_limit || 0) * 60); 
+      } catch (err) {
+        console.error("Error fetching reading detail:", err);
+        setError("Failed to load reading detail.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReading();
+  }, [id]);
 
   // Countdown Timer
   useEffect(() => {
@@ -33,25 +61,25 @@ const ReadDetail = () => {
     return () => clearInterval(timer);
   }, [test, timeLeft]);
 
-  if (!test) return <p>Test not found!</p>;
-
-  // Handle input change
+  // Handle answer input
   const handleChange = (blankId, value) => {
     setAnswers((prev) => ({ ...prev, [blankId]: value }));
   };
 
-  // Render passage with inline inputs
+  // Render passage inline
   const renderPassageInline = () => {
+    if (!test?.content_text) return null;
+
     const regex = /\((\d+)\) ___/g;
     const parts = [];
     let lastIndex = 0;
     let match;
 
-    while ((match = regex.exec(test.passage)) !== null) {
+    while ((match = regex.exec(test.content_text)) !== null) {
       const index = match.index;
       const blankId = Number(match[1]);
 
-      parts.push(test.passage.slice(lastIndex, index));
+      parts.push(test.content_text.slice(lastIndex, index));
 
       parts.push(
         <span key={`blank-${blankId}`} className="read-detail-blank">
@@ -67,59 +95,120 @@ const ReadDetail = () => {
       lastIndex = index + match[0].length;
     }
 
-    parts.push(test.passage.slice(lastIndex));
+    parts.push(test.content_text.slice(lastIndex));
 
     return parts;
   };
 
+  //  Handle submit
+  const handleSubmit = async () => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser?.id) {
+      alert("User not found!");
+      return;
+    }
 
-  // Handle submit
-  const handleSubmit = () => {
-    console.log("User answers:", answers);
-    setShowModal(true);
+    if (!test || !test.id) {
+      alert("Test data not loaded yet!");
+      return;
+    }
+
+    const user_id = storedUser.id;
+    const practice_id = test.id;
+    const time_spent = test.time_limit
+      ? Math.floor((test.time_limit * 60 - timeLeft) / 60)
+      : 0; // thoi gian lam bai tinh bang phut
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3002/api/user/read/submit",
+        {
+          user_id,
+          practice_id,
+          user_answers: answers,
+          time_spent,
+        }
+      );
+
+      const data = res.data;
+
+      if (!res.status || res.status !== 200) {
+        throw new Error(
+          data.message || "Network error while submitting your test."
+        );
+      }
+
+      alert("Submission saved successfully!");
+      setShowModal(true);
+
+      // save submissionId
+      const submissionId = res.data.data.id;
+      console.log("Firestore doc ID:", submissionId);
+
+      // navigate to score page
+      navigate(`/score/read/${submissionId}`, { state: { userAnswers: answers } });
+    } catch (err) {
+      console.error("Error submitting test:", err);
+      alert("Error submitting test. See console.");
+    }
   };
 
-  // Format time MM:SS
+  // Format MM:SS
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  if (loading) return <p>Loading reading...</p>;
+  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (!test) return <p>Test not found!</p>;
+
   return (
     <div className="read-detail-container">
       <h2 className="read-detail-title">{test.title}</h2>
 
       <div className="read-detail-main">
+        {/* LEFT: full passage */}
         <div className="read-detail-left">
-            <h3>Reading Passage</h3>
-            <div className="read-detail-full-passage">
-                {test.passageText.split("\n").map((line, index) => {
-                    const trimmed = line.trim();
-                    return trimmed ? <p key={index}>{trimmed}</p> : null;
-                })}
-            </div>
+          <h3>Reading Passage</h3>
+          <div className="read-detail-full-passage">
+            {test.content
+              ?.split(/\\n|\n/g)
+              .filter((line) => line.trim())
+              .map((line, index) => (
+                <p key={index}>{line}</p>
+              ))}
+          </div>
         </div>
 
-        {test.img && (
-            <div className="read-detail-right">
+        {/* RIGHT: inline answer passage */}
+        {test.image_url && (
+          <div className="read-detail-right">
             <div className="read-detail-right-inner">
-                <div className="read-detail-passage">{renderPassageInline()}</div>
+              <div className="read-detail-passage">{renderPassageInline()}</div>
             </div>
-            </div>
+          </div>
         )}
-        </div>
+      </div>
 
-        {/* Timer + Submit*/}
-        <div className="read-detail-bottom-controls" style={{ marginTop: "20px", display: "flex", gap: "10px", alignItems: "center" }}>
-            <div className="read-detail-timer">
-                <strong>{formatTime(timeLeft)}</strong>
-            </div>
-            <button className="read-detail-submit" onClick={handleSubmit}>
-                Submit
-            </button>
+      {/* Bottom controls */}
+      <div
+        className="read-detail-bottom-controls"
+        style={{
+          marginTop: "20px",
+          display: "flex",
+          gap: "10px",
+          alignItems: "center",
+        }}
+      >
+        <div className="read-detail-timer">
+          <strong>{formatTime(timeLeft)}</strong>
         </div>
-
+        <button className="read-detail-submit" onClick={handleSubmit}>
+          Submit
+        </button>
+      </div>
 
       {/* Modal */}
       {showModal && (
@@ -130,12 +219,13 @@ const ReadDetail = () => {
               <button onClick={() => navigate("/")}>Return Course Page</button>
               <button
                 onClick={() =>
-                  navigate(`/score/read/${test.id}`, { state: { userAnswers: answers } })
+                  navigate(`/score/read/${test.id}`, {
+                    state: { userAnswers: answers },
+                  })
                 }
               >
                 View Score
               </button>
-
             </div>
           </div>
         </div>
