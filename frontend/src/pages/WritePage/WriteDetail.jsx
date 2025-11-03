@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
 import "./WriteDetail.css";
 
@@ -65,6 +65,7 @@ const WriteDetail = () => {
     const essayText = Object.values(sections).join("\n\n");
 
     try {
+      // ✅ Gửi bài đến API AI
       const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -78,6 +79,20 @@ const WriteDetail = () => {
       const data = await res.json();
 
       if (res.status === 200) {
+        // ✅ Lấy document Firestore hiện tại
+        const taskRef = doc(db, "writing_practices", id);
+        const taskSnap = await getDoc(taskRef);
+        const currentData = taskSnap.data();
+        const currentAttempts = currentData?.attempts || 0;
+
+        // ✅ Cập nhật trạng thái và số lần thử
+        await updateDoc(taskRef, {
+          status: "Complete",
+          attempts: currentAttempts + 1,
+          last_completed_at: new Date(),
+        });
+
+        // ✅ Chuyển hướng sang trang điểm
         navigate(`/score/write/${id}`, {
           state: { aiResult: data, userWriting: sections },
         });
@@ -89,6 +104,7 @@ const WriteDetail = () => {
       alert("Server error during submission");
     }
   };
+
 
 
   const formatTime = (secs) => {
