@@ -147,6 +147,7 @@ export const aiSpeakingGeminiService = {
         // 🔁 Nếu đã tồn tại → Cập nhật lại
         submissionRef = existingSnap.docs[0].ref;
         await submissionRef.update({
+          question_text: questionText,
           audio_url: audioUrl,
           transcript,
           ai_score: finalResult.overall_band,
@@ -166,6 +167,7 @@ export const aiSpeakingGeminiService = {
           user_id: userId,
           speaking_id: speakingId,
           speaking_questions_id: questionId,
+          question_text: questionText,
           audio_url: audioUrl,
           transcript,
           ai_score: finalResult.overall_band,
