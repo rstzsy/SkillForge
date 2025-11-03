@@ -33,7 +33,7 @@ const AdminTestResult = () => {
         const resultsData = [];
 
         // 🔹 Fetch Writing Results
-        const feedbackSnapshot = await getDocs(collection(db, "writing_feedbacks"));
+        const feedbackSnapshot = await getDocs(collection(db, "writing_submissions"));
         for (const fbDoc of feedbackSnapshot.docs) {
           const fbData = fbDoc.data();
 

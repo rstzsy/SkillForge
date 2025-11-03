@@ -124,7 +124,7 @@ export const aiWritingGeminiService = {
       };
 
       // ✅ Save to Firestore
-      const docRef = await db.collection("writing_feedbacks").add({
+      const docRef = await db.collection("writing_submissions").add({
         user_id: userId,
         practice_id: practiceId,
         essay_text: essayText,
