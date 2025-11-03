@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBook, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faMagnifyingGlass, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ReadPage.css";
@@ -20,6 +20,8 @@ const ReadingPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [wishlist, setWishlist] = useState([]);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const sections = ["Section 1", "Section 2", "Section 3", "Full Test"];
@@ -76,10 +78,42 @@ const ReadingPage = () => {
   // Filtered data based on tab, section, search
   const filteredData = readingData.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const sectionMatch = selectedSection ? item.section === selectedSection : true;
-    const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const sectionMatch = selectedSection
+      ? item.section === selectedSection
+      : true;
+    const searchMatch = item.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return statusMatch && sectionMatch && searchMatch;
   });
+
+  // wishlist
+  const handleAddToWishlist = async (item) => {
+    try {
+      // da co trong wishlist thi khong can them
+      const exists = wishlist.some((w) => w.id === item.id);
+      if (exists) {
+        setMessage("Task này đã có trong wishlist!");
+        setTimeout(() => setMessage(""), 2000);
+        return;
+      }
+
+      await axios.post("http://localhost:3002/api/user/wishlist", {
+        user_id: userId,
+        practice_id: item.id,
+        type: "reading",
+      });
+
+      // cap nhap state o frontend
+      setWishlist([...wishlist, item]);
+      setMessage("Đã thêm vào wishlist thành công!");
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      console.error("Lỗi khi thêm vào wishlist:", err);
+      setMessage("Không thể thêm vào wishlist.");
+      setTimeout(() => setMessage(""), 2000);
+    }
+  };
 
   return (
     <div className="reading-page">
@@ -132,7 +166,11 @@ const ReadingPage = () => {
           </div>
 
           <div className="search-read">
-            <FontAwesomeIcon icon={faMagnifyingGlass} size="x" color="#dc9f36" />
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              size="x"
+              color="#dc9f36"
+            />
             <input
               type="text"
               placeholder="Search..."
@@ -154,13 +192,29 @@ const ReadingPage = () => {
                 className="card-read"
                 key={item.id}
                 onClick={() => navigate(`/read/${item.id}`)}
-                style={{ cursor: "pointer" }}
+                style={{ cursor: "pointer", position: "relative" }}
               >
-                <img src={item.image_url || "/assets/listpic.jpg"} alt={item.title} />
+                {/* Icon trái tim */}
+                <div
+                  className="wishlist-heart"
+                  onClick={(e) => {
+                    e.stopPropagation(); // tranh click vao card
+                    handleAddToWishlist(item);
+                  }}
+                  title="Add to wishlist"
+                >
+                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
+                </div>
+                <img
+                  src={item.image_url || "/assets/listpic.jpg"}
+                  alt={item.title}
+                />
                 <div className="card-info-read">
                   <span
                     className="section-read"
-                    style={{ backgroundColor: sectionColors[item.section] || "#ddd" }}
+                    style={{
+                      backgroundColor: sectionColors[item.section] || "#ddd",
+                    }}
                   >
                     {item.section}
                   </span>
@@ -168,9 +222,7 @@ const ReadingPage = () => {
                   <p className="type-read">{item.type}</p>
                   <p className="attempts-read">{item.attempts || 0} attempts</p>
                   {item.completed && item.submitted_at && (
-                    <span className="completed-label">
-                      Completed 
-                    </span>
+                    <span className="completed-label">Completed</span>
                   )}
                 </div>
               </div>
@@ -178,6 +230,7 @@ const ReadingPage = () => {
             {filteredData.length === 0 && <p>No tasks found.</p>}
           </div>
         )}
+        {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>
   );

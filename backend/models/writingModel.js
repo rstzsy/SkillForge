@@ -1,4 +1,5 @@
 export class WritingPractice {
+  static collectionName = "writing_practices";
   constructor({
     writing_practices_id = null,
     section,
