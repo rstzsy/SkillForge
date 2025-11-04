@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/config";
 import SliderComponent from "../../component/SliderComponent/SliderComponent";
 import "./HomePage.css";
+
 
 const sliderImages = [
   "/assets/slider1.png",
@@ -9,17 +12,6 @@ const sliderImages = [
   "/assets/slider3.png",
   "/assets/slider4.png",
   "/assets/slider5.png",
-];
-
-const exercises = [
-  { id: 1, title: "Listening Part 3 – Multiple Choice", skill: "L", difficulty: "Medium", duration: 30 },
-  { id: 2, title: "Reading Passage 2 – True/False/Not Given", skill: "R", difficulty: "Hard", duration: 60 },
-  { id: 3, title: "Writing Task 1 – Bar Chart", skill: "W", difficulty: "Easy", duration: 30 },
-  { id: 4, title: "Speaking Part 2 – Cue Card Practice", skill: "S", difficulty: "Medium", duration: 15 },
-  { id: 5, title: "Listening Part 4 – Note Completion", skill: "L", difficulty: "Hard", duration: 30 },
-  { id: 6, title: "Reading Passage 3 – Matching Headings", skill: "R", difficulty: "Medium", duration: 45 },
-  { id: 7, title: "Writing Task 2 – Opinion Essay", skill: "W", difficulty: "Hard", duration: 40 },
-  { id: 8, title: "Speaking Part 3 – Discussion", skill: "S", difficulty: "Medium", duration: 20 },
 ];
 
 const services = [
@@ -52,6 +44,69 @@ const HomePage = () => {
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [durationFilter, setDurationFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [exercises, setExercises] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Lấy các collection tương ứng
+        const [speakSnap, writeSnap, readSnap, listenSnap] = await Promise.all([
+          getDocs(collection(db, "speaking_practices")),
+          getDocs(collection(db, "writing_practices")),
+          getDocs(collection(db, "reading_practices")),
+          getDocs(collection(db, "listening_practices")),
+        ]);
+
+        // Chuẩn hóa dữ liệu
+        const allExercises = [
+          ...speakSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().topic || "Untitled Speaking Task",
+            skill: "S",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 15,
+            type: "Speaking",
+          })),
+          ...writeSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Writing Task",
+            skill: "W",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 30,
+            type: "Writing",
+          })),
+          ...readSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Reading Task",
+            skill: "R",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 45,
+            type: "Reading",
+          })),
+          ...listenSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Listening Task",
+            skill: "L",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 30,
+            type: "Listening",
+          })),
+        ];
+
+        setExercises(allExercises);
+      } catch (error) {
+        console.error("Error fetching exercises:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const filteredExercises = exercises.filter((item) => {
     return (
@@ -63,7 +118,7 @@ const HomePage = () => {
 
   const totalPages = Math.ceil(filteredExercises.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentExercises = filteredExercises.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentExercises = filteredExercises.slice(startIndex,startIndex + ITEMS_PER_PAGE);
 
   return (
     <>
@@ -162,6 +217,7 @@ const HomePage = () => {
       <section className="suggested-exercises">
         <div className="exercise-header">
           <h2 className="section-title">Suggested Exercises & Mock Tests</h2>
+
           <div className="exercise-filters">
             <select onChange={(e) => setSkillFilter(e.target.value)}>
               <option value="All">Skill</option>
@@ -188,20 +244,38 @@ const HomePage = () => {
           </div>
         </div>
 
-        {/* Grid hiển thị bài tập */}
-        <div className="exercise-grid">
-          {currentExercises.map((item) => (
-            <div key={item.id} className="exercise-card">
-              <img src="/assets/listpic.jpg" alt="Exercise" className="exercise-image" />
-              <h3>{item.title}</h3>
-              <p><strong>Skill:</strong> {item.skill}</p>
-              <p><strong>Difficulty:</strong> {item.difficulty}</p>
-              <p><strong>Duration:</strong> {item.duration} mins</p>
-              <button className="start-btn">Start</button>
-            </div>
-          ))}
-          {currentExercises.length === 0 && <p>No exercises found.</p>}
-        </div>
+        {loading ? (
+          <p>Loading exercises...</p>
+        ) : (
+          <div className="exercise-grid">
+            {currentExercises.map((item) => (
+              <div
+                key={item.id}
+                className="exercise-card"
+                onClick={() => navigate(`/${item.type.toLowerCase()}/${item.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <img
+                  src="/assets/listpic.jpg"
+                  alt="Exercise"
+                  className="exercise-image"
+                />
+                <h3>{item.title}</h3>
+                <p>
+                  <strong>Skill:</strong> {item.type}
+                </p>
+                <p>
+                  <strong>Difficulty:</strong> {item.difficulty}
+                </p>
+                <p>
+                  <strong>Duration:</strong> {item.duration} mins
+                </p>
+                <button className="start-btn">Start</button>
+              </div>
+            ))}
+            {currentExercises.length === 0 && <p>No exercises found.</p>}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -211,7 +285,7 @@ const HomePage = () => {
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
-                Prev
+              Prev
             </button>
             <span className="page-info">
               Page {currentPage} / {totalPages}
