@@ -25,7 +25,6 @@ const SpeakPage = () => {
   const [userCompleted, setUserCompleted] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
-
   const navigate = useNavigate();
 
   const sections = ["Part 1", "Part 2", "Part 3"];
@@ -35,15 +34,18 @@ const SpeakPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch speaking practices
         const practicesSnap = await getDocs(collection(db, "speaking_practices"));
         const practices = practicesSnap.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
+        // Fetch submissions
         const submissionsSnap = await getDocs(collection(db, "speaking_submissions"));
         const submissions = submissionsSnap.docs.map((doc) => doc.data());
 
+        // Count attempts
         const attemptsCount = {};
         submissions.forEach((sub) => {
           const id = sub.speaking_id;
@@ -51,6 +53,7 @@ const SpeakPage = () => {
           attemptsCount[id]++;
         });
 
+        // User completed
         if (userId) {
           const userSubmissionsQuery = query(
             collection(db, "speaking_submissions"),
@@ -61,6 +64,7 @@ const SpeakPage = () => {
           setUserCompleted(completedIds);
         }
 
+        // Combine attempts
         const combined = practices.map((p) => ({
           ...p,
           attempts: attemptsCount[p.id] || 0,
@@ -75,6 +79,22 @@ const SpeakPage = () => {
     fetchData();
   }, [userId]);
 
+  // Fetch wishlist
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        if (!userId) return;
+        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        setWishlist(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      }
+    };
+
+    fetchWishlist();
+  }, [userId]);
+
+  // Filter displayed data
   const filteredData = speakingData.filter((item) => {
     const sectionMatch = selectedSection ? item.section === selectedSection : true;
     const searchMatch = item.topic?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -86,30 +106,42 @@ const SpeakPage = () => {
     return sectionMatch && searchMatch;
   });
 
-  const handleAddToWishlist = async (item) => {
-    try {
-      const exists = wishlist.some((w) => w.id === item.id);
-      if (exists) {
-        setMessage("Đã có trong wishlist!");
-        setTimeout(() => setMessage(""), 2000);
-        return;
+  const handleWishlistToggle = async (item, e) => {
+    e.stopPropagation();
+    const existing = wishlist.find(
+      (w) => w.practice_id === item.id && w.user_id === userId
+    );
+
+    if (existing) {
+      try {
+        await axios.delete(`http://localhost:3002/api/user/wishlist/${existing.id}`);
+        setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
+        setMessage("Đã xóa khỏi wishlist");
+      } catch (err) {
+        console.error("❌ Lỗi khi xóa khỏi wishlist:", err);
+        setMessage("Không thể xóa khỏi wishlist");
       }
+    } else {
+      // ✅ Thêm vào wishlist
+      try {
+        const res = await axios.post("http://localhost:3002/api/user/wishlist", {
+          user_id: userId,
+          practice_id: item.id,
+          type: "speaking",
+        });
 
-      await axios.post("http://localhost:3002/api/user/wishlist", {
-        user_id: userId,
-        practice_id: item.id,
-        type: "speaking",
-      });
-
-      setWishlist([...wishlist, item]);
-      setMessage("Đã thêm vào wishlist thành công!");
-      setTimeout(() => setMessage(""), 2000);
-    } catch (err) {
-      console.error("Lỗi khi thêm vào wishlist:", err);
-      setMessage("Không thể thêm vào wishlist.");
-      setTimeout(() => setMessage(""), 2000);
+        const newItem = { id: res.data.id, user_id: userId, practice_id: item.id, type: "speaking" };
+        setWishlist((prev) => [...prev, newItem]);
+        setMessage("Đã thêm vào wishlist");
+      } catch (err) {
+        console.error("❌ Lỗi khi thêm vào wishlist:", err);
+        setMessage("Không thể thêm vào wishlist");
+      }
     }
+
+    setTimeout(() => setMessage(""), 2000);
   };
+
 
   return (
     <div className="speaking-page">
@@ -172,44 +204,47 @@ const SpeakPage = () => {
 
         <div className="cards-speak">
           {filteredData.length > 0 ? (
-            filteredData.map((item) => (
-              <div
-                className={`card-speak ${
-                  userCompleted.includes(item.id) ? "completed" : ""
-                }`}
-                key={item.id}
-                onClick={() => navigate(`/speak/${item.id}`)}
-                style={{ cursor: "pointer", position: "relative" }}
-              >
-                {/* Icon trái tim */}
+            filteredData.map((item) => {
+              const inWishlist = wishlist.some((w) => w.practice_id === item.id);
+              return (
                 <div
-                  className="wishlist-heart"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToWishlist(item);
-                  }}
-                  title="Add to wishlist"
+                  className={`card-speak ${
+                    userCompleted.includes(item.id) ? "completed" : ""
+                  }`}
+                  key={item.id}
+                  onClick={() => navigate(`/speak/${item.id}`)}
+                  style={{ cursor: "pointer", position: "relative" }}
                 >
-                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
-                </div>
-
-                <img src={"/assets/listpic.jpg"} alt={item.topic} />
-                <div className="card-info-speak">
-                  <span
-                    className="section-speak"
-                    style={{ backgroundColor: sectionColors[item.section] }}
+                  {/* Wishlist heart */}
+                  <div
+                    className="wishlist-heart"
+                    onClick={(e) => handleWishlistToggle(item, e)}
+                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                   >
-                    {item.section}
-                  </span>
-                  <h4>{item.topic}</h4>
-                  <p className="type-speak">{item.type}</p>
-                  <p className="attempts-speak">{item.attempts} attempts</p>
-                  {userCompleted.includes(item.id) && (
-                    <p className="completed-label">Completed</p>
-                  )}
+                    <FontAwesomeIcon
+                      icon={faHeart}
+                      color={inWishlist ? "#ff4757" : "#ccc"}
+                    />
+                  </div>
+
+                  <img src={"/assets/listpic.jpg"} alt={item.topic} />
+                  <div className="card-info-speak">
+                    <span
+                      className="section-speak"
+                      style={{ backgroundColor: sectionColors[item.section] }}
+                    >
+                      {item.section}
+                    </span>
+                    <h4>{item.topic}</h4>
+                    <p className="type-speak">{item.type}</p>
+                    <p className="attempts-speak">{item.attempts} attempts</p>
+                    {userCompleted.includes(item.id) && (
+                      <p className="completed-label">Completed</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p>No speaking topics found.</p>
           )}

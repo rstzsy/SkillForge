@@ -99,39 +99,49 @@ const ListeningPage = () => {
 
   // Handle wishlist toggle
   const handleWishlistToggle = async (item, e) => {
-    e.stopPropagation(); // prevent card click
-    const exists = wishlist.some((w) => w.practice_id === item.id);
+    e.stopPropagation();
 
-    if (exists) {
-      // Remove from wishlist
+    const existing = wishlist.find(
+      (w) => w.practice_id === item.id && w.user_id === userId
+    );
+
+    if (existing) {
       try {
-        await axios.delete(`http://localhost:3002/api/user/wishlist/${item.id}`);
-        setWishlist(wishlist.filter((w) => w.practice_id !== item.id));
+        await axios.delete(`http://localhost:3002/api/user/wishlist/${existing.id}`);
+        setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
         setMessage("Đã xóa khỏi wishlist");
-        setTimeout(() => setMessage(""), 2000);
       } catch (err) {
         console.error("Error removing from wishlist:", err);
         setMessage("Không thể xóa khỏi wishlist");
+      } finally {
         setTimeout(() => setMessage(""), 2000);
       }
     } else {
-      // Add to wishlist
       try {
-        await axios.post("http://localhost:3002/api/user/wishlist", {
+        const res = await axios.post("http://localhost:3002/api/user/wishlist", {
           user_id: userId,
           practice_id: item.id,
           type: "listening",
         });
-        setWishlist([...wishlist, { user_id: userId, practice_id: item.id, type: "listening" }]);
+
+        const newWishlistItem = {
+          id: res.data.id, 
+          user_id: userId,
+          practice_id: item.id,
+          type: "listening",
+        };
+
+        setWishlist((prev) => [...prev, newWishlistItem]);
         setMessage("Đã thêm vào wishlist");
-        setTimeout(() => setMessage(""), 2000);
       } catch (err) {
         console.error("Error adding to wishlist:", err);
         setMessage("Không thể thêm vào wishlist");
+      } finally {
         setTimeout(() => setMessage(""), 2000);
       }
     }
   };
+
 
   return (
     <div className="listening-page">

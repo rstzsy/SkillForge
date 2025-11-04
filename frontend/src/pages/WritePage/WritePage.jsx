@@ -24,7 +24,6 @@ const WritePage = () => {
   const navigate = useNavigate();
 
   const sections = ["Task 1", "Task 2", "Full Test"];
-
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
@@ -62,6 +61,19 @@ const WritePage = () => {
     fetchUserSubmissions();
   }, [userId]);
 
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        if (!userId) return;
+        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        setWishlist(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      }
+    };
+    fetchWishlist();
+  }, [userId]);
+
   const combinedData = writingData.map((task) => {
     const userSubmission = submissions.find((sub) => sub.practice_id === task.id);
     return {
@@ -71,7 +83,6 @@ const WritePage = () => {
     };
   });
 
-
   const filteredData = combinedData.filter((item) => {
     const statusMatch =
       tab === "completed" ? item.status === "Completed" : item.status !== "Completed";
@@ -80,37 +91,45 @@ const WritePage = () => {
     return statusMatch && sectionMatch && searchMatch;
   });
 
-  const handleAddToWishlist = async (item) => {
-    try {
-      const exists = wishlist.some((w) => w.id === item.id);
-      if (exists) {
-        setMessage("Task này đã có trong wishlist!");
-        setTimeout(() => setMessage(""), 2000);
-        return;
+  const handleWishlistToggle = async (item, e) => {
+    e.stopPropagation();
+    const existing = wishlist.find(
+      (w) => w.practice_id === item.id && w.user_id === userId
+    );
+
+    if (existing) {
+      try {
+        await axios.delete(`http://localhost:3002/api/user/wishlist/${existing.id}`);
+        setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
+        setMessage("Đã xóa khỏi wishlist");
+      } catch (err) {
+        console.error("Lỗi khi xóa khỏi wishlist:", err);
+        setMessage("Không thể xóa khỏi wishlist");
       }
-
-      await axios.post("http://localhost:3002/api/user/wishlist", {
-        user_id: userId,
-        practice_id: item.id,
-        type: "writing",
-      });
-
-      setWishlist([...wishlist, item]);
-      setMessage("Đã thêm vào wishlist thành công!");
-      setTimeout(() => setMessage(""), 2000);
-    } catch (err) {
-      console.error("Lỗi khi thêm vào wishlist:", err);
-      setMessage("Không thể thêm vào wishlist.");
-      setTimeout(() => setMessage(""), 2000);
+    } else {
+      try {
+        const res = await axios.post("http://localhost:3002/api/user/wishlist", {
+          user_id: userId,
+          practice_id: item.id,
+          type: "writing",
+        });
+        const newItem = { id: res.data.id, user_id: userId, practice_id: item.id, type: "writing" };
+        setWishlist((prev) => [...prev, newItem]);
+        setMessage("Đã thêm vào wishlist");
+      } catch (err) {
+        console.error("Lỗi khi thêm vào wishlist:", err);
+        setMessage("Không thể thêm vào wishlist");
+      }
     }
+
+    setTimeout(() => setMessage(""), 2000);
   };
 
-  // 🔹 6. Render giao diện
   return (
     <div className="writing-page">
       <aside className="sidebar-write">
         <h3>
-          <FontAwesomeIcon icon={faPenNib} size="x" /> Writing Practise
+          <FontAwesomeIcon icon={faPenNib} size="x" /> Writing Practice
         </h3>
         <div className="filter-group-write">
           {sections.map((sec) => (
@@ -166,42 +185,49 @@ const WritePage = () => {
 
         <div className="cards-write">
           {filteredData.length > 0 ? (
-            filteredData.map((item) => (
-              <div
-                className="card-write"
-                key={item.id}
-                onClick={() => navigate(`/write/${item.id}`)}
-                style={{ cursor: "pointer", position: "relative" }}
-              >
+            filteredData.map((item) => {
+              const inWishlist = wishlist.some((w) => w.practice_id === item.id);
+              return (
                 <div
-                  className="wishlist-heart"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToWishlist(item);
-                  }}
-                  title="Add to wishlist"
+                  className={`card-write ${
+                    item.status === "Completed" ? "completed" : ""
+                  }`}
+                  key={item.id}
+                  onClick={() => navigate(`/write/${item.id}`)}
+                  style={{ cursor: "pointer", position: "relative" }}
                 >
-                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
-                </div>
-                <img src={"/assets/listpic.jpg"} alt={item.title} />
-                <div className="card-info-write">
-                  <span
-                    className="section-write"
-                    style={{ backgroundColor: sectionColors[item.section] }}
+                  {/* ❤️ Wishlist toggle */}
+                  <div
+                    className="wishlist-heart"
+                    onClick={(e) => handleWishlistToggle(item, e)}
+                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                   >
-                    {item.section}
-                  </span>
-                  <h4>{item.title}</h4>
-                  <p className="type-write">{item.type}</p>
-                  <p className="attempts-write">{item.attempts || 0} attempts</p>
-                  {item.status === "Completed" && <span className="completed-label">Completed</span>}
+                    <FontAwesomeIcon icon={faHeart} color={inWishlist ? "#ff4757" : "#ccc"} />
+                  </div>
+
+                  <img src={"/assets/listpic.jpg"} alt={item.title} />
+                  <div className="card-info-write">
+                    <span
+                      className="section-write"
+                      style={{ backgroundColor: sectionColors[item.section] }}
+                    >
+                      {item.section}
+                    </span>
+                    <h4>{item.title}</h4>
+                    <p className="type-write">{item.type}</p>
+                    <p className="attempts-write">{item.attempts || 0} attempts</p>
+                    {item.status === "Completed" && (
+                      <span className="completed-label">Completed</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p>No tasks found.</p>
           )}
         </div>
+
         {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>
