@@ -23,10 +23,12 @@ const AdminTestResult = () => {
     if (result.skill === "speaking") {
       return parseFloat(result.feedback?.overall_band || result.feedback?.ai_score) || 0;
     }
+    if (result.skill === "listening" || result.skill === "reading") {
+      return result.score || 0;
+    }
     return 0;
   };
 
-  
   useEffect(() => {
     const fetchResults = async () => {
       try {
@@ -75,7 +77,7 @@ const AdminTestResult = () => {
           });
         }
 
-        // 🔹 Fetch Speaking Question Submissions (Từng câu hỏi)
+        // 🔹 Fetch Speaking Question Submissions
         const speakingSnapshot = await getDocs(collection(db, "speaking_question_submissions"));
         
         for (const spDoc of speakingSnapshot.docs) {
@@ -148,7 +150,7 @@ const AdminTestResult = () => {
             title,
             questionText,
             skill: "speaking",
-            type: "question", // 🔹 Đánh dấu là câu hỏi đơn lẻ
+            type: "question",
             transcript: spData.transcript || "N/A",
             audioUrl: spData.audio_url,
             feedback,
@@ -158,7 +160,7 @@ const AdminTestResult = () => {
           });
         }
 
-        // 🔹 Fetch Speaking Submissions (Tổng điểm topic - MỚI)
+        // 🔹 Fetch Speaking Submissions (Topic Complete)
         const speakingSubmissionsSnapshot = await getDocs(collection(db, "speaking_submissions"));
         
         for (const subDoc of speakingSubmissionsSnapshot.docs) {
@@ -202,9 +204,9 @@ const AdminTestResult = () => {
             userId,
             username,
             email,
-            title: `${title} - Complete Topic`, // 🔹 Đánh dấu là hoàn thành topic
+            title: `${title} - Complete Topic`,
             skill: "speaking",
-            type: "topic", // 🔹 Đánh dấu là tổng điểm topic
+            type: "topic",
             feedback: {
               overall_band: subData.ai_score,
               pronunciation_score: subData.pronunciation_score,
@@ -216,6 +218,122 @@ const AdminTestResult = () => {
             createdAt: subData.submitted_at?.toDate
               ? subData.submitted_at.toDate()
               : new Date(subData.submitted_at || Date.now()),
+          });
+        }
+
+        // 🔹 Fetch Listening Submissions
+        const listeningSnapshot = await getDocs(collection(db, "listening_submissions"));
+        
+        for (const lisDoc of listeningSnapshot.docs) {
+          const lisData = lisDoc.data();
+
+          let username = "Unknown User";
+          let email = "N/A";
+          let userId = lisData.user_id || "unknown";
+          
+          if (lisData.user_id) {
+            try {
+              const userRef = doc(db, "users", lisData.user_id);
+              const userSnap = await getDoc(userRef);
+              if (userSnap.exists()) {
+                const userData = userSnap.data();
+                username = userData.userName || userData.username || userData.user_name || "Unnamed";
+                email = userData.email || "No email";
+              }
+            } catch (err) {
+              console.error("Error fetching user:", err);
+            }
+          }
+
+          let title = "Unknown Listening Task";
+          if (lisData.practice_id) {
+            try {
+              const taskRef = doc(db, "listening_practices", lisData.practice_id);
+              const taskSnap = await getDoc(taskRef);
+              
+              if (taskSnap.exists()) {
+                const taskData = taskSnap.data();
+                title = taskData.title || "Untitled";
+              }
+            } catch (err) {
+              console.error("Error fetching listening practice:", err);
+            }
+          }
+
+          resultsData.push({
+            id: lisDoc.id,
+            userId,
+            username,
+            email,
+            title,
+            skill: "listening",
+            score: lisData.score || 0,
+            total: lisData.total || 0,
+            userAnswers: lisData.user_answer || {},
+            correctAnswers: lisData.correct_answers || {},
+            aiFeedback: lisData.ai_feedback,
+            durationSeconds: lisData.duration_seconds || 0,
+            createdAt: lisData.submitted_at?.toDate
+              ? lisData.submitted_at.toDate()
+              : new Date(lisData.submitted_at || Date.now()),
+          });
+        }
+
+        // 🔹 Fetch Reading Submissions
+        const readingSnapshot = await getDocs(collection(db, "reading_submissions"));
+        
+        for (const readDoc of readingSnapshot.docs) {
+          const readData = readDoc.data();
+
+          let username = "Unknown User";
+          let email = "N/A";
+          let userId = readData.user_id || "unknown";
+          
+          if (readData.user_id) {
+            try {
+              const userRef = doc(db, "users", readData.user_id);
+              const userSnap = await getDoc(userRef);
+              if (userSnap.exists()) {
+                const userData = userSnap.data();
+                username = userData.userName || userData.username || userData.user_name || "Unnamed";
+                email = userData.email || "No email";
+              }
+            } catch (err) {
+              console.error("Error fetching user:", err);
+            }
+          }
+
+          let title = "Unknown Reading Task";
+          if (readData.practice_id) {
+            try {
+              const taskRef = doc(db, "reading_practices", readData.practice_id);
+              const taskSnap = await getDoc(taskRef);
+              
+              if (taskSnap.exists()) {
+                const taskData = taskSnap.data();
+                title = taskData.title || "Untitled";
+              }
+            } catch (err) {
+              console.error("Error fetching reading practice:", err);
+            }
+          }
+
+          resultsData.push({
+            id: readDoc.id,
+            userId,
+            username,
+            email,
+            title,
+            skill: "reading",
+            score: readData.score || 0,
+            total: readData.total || 0,
+            userAnswers: readData.user_answers || {},
+            correctAnswers: readData.correct_answers || {},
+            aiFeedback: readData.ai_feedback,
+            timeSpent: readData.time_spent || 0,
+            createdAt: readData.submitted_at?.toDate
+              ? readData.submitted_at.toDate()
+              : new Date(readData.submitted_at || Date.now()),
           });
         }
 
@@ -231,7 +349,7 @@ const AdminTestResult = () => {
     fetchResults();
   }, []);
 
-  // 🔹 Filter results TRƯỚC KHI group
+  // Filter results
   const filteredResults = results.filter((r) => {
     const s = search.toLowerCase();
     const matchesSearch =
@@ -243,7 +361,7 @@ const AdminTestResult = () => {
     return matchesSearch && r.skill === filterSkill;
   });
 
-  // 🔹 Sort filtered results
+  // Sort filtered results
   const sortedResults = [...filteredResults].sort((a, b) => {
     if (sortBy === "date") {
       return b.createdAt - a.createdAt;
@@ -259,7 +377,7 @@ const AdminTestResult = () => {
     return 0;
   });
 
-  // 🔹 Group results by user SAU KHI sort
+  // Group results by user
   const groupedByUser = () => {
     const grouped = {};
     sortedResults.forEach((r) => {
@@ -279,8 +397,6 @@ const AdminTestResult = () => {
       return b.tests.length - a.tests.length;
     });
   };
-
-  
 
   const handleReset = () => {
     setFilterSkill("all");
@@ -337,6 +453,8 @@ const AdminTestResult = () => {
             <option value="all">All Skills</option>
             <option value="writing">✍️ Writing</option>
             <option value="speaking">🎤 Speaking</option>
+            <option value="listening">🎧 Listening</option>
+            <option value="reading">📖 Reading</option>
           </select>
 
           <label className="label-testresult">Sort By:</label>
@@ -395,7 +513,10 @@ const AdminTestResult = () => {
                         <div className="test-header-testresult">
                           <span className="test-number-testresult">#{idx + 1}</span>
                           <span className={`skill-badge-testresult ${test.skill}`}>
-                            {test.skill === "writing" ? "✍️ Writing" : "🎤 Speaking"}
+                            {test.skill === "writing" && "✍️ Writing"}
+                            {test.skill === "speaking" && "🎤 Speaking"}
+                            {test.skill === "listening" && "🎧 Listening"}
+                            {test.skill === "reading" && "📖 Reading"}
                           </span>
                           {test.type === "topic" && (
                             <span className="topic-complete-badge">🏆 Complete</span>
@@ -407,6 +528,7 @@ const AdminTestResult = () => {
 
                         <div className="test-title-testresult">📝 {test.title}</div>
 
+                        {/* Writing Results */}
                         {test.skill === "writing" && (
                           <div className="scores-grid-testresult">
                             <div className="score-item-testresult">
@@ -435,6 +557,7 @@ const AdminTestResult = () => {
                           </div>
                         )}
 
+                        {/* Speaking Question Results */}
                         {test.skill === "speaking" && test.type === "question" && (
                           <div className="scores-grid-testresult">
                             <div className="question-box-testresult">
@@ -474,6 +597,7 @@ const AdminTestResult = () => {
                           </div>
                         )}
 
+                        {/* Speaking Topic Results */}
                         {test.skill === "speaking" && test.type === "topic" && (
                           <div className="scores-grid-testresult">
                             <div className="topic-summary-box">
@@ -503,6 +627,74 @@ const AdminTestResult = () => {
                             <div className="feedback-text-testresult">
                               <strong>Summary:</strong> {test.feedback?.feedback || "-"}
                             </div>
+                          </div>
+                        )}
+
+                        {/* Listening Results */}
+                        {test.skill === "listening" && (
+                          <div className="scores-grid-testresult">
+                            <div className="score-item-testresult overall-score-item">
+                              <span>Score:</span>
+                              <strong>{test.score} / {test.total}</strong>
+                            </div>
+                            <div className="score-item-testresult">
+                              <span>Duration:</span>
+                              <strong>{Math.floor(test.durationSeconds / 60)}m {test.durationSeconds % 60}s</strong>
+                            </div>
+                            {test.aiFeedback?.feedback && (
+                              <div className="feedback-text-testresult">
+                                <strong>AI Feedback:</strong> {test.aiFeedback.feedback}
+                              </div>
+                            )}
+                            {test.aiFeedback?.detailed_feedback && (
+                              <div className="detailed-feedback-box">
+                                <strong>Detailed Feedback:</strong>
+                                {Object.entries(test.aiFeedback.detailed_feedback).map(([key, value]) => (
+                                  <div key={key}>
+                                    <em>Blank {key}:</em> {value}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Reading Results */}
+                        {test.skill === "reading" && (
+                          <div className="scores-grid-testresult">
+                            <div className="score-item-testresult overall-score-item">
+                              <span>Score:</span>
+                              <strong>{test.score} / {test.total}</strong>
+                            </div>
+                            <div className="score-item-testresult">
+                              <span>Time Spent:</span>
+                              <strong>{test.timeSpent} minutes</strong>
+                            </div>
+                            {test.aiFeedback?.feedback && (
+                              <div className="feedback-text-testresult">
+                                <strong>AI Feedback:</strong> {test.aiFeedback.feedback}
+                              </div>
+                            )}
+                            {test.aiFeedback?.detailed_feedback && (
+                              <div className="detailed-feedback-box">
+                                <strong>Detailed Feedback:</strong>
+                                {Object.entries(test.aiFeedback.detailed_feedback).map(([key, value]) => (
+                                  <div key={key}>
+                                    <em>Blank {key}:</em> {value}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {test.aiFeedback?.suggestions?.length > 0 && (
+                              <div className="suggestions-box">
+                                <strong>Suggestions:</strong>
+                                <ul>
+                                  {test.aiFeedback.suggestions.map((s, i) => (
+                                    <li key={i}>{s}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -557,6 +749,8 @@ const AdminTestResult = () => {
                     <td className="overall-score-testresult">
                       {r.skill === "writing" && (r.feedback?.overall_band || "-")}
                       {r.skill === "speaking" && (r.feedback?.overall_band || r.feedback?.ai_score || "-")}
+                      {r.skill === "listening" && `${r.score}/${r.total}`}
+                      {r.skill === "reading" && `${r.score}/${r.total}`}
                     </td>
                     <td>{r.createdAt.toLocaleString()}</td>
                     <td>
