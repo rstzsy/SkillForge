@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 import "./Wishlist.css";
 
 const sectionColors = {
@@ -20,13 +21,16 @@ const Wishlist = () => {
 
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
+  const navigate = useNavigate();
 
-  // 🟢 Gọi API lấy danh sách wishlist
+  // Fetch wishlist
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        const res = await axios.get(
+          `http://localhost:3002/api/user/wishlist/${userId}`
+        );
         setWishlist(res.data.data || []);
       } catch (err) {
         console.error("❌ Failed to load wishlist:", err);
@@ -37,7 +41,7 @@ const Wishlist = () => {
     fetchWishlist();
   }, [userId]);
 
-  // 🔴 Xóa khỏi wishlist (API)
+  // Remove item from wishlist
   const handleRemove = async (id) => {
     try {
       await axios.delete(`http://localhost:3002/api/user/wishlist/${id}`);
@@ -48,11 +52,14 @@ const Wishlist = () => {
     }
   };
 
+  // Filtered data
   const filteredData = wishlist.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const searchMatch =
-      (item.title?.toLowerCase() || item.topic?.toLowerCase() || "")
-      .includes(searchTerm.toLowerCase());
+    const searchMatch = (
+      item.title?.toLowerCase() ||
+      item.topic?.toLowerCase() ||
+      ""
+    ).includes(searchTerm.toLowerCase());
     return statusMatch && searchMatch;
   });
 
@@ -108,10 +115,49 @@ const Wishlist = () => {
         ) : (
           <div className="cards-wishlist">
             {filteredData.map((item) => (
-              <div className="card-wishlist" key={item.id}>
+              <div
+                key={item.id}
+                className="card-wishlist"
+                style={{ position: "relative", cursor: "pointer" }}
+                onClick={() => {
+                  const type = item.type?.toLowerCase(); 
+                  const practiceId = item.practice_id; 
+                  switch (type) {
+                    case "listening":
+                      navigate(`/listen/${practiceId}`);
+                      break;
+                    case "reading":
+                      navigate(`/read/${practiceId}`);
+                      break;
+                    case "writing":
+                      navigate(`/write/${practiceId}`);
+                      break;
+                    case "speaking":
+                      navigate(`/speak/${practiceId}`);
+                      break;
+                    default:
+                      console.warn("Unknown type:", item);
+                  }
+                }}
+              >
+                {/* Wishlist icon luôn màu đỏ */}
+                <div
+                  className="wishlist-heart"
+                  onClick={(e) => {
+                    e.stopPropagation(); // ngan navigate khi click vao icon
+                    setConfirmItem(item); 
+                  }}
+                  title="Remove from wishlist"
+                >
+                  <FontAwesomeIcon
+                    icon={faHeart}
+                    color="#ff4757" 
+                  />
+                </div>
+
                 <img
                   src={item.image_url || "/assets/listpic.jpg"}
-                  alt={item.title}
+                  alt={item.title || item.topic}
                 />
                 <div className="card-info-wishlist">
                   <span
@@ -122,7 +168,7 @@ const Wishlist = () => {
                   >
                     {item.section || "General"}
                   </span>
-                  <h4>{item.title  || item.topic}</h4>
+                  <h4>{item.title || item.topic}</h4>
                   <p className="type-wishlist">{item.type}</p>
                   <p className="attempts-wishlist">
                     {item.attempts || 0} learners
@@ -131,22 +177,17 @@ const Wishlist = () => {
                     <span className="completed-label">Completed</span>
                   )}
                 </div>
-
-                {/* Icon trái tim */}
-                <div
-                  className="wishlist-heart"
-                  onClick={() => setConfirmItem(item)}
-                  title="Remove from wishlist"
-                >
-                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
-                </div>
               </div>
             ))}
+
+            {filteredData.length === 0 && (
+              <p className="wishlist-empty">No favorite lessons found.</p>
+            )}
           </div>
         )}
       </div>
 
-      {/* Xác nhận gỡ bài */}
+      {/* Confirm remove */}
       {confirmItem && (
         <div className="confirm-overlay">
           <div className="confirm-box">

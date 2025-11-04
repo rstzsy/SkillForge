@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faHeadphones,
-  faMagnifyingGlass,
-  faHeart,
-} from "@fortawesome/free-solid-svg-icons";
+import { faHeadphones, faMagnifyingGlass, faHeart } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ListenPage.css";
@@ -19,27 +15,21 @@ const sectionColors = {
 
 const ListeningPage = () => {
   const [listeningData, setListeningData] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const [confirmItem, setConfirmItem] = useState(null);
-  const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
-  const sections = [
-    "Section 1",
-    "Section 2",
-    "Section 3",
-    "Section 4",
-    "Full Test",
-  ];
+  const sections = ["Section 1", "Section 2", "Section 3", "Section 4", "Full Test"];
 
+  // Fetch listening tasks + user submissions
   useEffect(() => {
     if (!userId) {
       setError("User not found");
@@ -51,19 +41,17 @@ const ListeningPage = () => {
       try {
         setLoading(true);
 
-        // get all tasks
-        const resListening = await axios.get(
-          "http://localhost:3002/api/user/listening"
-        );
+        // 1. Get all listening tasks
+        const resListening = await axios.get("http://localhost:3002/api/user/listening");
         const listenings = resListening.data.data || [];
 
-        // get all submission user
+        // 2. Get user submissions
         const resSubs = await axios.get(
           `http://localhost:3002/api/user/listen/submit/listening/${userId}`
         );
         const userSubs = resSubs.data.data || [];
 
-        // sorted completion task
+        // 3. Merge completion status
         const merged = listenings.map((item) => {
           const sub = userSubs.find(
             (s) => s.practice_id === item.id && s.status === "submitted"
@@ -87,43 +75,61 @@ const ListeningPage = () => {
     fetchData();
   }, [userId]);
 
+  // Fetch wishlist on page load
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        if (!userId) return;
+        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        setWishlist(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching wishlist:", err);
+      }
+    };
+
+    fetchWishlist();
+  }, [userId]);
+
   const filteredData = listeningData.filter((item) => {
     const statusMatch = tab === "completed" ? item.completed : !item.completed;
-    const sectionMatch = selectedSection
-      ? item.section === selectedSection
-      : true;
-    const searchMatch = item.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    const sectionMatch = selectedSection ? item.section === selectedSection : true;
+    const searchMatch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
     return statusMatch && sectionMatch && searchMatch;
   });
 
-  // wishlist
-  const handleAddToWishlist = async (item) => {
-    try {
-      // neu da co trong wishlist thi khong can them
-      const exists = wishlist.some((w) => w.id === item.id);
-      if (exists) {
-        setMessage("Task này đã có trong wishlist!");
+  // Handle wishlist toggle
+  const handleWishlistToggle = async (item, e) => {
+    e.stopPropagation(); // prevent card click
+    const exists = wishlist.some((w) => w.practice_id === item.id);
+
+    if (exists) {
+      // Remove from wishlist
+      try {
+        await axios.delete(`http://localhost:3002/api/user/wishlist/${item.id}`);
+        setWishlist(wishlist.filter((w) => w.practice_id !== item.id));
+        setMessage("Đã xóa khỏi wishlist");
         setTimeout(() => setMessage(""), 2000);
-        return;
+      } catch (err) {
+        console.error("Error removing from wishlist:", err);
+        setMessage("Không thể xóa khỏi wishlist");
+        setTimeout(() => setMessage(""), 2000);
       }
-
-      // call api
-      await axios.post("http://localhost:3002/api/user/wishlist", {
-        user_id: userId,
-        practice_id: item.id,
-        type: "listening",
-      });
-
-      // cap nhap wishlist
-      setWishlist([...wishlist, item]);
-      setMessage("Đã thêm vào wishlist thành công!");
-      setTimeout(() => setMessage(""), 2000);
-    } catch (err) {
-      console.error("Lỗi khi thêm vào wishlist:", err);
-      setMessage("Không thể thêm vào wishlist.");
-      setTimeout(() => setMessage(""), 2000);
+    } else {
+      // Add to wishlist
+      try {
+        await axios.post("http://localhost:3002/api/user/wishlist", {
+          user_id: userId,
+          practice_id: item.id,
+          type: "listening",
+        });
+        setWishlist([...wishlist, { user_id: userId, practice_id: item.id, type: "listening" }]);
+        setMessage("Đã thêm vào wishlist");
+        setTimeout(() => setMessage(""), 2000);
+      } catch (err) {
+        console.error("Error adding to wishlist:", err);
+        setMessage("Không thể thêm vào wishlist");
+        setTimeout(() => setMessage(""), 2000);
+      }
     }
   };
 
@@ -194,47 +200,45 @@ const ListeningPage = () => {
           <p style={{ color: "red" }}>{error}</p>
         ) : (
           <div className="cards-lis">
-            {filteredData.map((item) => (
-              <div
-                key={item.id}
-                className="card-lis"
-                onClick={() => navigate(`/listen/${item.id}`)}
-                style={{ cursor: "pointer", position: "relative" }} 
-              >
-                {/* Icon trái tim */}
+            {filteredData.map((item) => {
+              const inWishlist = wishlist.some((w) => w.practice_id === item.id);
+              return (
                 <div
-                  className="wishlist-heart"
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                    handleAddToWishlist(item);
-                  }}
-                  title="Add to wishlist"
+                  key={item.id}
+                  className="card-lis"
+                  onClick={() => navigate(`/listen/${item.id}`)}
+                  style={{ cursor: "pointer", position: "relative" }}
                 >
-                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
-                </div>
-
-                <img
-                  src={item.image_url || "/assets/listpic.jpg"}
-                  alt={item.title}
-                />
-                <div className="card-info-lis">
-                  <span
-                    className="section-lis"
-                    style={{
-                      backgroundColor: sectionColors[item.section] || "#ddd",
-                    }}
+                  {/* Wishlist icon */}
+                  <div
+                    className="wishlist-heart"
+                    onClick={(e) => handleWishlistToggle(item, e)}
+                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                   >
-                    {item.section}
-                  </span>
-                  <h4>{item.title}</h4>
-                  <p className="type-lis">{item.type}</p>
-                  <p className="attempts-lis">{item.attempts || 0} attempts</p>
-                  {item.completed && item.submitted_at && (
-                    <span className="completed-label">Completed</span>
-                  )}
+                    <FontAwesomeIcon
+                      icon={faHeart}
+                      color={inWishlist ? "#ff4757" : "#ccc"}
+                    />
+                  </div>
+
+                  <img src={item.image_url || "/assets/listpic.jpg"} alt={item.title} />
+                  <div className="card-info-lis">
+                    <span
+                      className="section-lis"
+                      style={{ backgroundColor: sectionColors[item.section] || "#ddd" }}
+                    >
+                      {item.section}
+                    </span>
+                    <h4>{item.title}</h4>
+                    <p className="type-lis">{item.type}</p>
+                    <p className="attempts-lis">{item.attempts || 0} attempts</p>
+                    {item.completed && item.submitted_at && (
+                      <span className="completed-label">Completed</span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {filteredData.length === 0 && <p>No tasks found.</p>}
           </div>
         )}
