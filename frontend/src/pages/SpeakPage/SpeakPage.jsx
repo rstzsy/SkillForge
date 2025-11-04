@@ -3,9 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMicrophone,
   faMagnifyingGlass,
-  faHeart
+  faHeart,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../firebase/config";
 import axios from "axios";
 import "./SpeakPage.css";
 
@@ -13,74 +15,91 @@ const sectionColors = {
   "Part 1": "#fcd5ce",
   "Part 2": "#d0f4de",
   "Part 3": "#cddafd",
-  "Full Test": "#ffe066",
 };
 
 const SpeakPage = () => {
   const [tab, setTab] = useState("uncompleted");
   const [selectedSection, setSelectedSection] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [speakData, setSpeakData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [speakingData, setSpeakingData] = useState([]);
+  const [userCompleted, setUserCompleted] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
+
   const navigate = useNavigate();
 
-  const sections = ["Part 1", "Part 2", "Part 3", "Full Test"];
+  const sections = ["Part 1", "Part 2", "Part 3"];
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
   useEffect(() => {
-    const fetchSpeaking = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/speaking");
-        const data = await res.json();
-
-        const formatted = data.map((item) => ({
-          id: item.speaking_practices_id,
-          section: item.section,
-          title: item.topic,
-          type: item.type || "General",
-          attempts: item.attempts || 0,
-          img: "/assets/listpic.jpg",
-          completed: false, 
-          timeLimit: item.time_limit || 2,
+        const practicesSnap = await getDocs(collection(db, "speaking_practices"));
+        const practices = practicesSnap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
         }));
 
-        setSpeakData(formatted);
+        const submissionsSnap = await getDocs(collection(db, "speaking_submissions"));
+        const submissions = submissionsSnap.docs.map((doc) => doc.data());
+
+        const attemptsCount = {};
+        submissions.forEach((sub) => {
+          const id = sub.speaking_id;
+          if (!attemptsCount[id]) attemptsCount[id] = 0;
+          attemptsCount[id]++;
+        });
+
+        if (userId) {
+          const userSubmissionsQuery = query(
+            collection(db, "speaking_submissions"),
+            where("user_id", "==", userId)
+          );
+          const userSubSnap = await getDocs(userSubmissionsQuery);
+          const completedIds = userSubSnap.docs.map((d) => d.data().speaking_id);
+          setUserCompleted(completedIds);
+        }
+
+        const combined = practices.map((p) => ({
+          ...p,
+          attempts: attemptsCount[p.id] || 0,
+        }));
+
+        setSpeakingData(combined);
       } catch (err) {
-        console.error("❌ Error loading speaking data:", err);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching speaking data:", err);
       }
     };
-    fetchSpeaking();
-  }, []);
 
-  const filteredData = speakData.filter((item) => {
-    const sectionMatch = selectedSection
-      ? item.section === selectedSection
-      : true;
-    const searchMatch = item.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+    fetchData();
+  }, [userId]);
+
+  const filteredData = speakingData.filter((item) => {
+    const sectionMatch = selectedSection ? item.section === selectedSection : true;
+    const searchMatch = item.topic?.toLowerCase().includes(searchTerm.toLowerCase());
+    const completed = userCompleted.includes(item.id);
+
+    if (tab === "completed" && !completed) return false;
+    if (tab === "uncompleted" && completed) return false;
+
     return sectionMatch && searchMatch;
   });
 
- 
   const handleAddToWishlist = async (item) => {
     try {
-      const response = await axios.post("http://localhost:3002/api/user/wishlist", {
+      const exists = wishlist.some((w) => w.id === item.id);
+      if (exists) {
+        setMessage("Đã có trong wishlist!");
+        setTimeout(() => setMessage(""), 2000);
+        return;
+      }
+
+      await axios.post("http://localhost:3002/api/user/wishlist", {
         user_id: userId,
         practice_id: item.id,
         type: "speaking",
       });
-
-      if (response.data.duplicate) {
-        setMessage("Task này đã có trong wishlist!");
-        setTimeout(() => setMessage(""), 2000);
-        return;
-      }
 
       setWishlist([...wishlist, item]);
       setMessage("Đã thêm vào wishlist thành công!");
@@ -92,22 +111,19 @@ const SpeakPage = () => {
     }
   };
 
-
-  if (loading) return <p>Loading Speaking Data...</p>;
-
   return (
     <div className="speaking-page">
-      {/* Sidebar */}
       <aside className="sidebar-speak">
         <h3>
           <FontAwesomeIcon icon={faMicrophone} size="x" /> Speaking Practice
         </h3>
+
         <div className="filter-group-speak">
           {sections.map((sec) => (
             <label key={sec}>
               <input
                 type="radio"
-                name="speaking"
+                name="speak"
                 checked={selectedSection === sec}
                 onChange={() => setSelectedSection(sec)}
               />
@@ -117,7 +133,7 @@ const SpeakPage = () => {
           <label>
             <input
               type="radio"
-              name="speaking"
+              name="speak"
               checked={selectedSection === null}
               onChange={() => setSelectedSection(null)}
             />
@@ -126,76 +142,79 @@ const SpeakPage = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="content-speak">
-        {/* Tabs + Search */}
         <div className="tabs-search-speak">
           <div className="tabs-speak">
             <button
               className={tab === "uncompleted" ? "active" : ""}
               onClick={() => setTab("uncompleted")}
             >
-              Uncompleted Task
+              Uncomplete Task
             </button>
             <button
               className={tab === "completed" ? "active" : ""}
               onClick={() => setTab("completed")}
             >
-              Completed Task
+              Complete Task
             </button>
           </div>
 
           <div className="search-speak">
-            <FontAwesomeIcon
-              icon={faMagnifyingGlass}
-              size="x"
-              color="#dc9f36"
-            />
+            <FontAwesomeIcon icon={faMagnifyingGlass} size="x" color="#dc9f36" />
             <input
               type="text"
-              placeholder="Search Speaking..."
+              placeholder="Search Speaking Topic..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
 
-        {/* Card list */}
         <div className="cards-speak">
-          {filteredData.map((item) => (
-            <div
-              className="card-speak"
-              key={item.id}
-              onClick={() => navigate(`/speak/${item.id}`)}
-              style={{ cursor: "pointer", position: "relative" }}
-            >
-              {/* Icon trái tim */}
+          {filteredData.length > 0 ? (
+            filteredData.map((item) => (
               <div
-                className="wishlist-heart"
-                onClick={(e) => {
-                  e.stopPropagation(); // tranh click vao card
-                  handleAddToWishlist(item);
-                }}
-                title="Add to wishlist"
+                className={`card-speak ${
+                  userCompleted.includes(item.id) ? "completed" : ""
+                }`}
+                key={item.id}
+                onClick={() => navigate(`/speak/${item.id}`)}
+                style={{ cursor: "pointer", position: "relative" }}
               >
-                <FontAwesomeIcon icon={faHeart} color="#ff4757" />
-              </div>
-              <img src={item.img} alt={item.title} />
-              <div className="card-info-speak">
-                <span
-                  className="section-speak"
-                  style={{ backgroundColor: sectionColors[item.section] }}
+                {/* Icon trái tim */}
+                <div
+                  className="wishlist-heart"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToWishlist(item);
+                  }}
+                  title="Add to wishlist"
                 >
-                  {item.section}
-                </span>
-                <h4>{item.title}</h4>
-                <p className="type-speak">{item.type}</p>
-                <p className="attempts-speak">{item.attempts} attempts</p>
+                  <FontAwesomeIcon icon={faHeart} color="#ff4757" />
+                </div>
+
+                <img src={"/assets/listpic.jpg"} alt={item.topic} />
+                <div className="card-info-speak">
+                  <span
+                    className="section-speak"
+                    style={{ backgroundColor: sectionColors[item.section] }}
+                  >
+                    {item.section}
+                  </span>
+                  <h4>{item.topic}</h4>
+                  <p className="type-speak">{item.type}</p>
+                  <p className="attempts-speak">{item.attempts} attempts</p>
+                  {userCompleted.includes(item.id) && (
+                    <p className="completed-label">Completed</p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-          {filteredData.length === 0 && <p>No tasks found.</p>}
+            ))
+          ) : (
+            <p>No speaking topics found.</p>
+          )}
         </div>
+
         {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>

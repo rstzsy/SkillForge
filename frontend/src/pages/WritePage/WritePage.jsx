@@ -28,7 +28,6 @@ const WritePage = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
   const userId = storedUser?.id;
 
-  // 🔹 1. Load đề bài (writing_practices)
   useEffect(() => {
     const fetchPractices = async () => {
       try {
@@ -45,7 +44,6 @@ const WritePage = () => {
     fetchPractices();
   }, []);
 
-  // 🔹 2. Load bài làm của user hiện tại (writing_submissions)
   useEffect(() => {
     const fetchUserSubmissions = async () => {
       if (!userId) return;
@@ -64,19 +62,16 @@ const WritePage = () => {
     fetchUserSubmissions();
   }, [userId]);
 
-  // 🔹 3. Gộp 2 bảng lại
   const combinedData = writingData.map((task) => {
     const userSubmission = submissions.find((sub) => sub.practice_id === task.id);
     return {
       ...task,
-      // Giữ nguyên attempts từ writing_practices
       status: userSubmission?.status || "Not Started",
       overall_band: userSubmission?.ai_feedback?.overall_band || null,
     };
   });
 
 
-  // 🔹 4. Lọc dữ liệu hiển thị
   const filteredData = combinedData.filter((item) => {
     const statusMatch =
       tab === "completed" ? item.status === "Completed" : item.status !== "Completed";
@@ -85,7 +80,6 @@ const WritePage = () => {
     return statusMatch && sectionMatch && searchMatch;
   });
 
-  // 🔹 5. Wishlist
   const handleAddToWishlist = async (item) => {
     try {
       const exists = wishlist.some((w) => w.id === item.id);
