@@ -27,22 +27,35 @@ export const createListeningPractice = async (formData) => {
 // all list
 export const getListeningPractices = async () => {
   const snapshot = await db.collection(ListeningPractice.collectionName).get();
-  const data = snapshot.docs.map((doc) => {
-    const d = doc.data();
-    return {
-      id: doc.id,
-      section: d.section,
-      title: d.title,
-      type: d.type,
-      image_url: d.image_url || null,
-      audio_url: d.audio_url || null,
-      content: d.content_text || "",
-      correctAnswer: d.correct_answer || "",
-      timeLimit: d.time_limit || null,
-      attempts: d.attempts || 0,
-    };
-  });
-  return data; // return array
+
+  // get all data
+  const practices = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    section: doc.data().section,
+    title: doc.data().title,
+    type: doc.data().type,
+    image_url: doc.data().image_url || null,
+    audio_url: doc.data().audio_url || null,
+    content: doc.data().content_text || "",
+    correctAnswer: doc.data().correct_answer || "",
+    timeLimit: doc.data().time_limit || null,
+    attempts: 0, 
+  }));
+
+  // count submission -> attempt
+  const updatedPractices = await Promise.all(
+    practices.map(async (practice) => {
+      const submissionsSnap = await db
+        .collection("listening_submissions")
+        .where("practice_id", "==", practice.id)
+        .get();
+
+      const attemptCount = submissionsSnap.size || 0;
+      return { ...practice, attempts: attemptCount };
+    })
+  );
+
+  return updatedPractices;
 };
 
 // get by id
