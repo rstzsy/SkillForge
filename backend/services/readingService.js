@@ -27,7 +27,8 @@ export const createReadingPractice = async (formData) => {
 // all list
 export const getReadingPractices = async () => {
   const snapshot = await db.collection(ReadingPractice.collectionName).get();
-  const data = snapshot.docs.map((doc) => {
+
+  const practices = snapshot.docs.map((doc) => {
     const d = doc.data();
     return {
       id: doc.id,
@@ -39,10 +40,26 @@ export const getReadingPractices = async () => {
       content: d.content_text || "",
       correctAnswer: d.correct_answer || "",
       timeLimit: d.time_limit || null,
-      attempts: d.attempts || 0,
+      attempts: 0, 
     };
   });
-  return data; // return array
+
+  // count submission
+  const practicesWithAttempts = await Promise.all(
+    practices.map(async (practice) => {
+      const submissionsSnap = await db
+        .collection("reading_submissions")
+        .where("practice_id", "==", practice.id)
+        .get();
+
+      return {
+        ...practice,
+        attempts: submissionsSnap.size || 0,
+      };
+    })
+  );
+
+  return practicesWithAttempts;
 };
 
 // get by id

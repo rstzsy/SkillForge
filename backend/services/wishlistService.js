@@ -50,7 +50,15 @@ export const getWishlistByUser = async (userId) => {
         const collection = typeToCollection[typeKey];
         const practiceSnap = await db.collection(collection).doc(item.practice_id).get();
         const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
-        return { ...item, ...practiceData };
+
+        // lay so luot lam bai
+        const submissionsSnap = await db
+          .collection(typeKey === "listening" ? "listen_submissions" : "reading_submissions")
+          .where("practice_id", "==", item.practice_id)
+          .get();
+        const attempts = submissionsSnap.size;
+
+        return { ...item, ...practiceData, attempts };
       }
 
       if (typeKey === "writing") {
