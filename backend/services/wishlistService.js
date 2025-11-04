@@ -45,6 +45,7 @@ export const getWishlistByUser = async (userId) => {
   const wishlistWithPractice = await Promise.all(
     wishlistDocs.map(async (item) => {
       const typeKey = item.type?.trim().toLowerCase();
+      const wishlistType = item.type; // luu type trong wishlist
 
       if (typeKey === "listening" || typeKey === "reading") {
         const collection = typeToCollection[typeKey];
@@ -58,19 +59,37 @@ export const getWishlistByUser = async (userId) => {
           .get();
         const attempts = submissionsSnap.size;
 
-        return { ...item, ...practiceData, attempts };
+        return { 
+          ...item, 
+          ...practiceData, 
+          attempts,
+          type: wishlistType, // lay type cua wishlist chu khong phai cua task
+          practice_type: practiceData.type // type cua task
+        };
       }
 
       if (typeKey === "writing") {
         const practiceSnap = await db.collection("writing_practices").doc(item.practice_id).get();
         const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
-        return { ...item, ...practiceData };
+        return { 
+          ...item, 
+          ...practiceData,
+          type: wishlistType, // type cua wishlist
+          practice_type: practiceData.type
+        };
       }
 
       if (typeKey === "speaking") {
         const practiceSnap = await db.collection("speaking_practices").doc(item.practice_id).get();
         const practiceData = practiceSnap.exists ? practiceSnap.data() : {};
-        return { ...item, ...practiceData, section: "Speaking", title: practiceData.topic || "Untitled Speaking" };
+        return { 
+          ...item, 
+          ...practiceData, 
+          section: "Speaking", 
+          title: practiceData.topic || "Untitled Speaking",
+          type: wishlistType, // 
+          practice_type: practiceData.type
+        };
       }
 
       return { ...item };
