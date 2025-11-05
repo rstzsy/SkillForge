@@ -18,7 +18,6 @@ const WriteDetail = () => {
     conclusion: "",
   });
 
-  // 🔹 Lấy dữ liệu từ Firestore
   useEffect(() => {
     const fetchTask = async () => {
       try {
@@ -38,7 +37,6 @@ const WriteDetail = () => {
     fetchTask();
   }, [id]);
 
-  // 🔹 Đếm ngược thời gian
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
@@ -46,26 +44,29 @@ const WriteDetail = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 🔹 Đếm từ
   useEffect(() => {
     const text = Object.values(sections).join(" ");
     setWordCount(text.trim().split(/\s+/).filter(Boolean).length);
   }, [sections]);
 
-  // 🔹 Xử lý thay đổi nội dung
   const handleChange = (section, value) => {
     setSections((prev) => ({ ...prev, [section]: value }));
   };
 
-  // 🔹 Xử lý nộp bài
   const handleSubmit = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
-
     const essayText = Object.values(sections).join("\n\n");
 
+    console.log("📤 Sending to API:", {
+      userId,
+      practiceId: id,
+      essayText: essayText.substring(0, 100) + "...",
+      imageUrl: task.image_url,
+      section: task.section,
+    });
+
     try {
-      // ✅ Gửi bài đến API AI
       const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,26 +74,25 @@ const WriteDetail = () => {
           userId,
           practiceId: id,
           essayText,
+          imageUrl: task.image_url || null,
+          section: task.section,
         }),
       });
 
       const data = await res.json();
+      console.log("📥 Received from API:", data); // ✅ DEBUG
 
       if (res.status === 200) {
-        // ✅ Lấy document Firestore hiện tại
         const taskRef = doc(db, "writing_practices", id);
         const taskSnap = await getDoc(taskRef);
-        const currentData = taskSnap.data();
-        const currentAttempts = currentData?.attempts || 0;
+        const currentAttempts = taskSnap.data()?.attempts || 0;
 
-        // ✅ Cập nhật trạng thái và số lần thử
         await updateDoc(taskRef, {
           status: "Complete",
           attempts: currentAttempts + 1,
           last_completed_at: new Date(),
         });
 
-        // ✅ Chuyển hướng sang trang điểm
         navigate(`/score/write/${id}`, {
           state: { aiResult: data, userWriting: sections },
         });

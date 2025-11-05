@@ -2,8 +2,7 @@ import { aiWritingGeminiService } from "../ai/aiWritingGeminiService.js";
 
 export const evaluateEssay = async (req, res) => {
   try {
-    const { userId, practiceId, essayText } = req.body;
-    console.log("🧩 Received:", { userId, practiceId, essayTextLength: essayText?.length });
+    const { userId, practiceId, essayText, imageUrl, section } = req.body;
 
     if (!essayText || !userId || !practiceId) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -13,6 +12,8 @@ export const evaluateEssay = async (req, res) => {
       userId,
       practiceId,
       essayText,
+      imageUrl,
+      section,
     });
 
     res.status(200).json(result);

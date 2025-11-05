@@ -7,7 +7,6 @@ const ScoreWritePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🧠 Nhận dữ liệu từ WriteDetail
   const aiResult = location.state?.aiResult;
   const userWriting = location.state?.userWriting;
 
@@ -15,7 +14,6 @@ const ScoreWritePage = () => {
 
   useEffect(() => {
     if (!userWriting || !aiResult) {
-      // Nếu thiếu dữ liệu thì quay lại trang chính
       navigate("/");
       return;
     }
@@ -25,10 +23,8 @@ const ScoreWritePage = () => {
   if (loading) return <p className="loading">Analyzing your writing with Gemini AI...</p>;
   if (!aiResult) return <p>No AI result available.</p>;
 
-  // 🔹 Ghép toàn bộ bài viết
   const fullWriting = Object.values(userWriting).join("\n\n");
 
-  // 🔹 Highlight lỗi trong bài viết (nếu có)
   const errors = aiResult.errors || [];
   const highlightedWriting = errors.reduce((text, err) => {
     const escapedSentence = err.sentence.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -43,7 +39,13 @@ const ScoreWritePage = () => {
     <div className="score-page-container">
       <h2 className="score-title">AI Writing Feedback</h2>
 
-      {/* Tổng điểm */}
+      {aiResult.image_analysis && (
+        <div className="score-image-analysis">
+          <h3>Image Analysis</h3>
+          <p>{aiResult.image_analysis}</p>
+        </div>
+      )}
+
       <div className="score-summary">
         <h3>Overall Band: {aiResult.overall_band || "N/A"}</h3>
         <div className="score-grid">
