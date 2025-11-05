@@ -51,27 +51,26 @@ const ScoreReadPage = () => {
       {/* AI feedback */}
       <div className="ai-feedback-read">
         <h3>AI Feedback</h3>
-        <p>{aiFeedback?.feedback || "No feedback available"}</p>
-        {aiFeedback?.detailed_feedback && (
-          <div>
-            <h4>Detailed Feedback:</h4>
-            {Object.keys(aiFeedback.detailed_feedback).map((num) => (
-              <p key={num}>
-                ({num}): {aiFeedback.detailed_feedback[num]}
-              </p>
+
+        {/* OVERBAND */}
+        {aiFeedback?.overband !== undefined &&
+          aiFeedback?.overband !== null && (
+            <div className="overband-read">
+              <strong>Predicted IELTS Band: {aiFeedback.overband}</strong>
+            </div>
+          )}
+
+        <p>{aiFeedback?.feedback || "No AI feedback available"}</p>
+
+        <div className="ai-detailed-feedback">
+          {aiFeedback?.detailed_feedback &&
+            Object.keys(aiFeedback.detailed_feedback).map((key) => (
+              <div key={key}>
+                <strong>Blank {key}:</strong>{" "}
+                {aiFeedback.detailed_feedback[key]}
+              </div>
             ))}
-          </div>
-        )}
-        {aiFeedback?.suggestions?.length > 0 && (
-          <div>
-            <h4>Suggestions:</h4>
-            <ul>
-              {aiFeedback.suggestions.map((s, idx) => (
-                <li key={idx}>{s}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Result */}

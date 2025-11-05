@@ -53,7 +53,17 @@ const ScorePage = () => {
       {/* left side */}
       <div className="ai-feedback-lis">
         <h3>AI Feedback</h3>
-        <p>{feedbackText}</p>
+
+        {/* OVERBAND */}
+        {aiFeedback?.overband !== undefined &&
+          aiFeedback?.overband !== null && (
+            <div className="overband-lis">
+              <strong>Predicted IELTS Band: {aiFeedback.overband}</strong>
+            </div>
+          )}
+
+        <p>{aiFeedback?.feedback || "No AI feedback available"}</p>
+
         <div className="ai-detailed-feedback">
           {aiFeedback?.detailed_feedback &&
             Object.keys(aiFeedback.detailed_feedback).map((key) => (

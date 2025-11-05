@@ -128,6 +128,7 @@ const AdminEditSpeak = () => {
           <option value="Part 1">Part 1</option>
           <option value="Part 2">Part 2</option>
           <option value="Part 3">Part 3</option>
+          <option value="Test">Test</option>
         </select>
 
         {/* Topic */}

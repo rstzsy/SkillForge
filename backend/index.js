@@ -18,6 +18,7 @@ import userListeningSubmissionRoutes from "./routes/listeningSubmissionRoute.js"
 import userReadingRoutes from "./routes/userReadingRoute.js";
 import userReadingSubmissionRoutes from "./routes/readingSubmissionRoute.js";
 import wishlistRoute from "./routes/wishlistRoute.js";
+import placementRoutes from "./routes/placementRoute.js";
 
 
 dotenv.config();
@@ -49,6 +50,7 @@ app.use("/api/user/listen/submit", userListeningSubmissionRoutes);
 app.use("/api/user/reading", userReadingRoutes);
 app.use("/api/user/read/submit", userReadingSubmissionRoutes);
 app.use("/api/user/wishlist", wishlistRoute);
+app.use("/api/placement-tests", placementRoutes);
 
 
 app.get("/", (req, res) => {

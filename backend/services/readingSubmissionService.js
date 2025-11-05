@@ -88,7 +88,7 @@ export const gradeReadingSubmission = async (submissionId) => {
     console.warn("Cannot parse user_answers:", err);
   }
 
-  // get reading practice to compare answer
+  // get reading practice
   const practice = await getReadingPracticeById(submission.practice_id);
   const correctAnswerString = practice.correct_answer || "";
 
@@ -111,14 +111,9 @@ export const gradeReadingSubmission = async (submissionId) => {
   });
   const percent = total > 0 ? (score / total) * 100 : 0;
 
-  // luu diem vao firestore
-  await db.collection("reading_submissions").doc(submissionId).update({
-    score,
-    updated_at: new Date(),
-  });
-
-  // Sinh feedback AI
+  // ai feedback
   let aiFeedback = {};
+
   try {
     const prompt = `
 Bạn là giáo viên tiếng Anh chuyên về Reading. Hãy phân tích bài làm đọc hiểu của học viên chi tiết.
@@ -128,9 +123,10 @@ Correct Answers: ${JSON.stringify(correctAnswers)}
 
 Yêu cầu:
 - Đánh giá từng câu trả lời đúng/sai
-- Phân tích lý do sai (ví dụ do từ vựng, ngữ pháp, hiểu sai đoạn)
+- Phân tích lý do sai (từ vựng, ngữ pháp, hiểu sai đoạn)
 - Đưa ra các gợi ý cải thiện
-- Phản hồi bắt buộc ở **JSON format** như sau:
+- ước lượng điểm IELTS Reading (overband)
+- Phản hồi bắt buộc ở JSON format như sau:
 {
   "feedback": "Tóm tắt nhận xét 2-3 câu",
   "detailed_feedback": {
@@ -138,8 +134,9 @@ Yêu cầu:
     "2": "Nhận xét câu 2"
   },
   "suggestions": [
-    "1–3 gợi ý ngắn gọn cải thiện kỹ năng reading"
-  ]
+    "1–3 gợi ý cải thiện kỹ năng reading"
+  ],
+  "overband": 0
 }
 `;
 
@@ -155,11 +152,33 @@ Yêu cầu:
 
     if (text) {
       try {
+        // get string in json
         const match = text.match(/\{[\s\S]*\}/);
-        aiFeedback = match ? JSON.parse(match[0]) : null;
+        let jsonString = match ? match[0] : null;
+
+        // Thay nhay don thanh nhay kep ' -> ""
+        if (jsonString) {
+          jsonString = jsonString.replace(
+            /(['"])?([a-zA-Z0-9_]+)(['"])?:/g,
+            '"$2":'
+          );
+          aiFeedback = JSON.parse(jsonString);
+        } else {
+          aiFeedback = {
+            feedback: text,
+            detailed_feedback: {},
+            suggestions: [],
+            overband: null,
+          };
+        }
       } catch (err) {
         console.warn("⚠️ Cannot parse AI response as JSON:", err);
-        aiFeedback = { feedback: text, detailed_feedback: {}, suggestions: [] };
+        aiFeedback = {
+          feedback: text,
+          detailed_feedback: {},
+          suggestions: [],
+          overband: null,
+        };
       }
     }
 
@@ -173,6 +192,7 @@ Yêu cầu:
           "Improve vocabulary comprehension.",
           "Read articles and summarize key points.",
         ],
+        overband: null,
       };
     }
   } catch (err) {
@@ -186,10 +206,20 @@ Yêu cầu:
         "Improve vocabulary comprehension.",
         "Read articles and summarize key points.",
       ],
+      overband: null,
     };
   }
 
-  // return result
+  // Lưu score + overband in Firestore
+  await db
+    .collection("reading_submissions")
+    .doc(submissionId)
+    .update({
+      score,
+      updated_at: new Date(),
+      overband: aiFeedback.overband ?? null,
+    });
+
   return {
     submissionId,
     score,
