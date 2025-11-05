@@ -90,6 +90,7 @@ const AdminEditWrite = () => {
           <option value="">Select Section</option>
           <option value="Task 1">Task 1</option>
           <option value="Task 2">Task 2</option>
+          <option value="Test">Test</option>
         </select>
 
         <label>Title</label>

@@ -168,6 +168,7 @@ const AdminEditRead = () => {
           <option value="Section 2">Section 2</option>
           <option value="Section 3">Section 3</option>
           <option value="Section 4">Section 4</option>
+          <option value="Test">Test</option>
         </select>
 
         {/* Title */}

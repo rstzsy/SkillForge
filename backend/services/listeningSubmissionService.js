@@ -102,7 +102,7 @@ export const gradeListeningSubmission = async (submissionId) => {
     correctAnswers[index + 1] = ans.trim();
   });
 
-  // tinh diem
+  // tính điểm
   const total = Object.keys(correctAnswers).length;
   let score = 0;
   Object.keys(correctAnswers).forEach((key) => {
@@ -116,16 +116,12 @@ export const gradeListeningSubmission = async (submissionId) => {
   });
   const percent = total > 0 ? (score / total) * 100 : 0;
 
-  await db.collection("listening_submissions").doc(submissionId).update({
-    score,
-    updated_at: new Date(),
-  });
-
-  // call api gemini to get feedback about score
+  // call AI for feedback + predicted IELTS band
   let aiFeedback = {};
+  let overband = null;
   try {
     const prompt = `
-Bạn là giáo viên tiếng Anh chuyên về Listening. Hãy phân tích bài làm của học viên một cách chi tiết.
+Bạn là giáo viên IELTS Listening chuyên nghiệp. Hãy phân tích bài làm của học viên:
 
 User Answers: ${JSON.stringify(userAnswers)}
 Correct Answers: ${JSON.stringify(correctAnswers)}
@@ -134,7 +130,8 @@ Yêu cầu:
 - Đánh giá từng câu trả lời đúng/sai
 - Phân tích chi tiết từng blank
 - Đưa ra các gợi ý cải thiện
-- Phản hồi bắt buộc ở **JSON format** như sau:
+- Đưa ra **ước lượng điểm IELTS Listening (band score từ 0–9)** dựa trên bài làm
+- Phản hồi bắt buộc ở JSON format như sau:
 {
   "feedback": "Tóm tắt nhận xét 2-3 câu",
   "detailed_feedback": {
@@ -143,7 +140,8 @@ Yêu cầu:
   },
   "suggestions": [
     "1–3 gợi ý ngắn gọn cải thiện kỹ năng listening"
-  ]
+  ],
+  "overband": 0 // điểm IELTS Listening do AI ước lượng
 }
 `;
 
@@ -162,6 +160,7 @@ Yêu cầu:
         // Parse JSON
         const match = text.match(/\{[\s\S]*\}/);
         aiFeedback = match ? JSON.parse(match[0]) : null;
+        overband = aiFeedback?.overband ?? null;
       } catch (err) {
         console.warn("⚠️ Cannot parse AI response as JSON:", err);
         aiFeedback = { feedback: text, detailed_feedback: {}, suggestions: [] };
@@ -178,6 +177,7 @@ Yêu cầu:
           "Practice with similar exercises.",
           "Review vocabulary for common topics.",
         ],
+        overband: null,
       };
     }
   } catch (err) {
@@ -191,10 +191,17 @@ Yêu cầu:
         "Practice with similar exercises.",
         "Review vocabulary for common topics.",
       ],
+      overband: null,
     };
   }
 
-  // Return result
+  // update overband to firestore
+  await db.collection("listening_submissions").doc(submissionId).update({
+    score,
+    overband, 
+    updated_at: new Date(),
+  });
+
   return {
     submissionId,
     score,
@@ -204,5 +211,7 @@ Yêu cầu:
     correctAnswers,
     practiceTitle: practice.title,
     aiFeedback,
+    overband,
   };
 };
+

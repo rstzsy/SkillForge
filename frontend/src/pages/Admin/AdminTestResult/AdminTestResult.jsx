@@ -24,7 +24,7 @@ const AdminTestResult = () => {
       return parseFloat(result.feedback?.overall_band || result.feedback?.ai_score) || 0;
     }
     if (result.skill === "listening" || result.skill === "reading") {
-      return result.score || 0;
+      return result.overband || 0;
     }
     return 0;
   };
@@ -267,7 +267,7 @@ const AdminTestResult = () => {
             email,
             title,
             skill: "listening",
-            score: lisData.score || 0,
+            overband: lisData.overband || 0,
             total: lisData.total || 0,
             userAnswers: lisData.user_answer || {},
             correctAnswers: lisData.correct_answers || {},
@@ -325,7 +325,7 @@ const AdminTestResult = () => {
             email,
             title,
             skill: "reading",
-            score: readData.score || 0,
+            overband: readData.overband || 0,
             total: readData.total || 0,
             userAnswers: readData.user_answers || {},
             correctAnswers: readData.correct_answers || {},
@@ -749,8 +749,8 @@ const AdminTestResult = () => {
                     <td className="overall-score-testresult">
                       {r.skill === "writing" && (r.feedback?.overall_band || "-")}
                       {r.skill === "speaking" && (r.feedback?.overall_band || r.feedback?.ai_score || "-")}
-                      {r.skill === "listening" && `${r.score}/${r.total}`}
-                      {r.skill === "reading" && `${r.score}/${r.total}`}
+                      {r.skill === "listening" && `${r.overband}`}
+                      {r.skill === "reading" && `${r.overband}`}
                     </td>
                     <td>{r.createdAt.toLocaleString()}</td>
                     <td>
