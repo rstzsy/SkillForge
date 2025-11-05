@@ -30,8 +30,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ Public thư mục uploads để có thể truy cập file trực tiếp
-app.use("/uploads/audio", express.static(path.join(__dirname, "uploads/audio")));
-console.log("🗂️ Serving uploads from:", path.join(__dirname, "uploads/audio"));
+const audioPath = path.join(process.cwd(), "uploads", "audio");
+app.use("/uploads/audio", express.static(audioPath));
+console.log("🗂️ Serving uploads from:", audioPath);
 
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes); 
