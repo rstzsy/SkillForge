@@ -130,7 +130,7 @@ Yêu cầu:
 - Đánh giá từng câu trả lời đúng/sai
 - Phân tích chi tiết từng blank
 - Đưa ra các gợi ý cải thiện
-- Đưa ra **ước lượng điểm IELTS Listening (band score từ 0–9)** dựa trên bài làm
+- Đưa ra **ước lượng điểm IELTS Listening (band score từ 0-9)** dựa trên bài làm
 - Phản hồi bắt buộc ở JSON format như sau:
 {
   "feedback": "Tóm tắt nhận xét 2-3 câu",
@@ -139,7 +139,7 @@ Yêu cầu:
     "2": "Nhận xét blank 2"
   },
   "suggestions": [
-    "1–3 gợi ý ngắn gọn cải thiện kỹ năng listening"
+    "1-3 gợi ý ngắn gọn cải thiện kỹ năng listening"
   ],
   "overband": 0 // điểm IELTS Listening do AI ước lượng
 }
@@ -199,6 +199,7 @@ Yêu cầu:
   await db.collection("listening_submissions").doc(submissionId).update({
     score,
     overband, 
+    aiFeedback,
     updated_at: new Date(),
   });
 

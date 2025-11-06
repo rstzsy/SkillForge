@@ -109,6 +109,7 @@ const Header = () => {
               <Link to="/contact">Contact</Link>
               <Link to="/coursepage">My Course</Link>
               <Link to="/goalsetup">Setup Goal</Link>
+              <Link to="/result">Result</Link>
             </div>
           </div>
 
@@ -163,6 +164,7 @@ const Header = () => {
                 <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
                 <li><Link to="/progress" onClick={closeMenu}>Progress</Link></li>
                 <li><Link to="/coursepage" onClick={closeMenu}>My Course</Link></li>
+                <li><Link to="/result" onClick={closeMenu}>Result</Link></li>
               </ul>
             </div>
           </div>
