@@ -8,7 +8,6 @@
   gap: 28px;
   font-family: "Baloo 2", cursive, sans-serif;
   min-height: 100vh;
-  background: #fffdf8;
   box-sizing: border-box;
 }
 
@@ -118,11 +117,13 @@
 
 /* ====== Classes & upcoming ====== */
 .classes-card {
+  margin-top: -100px;  
   flex: 1 1 640px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
+
 .upcoming-card {
   width: 340px;
   display: flex;
@@ -270,23 +271,6 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-}
-.quick-btn {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: 1px solid #fbe4b2;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #9b6a00;
-  font-weight: 600;
-}
-.quick-btn:hover {
-  background: #fff6da;
 }
 
 /* ====== Responsive ====== */

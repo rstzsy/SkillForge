@@ -27,6 +27,7 @@ export default function Login() {
 
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", user.id);
 
         // check role
         if (user.role === "Admin") {
@@ -71,6 +72,7 @@ export default function Login() {
 
       if (res.status === 200) {
         localStorage.setItem("user", JSON.stringify(data.user || googleUser));
+        localStorage.setItem("userId", data.user?.id || googleUser.uid);
         if (data.token) {
           localStorage.setItem("token", data.token);
         }
