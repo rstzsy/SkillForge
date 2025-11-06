@@ -1,5 +1,6 @@
 import { getAllTeachers, getAllStudents, addClassService, 
-    getAllClasses, getClassById, updateClass, deleteClass, getClassesByTeacherId } from "../services/classService.js";
+    getAllClasses, getClassById, updateClass, 
+    deleteClass, getClassesByTeacherId, getClassesForUser } from "../services/classService.js";
 
 export const getTeachersController = async (req, res) => {
   try {
@@ -98,5 +99,23 @@ export const getClassesByTeacherController = async (req, res) => {
   } catch (err) {
     console.error("Failed to fetch classes:", err);
     return res.status(500).json({ message: "Failed to fetch classes" });
+  }
+};
+
+// student
+export const handleGetClassesOfUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const classes = await getClassesForUser(userId);
+
+    return res.status(200).json({
+      message: "Fetched classes successfully",
+      classes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
