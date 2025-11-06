@@ -1,4 +1,3 @@
-// AdminDashboard.jsx - Updated with real Firebase data
 import { useState, useEffect } from 'react';
 import AdminHeader from "../../../component/HeaderAdmin/HeaderAdmin";
 import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LineChart, Line } from "recharts";
@@ -107,7 +106,7 @@ const AdminDashboard = () => {
 
                 const monthlyTestsData = Object.values(monthlyData);
 
-                // 5. Tính average scores theo skill (Bar Chart)
+                // 5. Tính average scores theo skill (Bar Chart) - CẬP NHẬT CHÍNH XÁC
                 const calculateAvgScore = (submissions, scoreField) => {
                     if (submissions.length === 0) return 0;
                     
@@ -117,8 +116,20 @@ const AdminDashboard = () => {
                             // Xử lý các field score khác nhau
                             if (scoreField === 'writing') {
                                 return parseFloat(data.ai_feedback?.overall_band) || 0;
-                            } else if (scoreField === 'speaking') {
-                                return parseFloat(data.feedback?.overall_band || data.feedback?.ai_score || data.ai_score) || 0;
+                            } else if (scoreField === 'speaking_question') {
+                                // Cho speaking_question_submissions
+                                let feedback = data.feedback;
+                                if (typeof feedback === "string") {
+                                    try {
+                                        feedback = JSON.parse(feedback);
+                                    } catch (e) {
+                                        return 0;
+                                    }
+                                }
+                                return parseFloat(feedback?.overall_band || feedback?.ai_score) || 0;
+                            } else if (scoreField === 'speaking_topic') {
+                                // Cho speaking_submissions (Complete Topic)
+                                return parseFloat(data.ai_score) || 0;
                             } else { // listening/reading
                                 return parseFloat(data.overband) || 0;
                             }
@@ -132,7 +143,7 @@ const AdminDashboard = () => {
 
                 const avgScoresData = [
                     { skill: "Writing", score: parseFloat(calculateAvgScore(writingSnap.docs, 'writing')) },
-                    { skill: "Speaking", score: parseFloat(calculateAvgScore([...speakingQSnap.docs, ...speakingSnap.docs], 'speaking')) },
+                    { skill: "Speaking", score: parseFloat(calculateAvgScore(speakingQSnap.docs, 'speaking_question')) },
                     { skill: "Listening", score: parseFloat(calculateAvgScore(listeningSnap.docs, 'listening')) },
                     { skill: "Reading", score: parseFloat(calculateAvgScore(readingSnap.docs, 'reading')) }
                 ];

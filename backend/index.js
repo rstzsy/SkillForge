@@ -52,6 +52,7 @@ app.use("/api/user/read/submit", userReadingSubmissionRoutes);
 app.use("/api/user/wishlist", wishlistRoute);
 app.use("/api/placement-tests", placementRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/:userId/progress", userRoutes); 
 
 
 app.get("/", (req, res) => {
