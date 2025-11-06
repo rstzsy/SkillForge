@@ -271,7 +271,7 @@ const AdminTestResult = () => {
             total: lisData.total || 0,
             userAnswers: lisData.user_answer || {},
             correctAnswers: lisData.correct_answers || {},
-            aiFeedback: lisData.ai_feedback,
+            aiFeedback: lisData.aiFeedback,
             durationSeconds: lisData.duration_seconds || 0,
             createdAt: lisData.submitted_at?.toDate
               ? lisData.submitted_at.toDate()
@@ -329,7 +329,7 @@ const AdminTestResult = () => {
             total: readData.total || 0,
             userAnswers: readData.user_answers || {},
             correctAnswers: readData.correct_answers || {},
-            aiFeedback: readData.ai_feedback,
+            aiFeedback: readData.aiFeedback,
             timeSpent: readData.time_spent || 0,
             createdAt: readData.submitted_at?.toDate
               ? readData.submitted_at.toDate()
@@ -635,7 +635,7 @@ const AdminTestResult = () => {
                           <div className="scores-grid-testresult">
                             <div className="score-item-testresult overall-score-item">
                               <span>Score:</span>
-                              <strong>{test.score} / {test.total}</strong>
+                              <strong>{test.overband}</strong>
                             </div>
                             <div className="score-item-testresult">
                               <span>Duration:</span>
@@ -646,7 +646,7 @@ const AdminTestResult = () => {
                                 <strong>AI Feedback:</strong> {test.aiFeedback.feedback}
                               </div>
                             )}
-                            {test.aiFeedback?.detailed_feedback && (
+                            {/* {test.aiFeedback?.detailed_feedback && (
                               <div className="detailed-feedback-box">
                                 <strong>Detailed Feedback:</strong>
                                 {Object.entries(test.aiFeedback.detailed_feedback).map(([key, value]) => (
@@ -655,7 +655,7 @@ const AdminTestResult = () => {
                                   </div>
                                 ))}
                               </div>
-                            )}
+                            )} */}
                           </div>
                         )}
 
@@ -664,7 +664,7 @@ const AdminTestResult = () => {
                           <div className="scores-grid-testresult">
                             <div className="score-item-testresult overall-score-item">
                               <span>Score:</span>
-                              <strong>{test.score} / {test.total}</strong>
+                              <strong>{test.overband}</strong>
                             </div>
                             <div className="score-item-testresult">
                               <span>Time Spent:</span>
@@ -675,7 +675,7 @@ const AdminTestResult = () => {
                                 <strong>AI Feedback:</strong> {test.aiFeedback.feedback}
                               </div>
                             )}
-                            {test.aiFeedback?.detailed_feedback && (
+                            {/* {test.aiFeedback?.detailed_feedback && (
                               <div className="detailed-feedback-box">
                                 <strong>Detailed Feedback:</strong>
                                 {Object.entries(test.aiFeedback.detailed_feedback).map(([key, value]) => (
@@ -684,8 +684,8 @@ const AdminTestResult = () => {
                                   </div>
                                 ))}
                               </div>
-                            )}
-                            {test.aiFeedback?.suggestions?.length > 0 && (
+                            )} */}
+                            {/* {test.aiFeedback?.suggestions?.length > 0 && (
                               <div className="suggestions-box">
                                 <strong>Suggestions:</strong>
                                 <ul>
@@ -694,7 +694,7 @@ const AdminTestResult = () => {
                                   ))}
                                 </ul>
                               </div>
-                            )}
+                            )} */}
                           </div>
                         )}
                       </div>

@@ -134,7 +134,7 @@ Yêu cầu:
     "2": "Nhận xét câu 2"
   },
   "suggestions": [
-    "1–3 gợi ý cải thiện kỹ năng reading"
+    "1-3 gợi ý cải thiện kỹ năng reading"
   ],
   "overband": 0
 }
@@ -218,6 +218,7 @@ Yêu cầu:
       score,
       updated_at: new Date(),
       overband: aiFeedback.overband ?? null,
+      aiFeedback
     });
 
   return {

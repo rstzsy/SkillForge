@@ -1,47 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./CoursePage.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faLink } from "@fortawesome/free-solid-svg-icons";
 
 const CoursePage = () => {
-  const [classes] = useState([
-    {
-      id: "S101",
-      name: "Speaking 101",
-      subject: "Speaking",
-      studentCount: 25,
-      schedule: "Mon 8:00-10:00",
-      description:
-        "A beginner course focusing on improving your pronunciation, fluency, and confidence in speaking English.",
-      driveLink: "https://drive.google.com/speaking101",
-      zoomLink: "https://zoom.us/j/123456789",
-    },
-    {
-      id: "S102",
-      name: "Speaking 102",
-      subject: "Speaking",
-      studentCount: 30,
-      schedule: "Tue 10:00-12:00",
-      description:
-        "Learn strategies for understanding complex texts and improving your IELTS reading skills.",
-      driveLink: "https://drive.google.com/reading101",
-      zoomLink: "https://zoom.us/j/987654321",
-    },
-    {
-      id: "S103",
-      name: "Speaking 103",
-      subject: "Speaking",
-      studentCount: 20,
-      schedule: "Wed 13:00-15:00",
-      description:
-        "Develop your essay writing and academic expression with practice-based learning.",
-      driveLink: "https://drive.google.com/writing101",
-      zoomLink: "https://zoom.us/j/111222333",
-    },
-  ]);
-
+  const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  // Fetch classes from backend
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        const userId = storedUser?.id;
+
+        if (!userId) {
+          console.error("UserID not found in localStorage");
+          return;
+        }
+
+        const res = await fetch(
+          `http://localhost:3002/api/admin/classes/user/${userId}`
+        );
+        const data = await res.json();
+
+        if (data.classes) {
+          const classesWithFakeId = data.classes.map((cls, index) => ({
+            ...cls,
+            fakeId: `S${String(index + 1).padStart(3, "0")}`,
+          }));
+
+          setClasses(classesWithFakeId);
+        }
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   const handleView = (cls) => {
     setSelectedClass(cls);
@@ -65,7 +63,7 @@ const CoursePage = () => {
 
       {/* ===== Course List ===== */}
       <div className="course-list-container">
-        <h2 className="course-list-title">Available Classes</h2>
+        <h2 className="course-list-title">Your Classes</h2>
         <div className="course-table-wrapper">
           <table className="course-table">
             <thead>
@@ -75,27 +73,38 @@ const CoursePage = () => {
                 <th>Subject</th>
                 <th>Students</th>
                 <th>Schedule</th>
+                <th>Teacher</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {classes.map((cls) => (
-                <tr key={cls.id}>
-                  <td>{cls.id}</td>
-                  <td>{cls.name}</td>
-                  <td>{cls.subject}</td>
-                  <td>{cls.studentCount}</td>
-                  <td>{cls.schedule}</td>
-                  <td>
-                    <button
-                      className="btn-view-course"
-                      onClick={() => handleView(cls)}
-                    >
-                      <FontAwesomeIcon icon={faEye} /> View
-                    </button>
+              {classes.length > 0 ? (
+                classes.map((cls) => (
+                  <tr key={cls.id}>
+                    <td>{cls.fakeId}</td>
+                    <td>{cls.name}</td>
+                    <td>{cls.subject}</td>
+                    <td>{cls.studentCount}</td>
+                    <td>{cls.schedule}</td>
+                    <td>{cls.teacher}</td>
+
+                    <td>
+                      <button
+                        className="btn-view-course"
+                        onClick={() => handleView(cls)}
+                      >
+                        <FontAwesomeIcon icon={faEye} /> View
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" style={{ textAlign: "center" }}>
+                    No classes found.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -112,13 +121,22 @@ const CoursePage = () => {
             <p>
               <strong>Subject:</strong> {selectedClass.subject}
             </p>
+
+            <p>
+              <strong>Teacher:</strong> {selectedClass.teacher}
+            </p>
+
             <p>
               <strong>Schedule:</strong> {selectedClass.schedule}
             </p>
+
             <p>
               <strong>Students Enrolled:</strong> {selectedClass.studentCount}
             </p>
-            <p className="desc">{selectedClass.description}</p>
+
+            {selectedClass.description && (
+              <p className="desc">{selectedClass.description}</p>
+            )}
 
             <p>
               <strong>Drive Link: </strong>

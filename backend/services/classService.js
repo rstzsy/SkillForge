@@ -187,3 +187,58 @@ export const getClassesByTeacherId = async (teacherId) => {
   return classes;
 };
 
+// student
+export const getClassesForUser = async (userId) => {
+  if (!userId) throw new Error("Missing userId");
+
+  const classesRef = db.collection("classes");
+  const snapshot = await classesRef.get();
+
+  const classList = [];
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+
+    // check user in class?
+    const isUserInClass = data.students?.some((s) => s.id === userId);
+    if (!isUserInClass) continue;
+
+    //get teacher infor
+    const teacherDoc = await db.collection("users").doc(data.teacherId).get();
+    const teacherData = teacherDoc.exists ? teacherDoc.data() : null;
+
+    // format schedule
+    let scheduleFormatted = "";
+    if (data.schedule) {
+      let dateObj =
+        typeof data.schedule.toDate === "function"
+          ? data.schedule.toDate() // Firestore Timestamp
+          : new Date(data.schedule);
+
+      scheduleFormatted = dateObj.toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    classList.push({
+      id: doc.id,                  
+      name: data.name,
+      subject: data.subject,
+      schedule: scheduleFormatted, 
+      driveLink: data.driveLink || "",
+      zoomLink: data.zoomLink || "",
+      studentCount: data.students?.length || 0,
+      description: data.description || "",
+      teacher: teacherData?.userName || "Unknown Teacher",
+      teacherEmail: teacherData?.email || null,
+    });
+  }
+
+  return classList;
+};
+
+

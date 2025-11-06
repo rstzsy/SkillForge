@@ -19,7 +19,7 @@ import userReadingRoutes from "./routes/userReadingRoute.js";
 import userReadingSubmissionRoutes from "./routes/readingSubmissionRoute.js";
 import wishlistRoute from "./routes/wishlistRoute.js";
 import placementRoutes from "./routes/placementRoute.js";
-
+import resultRoutes from "./routes/userResultRoute.js";
 
 dotenv.config();
 const app = express();
@@ -51,6 +51,7 @@ app.use("/api/user/reading", userReadingRoutes);
 app.use("/api/user/read/submit", userReadingSubmissionRoutes);
 app.use("/api/user/wishlist", wishlistRoute);
 app.use("/api/placement-tests", placementRoutes);
+app.use("/api/results", resultRoutes);
 
 
 app.get("/", (req, res) => {

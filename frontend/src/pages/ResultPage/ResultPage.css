@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&display=swap');
+
+.resultpage-container-userresult {
+  display: flex;
+  gap: 24px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: auto;
+  font-family: 'Baloo 2', cursive, sans-serif;
+  flex-wrap: wrap;
+}
+
+/* ------------------ Title ------------------ */
+.page-title-userresult {
+  font-size: 1.8rem;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
+  color: #dc9f36;
+}
+
+/* ------------------ Left Panel ------------------ */
+.left-panel-userresult {
+  flex: 2;
+}
+
+/* Grid */
+.results-grid-userresult {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.result-card-userresult {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.result-card-userresult:hover {
+  transform: scale(1.02);
+}
+
+.card-header-userresult {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.card-title-userresult {
+  margin-top: 6px;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.card-section-userresult {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.card-score-userresult {
+  margin-top: 6px;
+  font-size: 1.4rem;
+  color: #dc9f36;
+}
+
+.card-date-userresult {
+  margin-top: 6px;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+/* Skill Colors */
+.result-card-userresult.writing-userresult { border-left: 5px solid #fff3e0; }
+.result-card-userresult.speaking-userresult { border-left: 5px solid #ffe0eb; }
+.result-card-userresult.listening-userresult { border-left: 5px solid #e3f2fd; }
+.result-card-userresult.reading-userresult  { border-left: 5px solid #e8f5e9; }
+
+.no-results-userresult {
+  text-align: center;
+  color: #888;
+  font-size: 1rem;
+}
+
+/* =================== PAGINATION =================== */
+.pagination-controls-userresult {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-family: 'Baloo 2', cursive, sans-serif;
+}
+
+.pagination-controls-userresult button {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #dc9f36;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.pagination-controls-userresult button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls-userresult span {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+
+/* ------------------ Right Panel ------------------ */
+.right-panel-userresult {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ------------------ Filter ------------------ */
+.custom-dropdown {
+  position: relative;
+  font-family: Arial, sans-serif;
+  user-select: none;
+}
+
+.custom-dropdown .selected-item {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.custom-dropdown .selected-item:hover {
+  border-color: #f5cf8d;
+}
+
+.custom-dropdown .selected-item::after {
+  content: "▼";
+  font-size: 0.7rem;
+  margin-left: 8px;
+}
+
+.custom-dropdown .dropdown-list {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.custom-dropdown .dropdown-item {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-dropdown .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.custom-dropdown .dropdown-item.selected {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+/* ------------------ Summary ------------------ */
+.summary-card-userresult {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.overview-title-userresult {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.skill-summary-userresult {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.skill-box-userresult {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: #eee;
+}
+
+.skill-box-userresult.writing-userresult  { background: #fff3e0; }
+.skill-box-userresult.speaking-userresult { background: #ffe0eb; }
+.skill-box-userresult.listening-userresult { background: #e3f2fd; }
+.skill-box-userresult.reading-userresult  { background: #e8f5e9; }
+
+.overband-userresult {
+  color: #dc9f36;
+  font-weight: bold;
+  font-size: 20px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ------------------ Modal ------------------ */
+.modal-userresult {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content-userresult {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.close-btn-userresult {
+  margin-top: 15px;
+  padding: 8px 16px;
+  background: #dc9f36;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+/* ------------------ Responsive ------------------ */
+@media (max-width: 960px) {
+  .resultpage-container-userresult {
+    flex-direction: column;
+  }
+
+  .right-panel-userresult {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .results-grid-userresult {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .result-card-userresult {
+    padding: 12px;
+  }
+
+  .page-title-userresult {
+    font-size: 1.4rem;
+  }
+
+  .modal-content-userresult {
+    width: 90%;
+    padding: 16px;
+  }
+}
