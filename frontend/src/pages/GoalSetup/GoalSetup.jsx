@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/config"; 
 import "./GoalSetup.css";
 
 const BAND_OPTIONS = ["4.5","5.0","5.5","6.0","6.5","7.0","7.5","8.0","8.5","9.0"];
@@ -28,8 +30,6 @@ const GoalSetup = () => {
   const [currentBand, setCurrentBand] = useState("-");
   const [roadmap, setRoadmap] = useState(null);
 
-
-
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const band = localStorage.getItem("currentBand");
@@ -39,7 +39,6 @@ const GoalSetup = () => {
       setEmail(storedUser.email || "");
       setUserId(storedUser.id || "");
       if (band) setCurrentBand(band);
-
     } else {
       console.warn("No user found in localStorage");
     }
@@ -99,7 +98,6 @@ const GoalSetup = () => {
       const goalId = data.data?.id || data.data?.goal_id || data.id || data.goal_id;
       console.log("Extracted goalId:", goalId);
 
-
       try {
         const roadmapPayload = {
           ...payload,
@@ -128,8 +126,6 @@ const GoalSetup = () => {
       setMessage("Failed to save goal. Please try again later.");
     }
   };
-
-
 
   const clearSaved = () => {
     localStorage.removeItem("userGoal");
@@ -177,13 +173,13 @@ const GoalSetup = () => {
             </ul>
           </div>
 
-            <div className="goalsetup-image-container">
-                <img
-                src="/assets/ieltsgoal.png"
-                alt="IELTS Goal Illustration"
-                className="goalsetup-image"
-                />
-            </div>
+          <div className="goalsetup-image-container">
+            <img
+              src="/assets/ieltsgoal.png"
+              alt="IELTS Goal Illustration"
+              className="goalsetup-image"
+            />
+          </div>
         </div>
 
         <div className="goalsetup-right">
@@ -270,7 +266,7 @@ const GoalSetup = () => {
               <div>
                 <p><strong>Name:</strong> {name || "—"}</p>
                 <p><strong>Email:</strong> {email || "—"}</p>
-                <p><strong>Current band:</strong> {currentBand}</p> {/* 🆕 */}
+                <p><strong>Current band:</strong> {currentBand}</p>
                 <p><strong>Target band:</strong> {targetBand}</p>
                 <p><strong>Target date:</strong> {targetDate || "—"}</p>
                 <p><strong>Days left:</strong> {daysUntil() !== null ? `${daysUntil()} days` : "—"}</p>
@@ -281,7 +277,6 @@ const GoalSetup = () => {
               <p>No goal saved yet. Fill the form to create your personalized plan.</p>
             )}
           </aside>
-
         </div>
       </section>
 
@@ -309,7 +304,6 @@ const GoalSetup = () => {
         </div>
       </section>
 
-
       <section className="goalsetup-roadmap">
         <h2 className="goalsetup-roadmap-title">🎯 Suggested Roadmap</h2>
         <p className="goalsetup-roadmap-subtitle">
@@ -317,12 +311,11 @@ const GoalSetup = () => {
         </p>
 
         <div className="goalsetup-roadmap-steps">
-          {/* Nếu có roadmap từ backend thì map ra */}
           {roadmap && roadmap.steps?.length > 0 ? (
             roadmap.steps.map((step, index) => (
               <div key={index} className="goalsetup-roadmap-step">
                 <img
-                  src={step.icon || "/assets/goal.png" || "/assets/assessmentIcon.png" || "/assets/personalizedPlan.png" || "/assets/practiceAndLearn.png"}
+                  src={step.icon || "/assets/goal.png"}
                   alt={step.title}
                   className="goalsetup-roadmap-icon"
                 />
@@ -333,7 +326,6 @@ const GoalSetup = () => {
               </div>
             ))
           ) : (
-            // Fallback mặc định nếu chưa có roadmap
             <>
               <div className="goalsetup-roadmap-step">
                 <img src="/assets/assessmentIcon.png" alt="Start" className="goalsetup-roadmap-icon" />
@@ -371,32 +363,93 @@ const GoalSetup = () => {
         </div>
       </section>
 
-
-      {/* Suggested Exercises Section */}
-      <SuggestedExercisesGoal />
+      {/* 🆕 Suggested Exercises từ Firebase */}
+      <SuggestedExercisesGoal prioritySkills={prioritySkills} targetBand={targetBand} />
     </div>
   );
 };
 
-// Suggested Exercises Component
-const SuggestedExercisesGoal = () => {
-  const exercises = [
-    { id: 1, title: "Listening Part 3 – Multiple Choice", skill: "L", difficulty: "Medium", duration: 30 },
-    { id: 2, title: "Reading Passage 2 – True/False/Not Given", skill: "R", difficulty: "Hard", duration: 60 },
-    { id: 3, title: "Writing Task 1 – Bar Chart", skill: "W", difficulty: "Easy", duration: 30 },
-    { id: 4, title: "Speaking Part 2 – Cue Card Practice", skill: "S", difficulty: "Medium", duration: 15 },
-    { id: 5, title: "Listening Part 4 – Note Completion", skill: "L", difficulty: "Hard", duration: 30 },
-    { id: 6, title: "Reading Passage 3 – Matching Headings", skill: "R", difficulty: "Medium", duration: 45 },
-    { id: 7, title: "Writing Task 2 – Opinion Essay", skill: "W", difficulty: "Hard", duration: 40 },
-    { id: 8, title: "Speaking Part 3 – Discussion", skill: "S", difficulty: "Medium", duration: 20 },
-  ];
-
+// 🆕 Component gợi ý bài tập từ Firebase
+const SuggestedExercisesGoal = ({ prioritySkills, targetBand }) => {
+  const [exercises, setExercises] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [skillFilter, setSkillFilter] = useState("All");
   const [difficultyFilter, setDifficultyFilter] = useState("All");
   const [durationFilter, setDurationFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
   const ITEMS_PER_PAGE = 4;
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        setLoading(true);
+
+        const [speakSnap, writeSnap, readSnap, listenSnap] = await Promise.all([
+          getDocs(collection(db, "speaking_practices")),
+          getDocs(collection(db, "writing_practices")),
+          getDocs(collection(db, "reading_practices")),
+          getDocs(collection(db, "listening_practices")),
+        ]);
+
+        const allExercises = [
+          ...speakSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().topic || "Untitled Speaking Task",
+            skill: "S",
+            skillName: "Speaking",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 15,
+            route: "speak",
+          })),
+          ...writeSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Writing Task",
+            skill: "W",
+            skillName: "Writing",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 30,
+            route: "write",
+          })),
+          ...readSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Reading Task",
+            skill: "R",
+            skillName: "Reading",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 45,
+            route: "read",
+          })),
+          ...listenSnap.docs.map((d) => ({
+            id: d.id,
+            title: d.data().title || "Untitled Listening Task",
+            skill: "L",
+            skillName: "Listening",
+            difficulty: d.data().difficulty || "Medium",
+            duration: d.data().duration || 30,
+            route: "listen",
+          })),
+        ];
+
+        // 🎯 Ưu tiên bài tập theo priority skills
+        const prioritized = allExercises.sort((a, b) => {
+          const aIsPriority = prioritySkills.includes(a.skillName);
+          const bIsPriority = prioritySkills.includes(b.skillName);
+          if (aIsPriority && !bIsPriority) return -1;
+          if (!aIsPriority && bIsPriority) return 1;
+          return 0;
+        });
+
+        setExercises(prioritized);
+      } catch (error) {
+        console.error("Error fetching exercises:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExercises();
+  }, [prioritySkills]);
 
   const filteredExercises = exercises.filter((item) => {
     return (
@@ -413,10 +466,13 @@ const SuggestedExercisesGoal = () => {
   return (
     <section className="goal-exercises">
       <div className="goal-exercises-header">
-        <h2 className="goal-exercises-title">Suggested Exercises & Mock Tests</h2>
+        <h2 className="goal-exercises-title">📚 Personalized Exercises for You</h2>
+        <p style={{ color: "#666", marginBottom: "1rem" }}>
+          Based on your priority: <strong>{prioritySkills.join(", ")}</strong>
+        </p>
         <div className="goal-exercises-filters">
           <select onChange={(e) => setSkillFilter(e.target.value)}>
-            <option value="All">Skill</option>
+            <option value="All">All Skills</option>
             <option value="L">Listening</option>
             <option value="R">Reading</option>
             <option value="W">Writing</option>
@@ -424,14 +480,14 @@ const SuggestedExercisesGoal = () => {
           </select>
 
           <select onChange={(e) => setDifficultyFilter(e.target.value)}>
-            <option value="All">Difficulty</option>
+            <option value="All">All Difficulty</option>
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
             <option value="Hard">Hard</option>
           </select>
 
           <select onChange={(e) => setDurationFilter(e.target.value)}>
-            <option value="All">Duration</option>
+            <option value="All">All Duration</option>
             <option value="15">15 min</option>
             <option value="30">30 min</option>
             <option value="45">45 min</option>
@@ -440,19 +496,28 @@ const SuggestedExercisesGoal = () => {
         </div>
       </div>
 
-      <div className="goal-exercises-grid">
-        {currentExercises.map((item) => (
-          <div key={item.id} className="goal-exercise-card">
-            <img src="/assets/listpic.jpg" alt="Exercise" className="goal-exercise-image" />
-            <h3>{item.title}</h3>
-            <p><strong>Skill:</strong> {item.skill}</p>
-            <p><strong>Difficulty:</strong> {item.difficulty}</p>
-            <p><strong>Duration:</strong> {item.duration} mins</p>
-            <button className="goal-exercise-start-btn">Start</button>
-          </div>
-        ))}
-        {currentExercises.length === 0 && <p>No exercises found.</p>}
-      </div>
+      {loading ? (
+        <p>Loading exercises...</p>
+      ) : (
+        <div className="goal-exercises-grid">
+          {currentExercises.map((item) => (
+            <div key={item.id} className="goal-exercise-card">
+              <img src="/assets/listpic.jpg" alt="Exercise" className="goal-exercise-image" />
+              <h3>{item.title}</h3>
+              <p><strong>Skill:</strong> {item.skillName}</p>
+              <p><strong>Difficulty:</strong> {item.difficulty}</p>
+              <p><strong>Duration:</strong> {item.duration} mins</p>
+              <button 
+                className="goal-exercise-start-btn"
+                onClick={() => window.location.href = `/${item.route}/${item.id}`}
+              >
+                Start
+              </button>
+            </div>
+          ))}
+          {currentExercises.length === 0 && <p>No exercises found.</p>}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="goal-exercises-pagination">

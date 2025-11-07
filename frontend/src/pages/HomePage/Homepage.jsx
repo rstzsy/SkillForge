@@ -67,33 +67,37 @@ const HomePage = () => {
             id: d.id,
             title: d.data().topic || "Untitled Speaking Task",
             skill: "S",
+            skillName: "Speaking",
             difficulty: d.data().difficulty || "Medium",
             duration: d.data().duration || 15,
-            type: "Speaking",
+            route: "speak",
           })),
           ...writeSnap.docs.map((d) => ({
             id: d.id,
             title: d.data().title || "Untitled Writing Task",
             skill: "W",
+            skillName: "Writing",
             difficulty: d.data().difficulty || "Medium",
             duration: d.data().duration || 30,
-            type: "Writing",
+            route: "write",
           })),
           ...readSnap.docs.map((d) => ({
             id: d.id,
             title: d.data().title || "Untitled Reading Task",
             skill: "R",
+            skillName: "Reading",
             difficulty: d.data().difficulty || "Medium",
             duration: d.data().duration || 45,
-            type: "Reading",
+            troute: "read", 
           })),
           ...listenSnap.docs.map((d) => ({
             id: d.id,
             title: d.data().title || "Untitled Listening Task",
             skill: "L",
+            skillName: "Listening",
             difficulty: d.data().difficulty || "Medium",
             duration: d.data().duration || 30,
-            type: "Listening",
+            route: "listen",
           })),
         ];
 
@@ -252,7 +256,7 @@ const HomePage = () => {
               <div
                 key={item.id}
                 className="exercise-card"
-                onClick={() => navigate(`/${item.type.toLowerCase()}/${item.id}`)}
+                onClick={() => navigate(`/${item.route}/${item.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <img
@@ -262,7 +266,7 @@ const HomePage = () => {
                 />
                 <h3>{item.title}</h3>
                 <p>
-                  <strong>Skill:</strong> {item.type}
+                  <strong>Skill:</strong> {item.skillName}
                 </p>
                 <p>
                   <strong>Difficulty:</strong> {item.difficulty}
