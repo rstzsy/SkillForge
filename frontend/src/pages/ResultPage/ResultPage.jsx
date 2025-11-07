@@ -30,9 +30,7 @@ export default function ResultPage() {
           return;
         }
 
-        const res = await fetch(
-          `http://localhost:3002/api/results/user/${userId}`
-        );
+        const res = await fetch(`http://localhost:3002/api/results/user/${userId}`);
         const data = await res.json();
 
         const submissions = (data.submissions || []).map((s) => ({
@@ -45,6 +43,11 @@ export default function ResultPage() {
 
         setResults(submissions);
         setSummary(data.summary || {});
+
+        if (data.summary?.overallBand) {
+          localStorage.setItem("currentBand", data.summary.overallBand);
+        }
+
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -53,6 +56,7 @@ export default function ResultPage() {
     };
     fetchResults();
   }, []);
+
 
   const skills = [
     { key: "all", label: "All", color: "#000000" },

@@ -5,6 +5,7 @@ export class LearningGoal {
     name,
     email,
     target_band,
+    current_band = null,
     target_date,
     priority_skills = "",
     notes = "",
@@ -15,6 +16,7 @@ export class LearningGoal {
     this.name = name;
     this.email = email;
     this.target_band = target_band;
+    this.current_band = current_band;
     this.target_date = target_date;
     this.priority_skills = priority_skills;
     this.notes = notes;

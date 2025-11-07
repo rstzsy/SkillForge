@@ -25,14 +25,19 @@ const GoalSetup = () => {
   const [savedAt, setSavedAt] = useState(saved?.savedAt || null);
   const [message, setMessage] = useState("");
   const [userId, setUserId] = useState("");
+  const [currentBand, setCurrentBand] = useState("-");
+
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
+    const band = localStorage.getItem("currentBand");
     if (storedUser) {
       console.log("Logged-in user:", storedUser);
       setName(storedUser.userName || "");
       setEmail(storedUser.email || "");
       setUserId(storedUser.id || "");
+      if (band) setCurrentBand(band);
+
     } else {
       console.warn("No user found in localStorage");
     }
@@ -60,6 +65,7 @@ const GoalSetup = () => {
       target_date: targetDate,
       priority_skills: prioritySkills.join(","),
       notes,
+      current_band: currentBand,
     };
 
     try {
@@ -222,6 +228,7 @@ const GoalSetup = () => {
               <div>
                 <p><strong>Name:</strong> {name || "—"}</p>
                 <p><strong>Email:</strong> {email || "—"}</p>
+                <p><strong>Current band:</strong> {currentBand}</p> {/* 🆕 */}
                 <p><strong>Target band:</strong> {targetBand}</p>
                 <p><strong>Target date:</strong> {targetDate || "—"}</p>
                 <p><strong>Days left:</strong> {daysUntil() !== null ? `${daysUntil()} days` : "—"}</p>
@@ -232,6 +239,7 @@ const GoalSetup = () => {
               <p>No goal saved yet. Fill the form to create your personalized plan.</p>
             )}
           </aside>
+
         </div>
       </section>
 
