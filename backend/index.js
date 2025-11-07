@@ -54,6 +54,7 @@ app.use("/api/user/wishlist", wishlistRoute);
 app.use("/api/placement-tests", placementRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/admin/learningpath", adminLearningPathRoute);
+app.use("/:userId/progress", userRoutes); 
 
 
 app.get("/", (req, res) => {
