@@ -26,6 +26,8 @@ const GoalSetup = () => {
   const [message, setMessage] = useState("");
   const [userId, setUserId] = useState("");
   const [currentBand, setCurrentBand] = useState("-");
+  const [roadmap, setRoadmap] = useState(null);
+
 
 
   useEffect(() => {
@@ -42,6 +44,18 @@ const GoalSetup = () => {
       console.warn("No user found in localStorage");
     }
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetch(`http://localhost:3002/api/roadmaps/user/${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Fetched roadmap:", data);
+          setRoadmap(data);
+        })
+        .catch((err) => console.error("Error fetching roadmap:", err));
+    }
+  }, [userId]);
 
   const toggleSkill = (skill) => {
     setPrioritySkills((prev) =>
@@ -81,6 +95,34 @@ const GoalSetup = () => {
       localStorage.setItem("userGoal", JSON.stringify(data));
       setSavedAt(data.saved_at || new Date().toISOString());
       setMessage("Your goal has been saved successfully!");
+
+      const goalId = data.data?.id || data.data?.goal_id || data.id || data.goal_id;
+      console.log("Extracted goalId:", goalId);
+
+
+      try {
+        const roadmapPayload = {
+          ...payload,
+          goal_id: goalId,
+        };
+
+        const roadmapRes = await fetch("http://localhost:3002/api/roadmaps/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(roadmapPayload),
+        });
+
+        if (roadmapRes.ok) {
+          const roadmapData = await roadmapRes.json();
+          setRoadmap(roadmapData);
+          console.log("Generated roadmap:", roadmapData);
+        } else {
+          console.error("Failed to generate roadmap");
+        }
+      } catch (err) {
+        console.error("Error generating roadmap:", err);
+      }
+
     } catch (error) {
       console.error("Error saving goal:", error);
       setMessage("Failed to save goal. Please try again later.");
@@ -275,55 +317,60 @@ const GoalSetup = () => {
         </p>
 
         <div className="goalsetup-roadmap-steps">
-          <div className="goalsetup-roadmap-step">
-            <img
-              src="/assets/assessmentIcon.png"
-              alt="Start"
-              className="goalsetup-roadmap-icon"
-            />
-            <h3 className="goalsetup-roadmap-step-title">Step 1: Diagnostic Test</h3>
-            <p className="goalsetup-roadmap-step-text">
-              Begin with a short diagnostic test to understand your current strengths and weaknesses across all four skills.
-            </p>
-          </div>
+          {/* Nếu có roadmap từ backend thì map ra */}
+          {roadmap && roadmap.steps?.length > 0 ? (
+            roadmap.steps.map((step, index) => (
+              <div key={index} className="goalsetup-roadmap-step">
+                <img
+                  src={step.icon || "/assets/goal.png" || "/assets/assessmentIcon.png" || "/assets/personalizedPlan.png" || "/assets/practiceAndLearn.png"}
+                  alt={step.title}
+                  className="goalsetup-roadmap-icon"
+                />
+                <h3 className="goalsetup-roadmap-step-title">
+                  Step {index + 1}: {step.title}
+                </h3>
+                <p className="goalsetup-roadmap-step-text">{step.description}</p>
+              </div>
+            ))
+          ) : (
+            // Fallback mặc định nếu chưa có roadmap
+            <>
+              <div className="goalsetup-roadmap-step">
+                <img src="/assets/assessmentIcon.png" alt="Start" className="goalsetup-roadmap-icon" />
+                <h3 className="goalsetup-roadmap-step-title">Step 1: Diagnostic Test</h3>
+                <p className="goalsetup-roadmap-step-text">
+                  Begin with a short diagnostic test to understand your current strengths and weaknesses across all four skills.
+                </p>
+              </div>
 
-          <div className="goalsetup-roadmap-step">
-            <img
-              src="/assets/personalizedPlan.png"
-              alt="Plan"
-              className="goalsetup-roadmap-icon"
-            />
-            <h3 className="goalsetup-roadmap-step-title">Step 2: Smart Study Plan</h3>
-            <p className="goalsetup-roadmap-step-text">
-              Get a weekly plan tailored to your target band, focusing on your priority skills and available study time.
-            </p>
-          </div>
+              <div className="goalsetup-roadmap-step">
+                <img src="/assets/personalizedPlan.png" alt="Plan" className="goalsetup-roadmap-icon" />
+                <h3 className="goalsetup-roadmap-step-title">Step 2: Smart Study Plan</h3>
+                <p className="goalsetup-roadmap-step-text">
+                  Get a weekly plan tailored to your target band, focusing on your priority skills and available study time.
+                </p>
+              </div>
 
-          <div className="goalsetup-roadmap-step">
-            <img
-              src="/assets/practiceAndLearn.png"
-              alt="Practice"
-              className="goalsetup-roadmap-icon"
-            />
-            <h3 className="goalsetup-roadmap-step-title">Step 3: Practice & Feedback</h3>
-            <p className="goalsetup-roadmap-step-text">
-              Engage in interactive exercises, receive instant AI feedback, and improve through realistic speaking sessions.
-            </p>
-          </div>
+              <div className="goalsetup-roadmap-step">
+                <img src="/assets/practiceAndLearn.png" alt="Practice" className="goalsetup-roadmap-icon" />
+                <h3 className="goalsetup-roadmap-step-title">Step 3: Practice & Feedback</h3>
+                <p className="goalsetup-roadmap-step-text">
+                  Engage in interactive exercises, receive instant AI feedback, and improve through realistic speaking sessions.
+                </p>
+              </div>
 
-          <div className="goalsetup-roadmap-step">
-            <img
-              src="/assets/goal.png"
-              alt="Track Progress"
-              className="goalsetup-roadmap-icon"
-            />
-            <h3 className="goalsetup-roadmap-step-title">Step 4: Progress Review</h3>
-            <p className="goalsetup-roadmap-step-text">
-              Track your improvement through monthly mock tests and adjust your strategy for maximum score gain.
-            </p>
-          </div>
+              <div className="goalsetup-roadmap-step">
+                <img src="/assets/goal.png" alt="Track Progress" className="goalsetup-roadmap-icon" />
+                <h3 className="goalsetup-roadmap-step-title">Step 4: Progress Review</h3>
+                <p className="goalsetup-roadmap-step-text">
+                  Track your improvement through monthly mock tests and adjust your strategy for maximum score gain.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </section>
+
 
       {/* Suggested Exercises Section */}
       <SuggestedExercisesGoal />

@@ -59,6 +59,7 @@ const AdminPersonalAim = () => {
                 <tr>
                   <th>Full Name</th>
                   <th>Email</th>
+                  <th>Current Band</th> {/* ✅ Thêm cột này */}
                   <th>Target Band</th>
                   <th>Target Date</th>
                   <th>Priority Skills</th>
@@ -72,6 +73,7 @@ const AdminPersonalAim = () => {
                   <tr key={idx}>
                     <td>{goal.name}</td>
                     <td>{goal.email}</td>
+                    <td>{goal.current_band || "—"}</td> {/* ✅ Hiển thị current_band */}
                     <td>{goal.target_band}</td>
                     <td>{goal.target_date}</td>
                     <td>
@@ -109,6 +111,7 @@ const AdminPersonalAim = () => {
               <h3 className="modal-title">User Goal Detail</h3>
               <p><strong>Name:</strong> {selectedGoal.name}</p>
               <p><strong>Email:</strong> {selectedGoal.email}</p>
+              <p><strong>Current Band:</strong> {selectedGoal.current_band || "—"}</p> {/* ✅ Hiển thị trong modal */}
               <p><strong>Target Band:</strong> {selectedGoal.target_band}</p>
               <p><strong>Target Date:</strong> {selectedGoal.target_date}</p>
               <p>

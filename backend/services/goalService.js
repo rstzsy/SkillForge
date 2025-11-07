@@ -18,7 +18,7 @@ export const GoalService = {
       });
 
       await docRef.update({ goal_id: docRef.id });
-      return { goal_id: docRef.id, ...goal };
+      return { goal_id: docRef.id, ...goalData };
     } catch (error) {
       console.error("🔥 Error saving goal to Firestore:", error);
       throw new Error("Failed to save goal");
