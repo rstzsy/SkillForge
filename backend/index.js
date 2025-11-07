@@ -20,6 +20,7 @@ import userReadingSubmissionRoutes from "./routes/readingSubmissionRoute.js";
 import wishlistRoute from "./routes/wishlistRoute.js";
 import placementRoutes from "./routes/placementRoute.js";
 import resultRoutes from "./routes/userResultRoute.js";
+import adminLearningPathRoute from "./routes/adminLearningPathRoute.js";
 
 dotenv.config();
 const app = express();
@@ -52,6 +53,7 @@ app.use("/api/user/read/submit", userReadingSubmissionRoutes);
 app.use("/api/user/wishlist", wishlistRoute);
 app.use("/api/placement-tests", placementRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/admin/learningpath", adminLearningPathRoute);
 app.use("/:userId/progress", userRoutes); 
 
 

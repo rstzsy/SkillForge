@@ -66,24 +66,42 @@
 .day-card-learningpath h3 {
   color: #ff7221;
   font-size: 20px;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
 }
 
 /* ===== Task Item ===== */
 .task-item-learningpath {
-  margin-bottom: 12px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
 .task-info {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  margin-bottom: 6px;
-  flex-wrap: wrap;
-  gap: 5px;
+  flex-direction: column; /* skill xuống dòng */
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
+.task-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+}
+
+.skill-text {
+  font-size: 14px;
+  color: #ff7221;
+  margin-top: 2px; /* khoảng cách với title */
+}
+
+.progress-text {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+}
+
+/* Progress Bar */
 .progress-bar-learningpath {
   width: 100%;
   height: 10px;
@@ -96,11 +114,6 @@
   height: 10px;
   background: linear-gradient(135deg, #d5a30a, #f1c232);
   border-radius: 6px;
-}
-
-.progress-text {
-  color: #555;
-  font-size: 14px;
 }
 
 /* ===== Back Button ===== */
@@ -126,7 +139,7 @@
 /* Tablet */
 @media (max-width: 992px) {
   .main-content-learningpath {
-    margin-left: 200px; /* sidebar thu nhỏ */
+    margin-left: 200px;
     padding: 15px;
   }
 
@@ -144,13 +157,21 @@
   .user-details-learningpath p {
     font-size: 15px;
   }
+
+  .task-title {
+    font-size: 15px;
+  }
+
+  .skill-text, .progress-text {
+    font-size: 13px;
+  }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
   .main-content-learningpath {
-    margin-left: 0; /* bỏ sidebar margin */
-    margin-top: 80px; /* tránh bị che bởi header */
+    margin-left: 0;
+    margin-top: 80px;
     padding: 15px;
   }
 
@@ -160,19 +181,9 @@
     text-align: center;
   }
 
-  .user-info-learningpath {
-    flex-direction: column;
-    align-items: center;
-    padding: 15px;
-  }
-
   .user-avatar-learningpath {
     width: 70px;
     height: 70px;
-  }
-
-  .user-details-learningpath p {
-    font-size: 14px;
   }
 
   .day-card-learningpath {
@@ -185,8 +196,6 @@
   }
 
   .task-info {
-    flex-direction: column;
-    align-items: flex-start;
     font-size: 14px;
   }
 
