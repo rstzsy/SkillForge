@@ -49,6 +49,7 @@ import AdminManageBooking from "../pages/Admin/AdminManageBooking/AdminManageBoo
 import PlacementTest from "../pages/PlacementTest/PlacementTest";
 import ScoreWritePage from "../pages/WritePage/ScoreWritePage";
 import ResultPage from "../pages/ResultPage/ResultPage";
+import VideoCall from "../pages/VideoCall/VideoCall";
 
 export const routes = [
     {
@@ -293,5 +294,9 @@ export const routes = [
         page: ResultPage,
         isShowHeader: true,
         isShowFooter: true
+    },
+    {
+        path: '/video_call',
+        page: VideoCall,
     },
 ]
