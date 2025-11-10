@@ -296,7 +296,7 @@ export const routes = [
         isShowFooter: true
     },
     {
-        path: '/video_call',
+        path: '/video_call/:id',
         page: VideoCall,
     },
 ]

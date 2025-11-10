@@ -1,51 +1,121 @@
-import React, { useState } from 'react';
-import './VideoCall.css';
-import { Phone, Video, Mic, MessageSquare, Users, Plus, Copy } from 'lucide-react';
+import React, { useState, useRef, useEffect } from "react";
+import { collection, doc, onSnapshot, setDoc, deleteDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { db } from "../../firebase/config";
+import { useLocation } from "react-router-dom"; // <-- để lấy URL
+import "./VideoCall.css";
+import {
+  Phone,
+  Video,
+  Mic,
+  MessageSquare,
+  Users,
+  Plus,
+  Copy,
+} from "lucide-react";
 
-const VideoCall = () => {
+const VideoCall = () => { 
+  const location = useLocation();
+  const urlPath = location.pathname; // ví dụ: "/video_call/class-Speaking-103-1762791490006"
+  const roomId = urlPath.split("/video_call/")[1]?.replace("class-", "class--"); 
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [showChat, setShowChat] = useState(false);
   const [showPending, setShowPending] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); 
-  const [chatMessages, setChatMessages] = useState([
-    { user: 'Ruben Dias', text: 'Hello Linh!', time: '03:49PM', isOwn: false },
-    { user: 'Ruben Dias', text: 'I really love your work 👌', time: '03:49PM', isOwn: false },
-    { user: 'You', text: 'Hi Tom 👋', time: '03:49PM', isOwn: true },
-    { user: 'You', text: 'Thank you, I also love it', time: '03:49PM', isOwn: true }
-  ]);
+  const [viewMode, setViewMode] = useState("grid");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [participants, setParticipants] = useState([]);
 
-  const participants = [
-    { name: 'Angel Herwitz', status: 'active', audio: true },
-    { name: 'Craig Siphron', status: 'active', audio: true },
-    { name: 'Jordyn Press', status: 'active', audio: true },
-    { name: 'Erfan Amade', status: 'waiting', audio: false, initials: 'ER' }
-  ];
+  const mainVideoRef = useRef(null);
+  const localStreamRef = useRef(null);
 
-  const pendingUser = {
-    name: 'Ruben Dias',
-    message: 'Want to join the meeting!'
+
+  // ===== Lấy user từ localStorage =====
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const userId = storedUser?.id;
+  const userName = storedUser?.userName || "Unknown";
+
+  // ===== Add pendingUser =====
+  const pendingUser = { 
+    name: "Ruben Dias", 
+    message: "Want to join the meeting!" 
   };
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      setChatMessages([...chatMessages, {
-        user: 'You',
-        text: message,
-        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        isOwn: true
-      }]);
-      setMessage('');
+  // ===== Add participant vào Firestore =====
+  useEffect(() => {
+    if (!roomId || !userId) return;
+
+    const participantRef = doc(db, "rooms", roomId, "participants", userId);
+
+    setDoc(participantRef, {
+      name: userName,
+      audio: true,
+      joinedAt: new Date(),
+    }).catch(console.error);
+
+    return () => {
+      deleteDoc(participantRef).catch(console.error);
+    };
+  }, [roomId, userId, userName]);
+
+  // ===== Listen participants realtime =====
+  useEffect(() => {
+    if (!roomId) return;
+
+    const participantsCol = collection(db, "rooms", roomId, "participants");
+    const unsub = onSnapshot(participantsCol, (snapshot) => {
+      const list = snapshot.docs.map((doc) => doc.data());
+      console.log("Participants realtime:", list);
+      setParticipants(list);
+    });
+
+    return () => unsub();
+  }, [roomId]);
+
+
+  // ===== Video =====
+  const startVideo = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localStreamRef.current = stream;
+      if (mainVideoRef.current) mainVideoRef.current.srcObject = stream;
+    } catch (err) {
+      console.error(err);
     }
   };
 
+  useEffect(() => {
+    if (!isVideoOff) startVideo();
+    else if (localStreamRef.current) localStreamRef.current.getTracks().forEach((t) => t.stop());
+  }, [isVideoOff]);
+
+  const toggleMic = () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => (track.enabled = isMuted));
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (!message.trim()) return;
+    setChatMessages([
+      ...chatMessages,
+      { user: "You", text: message, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), isOwn: true },
+    ]);
+    setMessage("");
+  };
+
   return (
-    <div className={`vc-container ${(showChat || showPending) ? 'vc-sidebar-open' : ''}`}>
+    <div
+      className={`vc-container ${
+        showChat || showPending ? "vc-sidebar-open" : ""
+      }`}
+    >
       {/* Participant Thumbnails - Grid View */}
-      {viewMode === 'grid' && (
-        <div className="vc-thumbnails">
-          {participants.slice(0, 3).map((participant, index) => (
+      {viewMode === "grid" && (
+        <div className="vc-thumbnails grid-view">
+          {participants.map((participant, index) => (
             <div key={index} className="vc-thumbnail">
               <div className="vc-thumbnail-video">
                 <div className="vc-thumbnail-overlay">
@@ -77,18 +147,37 @@ const VideoCall = () => {
 
           {/* Main Speaker Video */}
           <div className="vc-speaker-video">
-            <div className="vc-speaker-content">
-              {/* Subtitle */}
-              <div className="vc-subtitle">
-                <span className="vc-subtitle-label">CC/Subtitle</span>
-                <p className="vc-subtitle-text">i never know what made it so exciting</p>
+            {isVideoOff ? (
+              <div className="vc-speaker-avatar">
+                <span>YOU</span>
               </div>
+            ) : (
+              <video
+                ref={mainVideoRef}
+                autoPlay
+                muted
+                className="vc-speaker-content"
+              ></video>
+            )}
+
+            <div className="vc-subtitle">
+              <span className="vc-subtitle-label">CC/Subtitle</span>
+              <p className="vc-subtitle-text">
+                i never know what made it so exciting
+              </p>
             </div>
           </div>
 
           {/* Full Screen Button */}
           <button className="vc-fullscreen-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>
           </button>
@@ -96,25 +185,34 @@ const VideoCall = () => {
           {/* Control Bar */}
           <div className="vc-controls">
             <div className="vc-main-controls">
-              <button className="vc-control-btn" onClick={() => setIsMuted(!isMuted)}>
+              <button
+                className={`vc-control-btn ${!isMuted ? "vc-control-active" : ""}`}
+                onClick={toggleMic}
+              >
                 <Mic size={24} />
               </button>
-              
+
               <button className="vc-control-btn vc-control-cc">
                 <span>CC</span>
               </button>
-              
+
               <button className="vc-control-btn vc-control-end">
                 <Phone size={24} />
               </button>
-              
-              <button className="vc-control-btn" onClick={() => setIsVideoOff(!isVideoOff)}>
+
+              <button
+                className={`vc-control-btn ${!isVideoOff ? "vc-control-active" : ""}`}
+                onClick={() => setIsVideoOff(!isVideoOff)}
+              >
                 <Video size={24} />
               </button>
-              
-              <button 
-                className={`vc-control-btn ${showChat ? 'vc-control-active' : ''}`}
-                onClick={() => { setShowChat(!showChat); setShowPending(false); }}
+
+              <button
+                className={`vc-control-btn ${showChat ? "vc-control-active" : ""}`}
+                onClick={() => {
+                  setShowChat(!showChat);
+                  setShowPending(false);
+                }}
               >
                 <MessageSquare size={24} />
               </button>
@@ -123,49 +221,27 @@ const VideoCall = () => {
         </div>
       </div>
 
-      {/* Waiting User Card */}
-      <div className="vc-waiting-card">
-        <div className="vc-waiting-avatar">
-          {participants[3].initials}
-        </div>
-        <div className="vc-waiting-info">
-          <span className="vc-waiting-name">{participants[3].name}</span>
-          <span className="vc-waiting-status">●</span>
-        </div>
-        <button className="vc-wifi-off">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="1" y1="1" x2="23" y2="23"></line>
-            <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
-            <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
-            <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
-            <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
-            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-            <line x1="12" y1="20" x2="12.01" y2="20"></line>
-          </svg>
-        </button>
-        <button 
-          className="vc-pending-toggle"
-          onClick={() => { setShowPending(!showPending); setShowChat(false); }}
-        >
-          C
-        </button>
-      </div>
-
       {/* Right Sidebar */}
       {(showChat || showPending) && (
         <div className="vc-sidebar">
           {/* Tabs */}
           <div className="vc-sidebar-tabs">
-            <button 
-              className={`vc-tab ${showPending ? 'vc-tab-active' : ''}`}
-              onClick={() => { setShowPending(true); setShowChat(false); }}
+            <button
+              className={`vc-tab ${showPending ? "vc-tab-active" : ""}`}
+              onClick={() => {
+                setShowPending(true);
+                setShowChat(false);
+              }}
             >
               Pending
               <span className="vc-tab-badge">1</span>
             </button>
-            <button 
-              className={`vc-tab ${showChat ? 'vc-tab-active' : ''}`}
-              onClick={() => { setShowChat(true); setShowPending(false); }}
+            <button
+              className={`vc-tab ${showChat ? "vc-tab-active" : ""}`}
+              onClick={() => {
+                setShowChat(true);
+                setShowPending(false);
+              }}
             >
               Chat
             </button>
@@ -183,7 +259,7 @@ const VideoCall = () => {
               </div>
               <div className="vc-pending-actions">
                 <button className="vc-btn-admit">Admit</button>
-                <button className="vc-btn-deny">deny</button>
+                <button className="vc-btn-deny">Deny</button>
               </div>
             </div>
           )}
@@ -193,17 +269,14 @@ const VideoCall = () => {
             <div className="vc-chat-section">
               <div className="vc-chat-messages">
                 {chatMessages.map((msg, index) => (
-                  <div key={index} className={`vc-chat-message ${msg.isOwn ? 'vc-chat-own' : ''}`}>
-                    {!msg.isOwn && (
-                      <div className="vc-chat-avatar"></div>
-                    )}
+                  <div
+                    key={index}
+                    className={`vc-chat-message ${msg.isOwn ? "vc-chat-own" : ""}`}
+                  >
+                    {!msg.isOwn && <div className="vc-chat-avatar"></div>}
                     <div className="vc-chat-bubble-wrapper">
-                      {!msg.isOwn && (
-                        <span className="vc-chat-user">{msg.user}</span>
-                      )}
-                      <div className="vc-chat-bubble">
-                        {msg.text}
-                      </div>
+                      {!msg.isOwn && <span className="vc-chat-user">{msg.user}</span>}
+                      <div className="vc-chat-bubble">{msg.text}</div>
                       <span className="vc-chat-time">{msg.time}</span>
                     </div>
                   </div>
@@ -212,27 +285,16 @@ const VideoCall = () => {
 
               {/* Message Input */}
               <div className="vc-chat-input">
-                <button className="vc-emoji-btn">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                    <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                    <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                  </svg>
-                </button>
                 <input
                   type="text"
-                  placeholder="Type a massage..."
+                  placeholder="Type a message..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   className="vc-message-input"
                 />
                 <button className="vc-send-btn" onClick={handleSendMessage}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
+                  Send
                 </button>
               </div>
             </div>
@@ -243,9 +305,9 @@ const VideoCall = () => {
       {/* Bottom Bar */}
       <div className="vc-bottom-bar">
         <div className="vc-view-controls">
-          <button 
-            className={`vc-view-btn ${viewMode === 'grid' ? 'vc-view-active' : ''}`}
-            onClick={() => setViewMode('grid')}
+          <button
+            className={`vc-view-btn ${viewMode === "grid" ? "vc-view-active" : ""}`}
+            onClick={() => setViewMode("grid")}
           >
             <div className="vc-grid-icon"></div>
           </button>
@@ -253,13 +315,7 @@ const VideoCall = () => {
 
         <div className="vc-participants-info">
           <Users size={20} />
-          <span>Participants (46)</span>
-          <div className="vc-participant-avatars">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="vc-participant-avatar"></div>
-            ))}
-            <div className="vc-participant-more">+36</div>
-          </div>
+          <span>Participants ({participants.length})</span>
         </div>
 
         <button className="vc-add-participant">
@@ -268,10 +324,6 @@ const VideoCall = () => {
         </button>
 
         <div className="vc-meeting-link">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-          </svg>
           <span>VirtuFit.io/joinid245</span>
         </div>
 
