@@ -11,6 +11,7 @@ import {
 import { db } from "../../firebase/config";
 import { useLocation } from "react-router-dom";
 import "./VideoCall.css";
+import { useNavigate } from "react-router-dom";
 import {
   Phone,
   Video,
@@ -46,6 +47,7 @@ const VideoCall = () => {
 
   const [isStreamReady, setIsStreamReady] = useState(false);
   const videoRefs = useRef({});
+  const navigate = useNavigate();
 
   const pendingUser = {
     name: "Ruben Dias",
@@ -53,128 +55,131 @@ const VideoCall = () => {
   };
 
   // ===== Start local camera =====
-  // ===== Start local camera (Improved - No reinit PC) =====
-  // ===== Start local camera =====
-useEffect(() => {
-  if (!userId) return;
+  useEffect(() => {
+    if (!userId) return;
 
-  let isMounted = true;
+    let isMounted = true;
 
-  const handleStartVideo = async () => {
-    try {
-      // === 1️⃣ Nếu đã có stream cũ
-      if (localStreamRef.current) {
-        const videoTrack = localStreamRef.current.getVideoTracks()[0];
+    const handleStartVideo = async () => {
+      try {
+        // === 1️⃣ Nếu đã có stream cũ
+        if (localStreamRef.current) {
+          const videoTrack = localStreamRef.current.getVideoTracks()[0];
 
-        // --- Nếu đang tắt camera ---
+          // --- Nếu đang tắt camera ---
+          if (isVideoOff) {
+            if (videoTrack) videoTrack.enabled = false;
+            console.log("🚫 Camera disabled (track muted, not stopped)");
+            setIsStreamReady(true); // vẫn có stream, chỉ disable track
+            return;
+          }
+
+          // --- Nếu đang bật camera lại ---
+          if (videoTrack) {
+            videoTrack.enabled = true;
+            console.log("🎥 Re-enabled existing video track");
+
+            // 🚀 Đảm bảo video render lại
+            if (mainVideoRef.current) {
+              mainVideoRef.current.srcObject = localStreamRef.current;
+              mainVideoRef.current
+                .play()
+                .catch(() =>
+                  setTimeout(
+                    () => mainVideoRef.current.play().catch(() => {}),
+                    100
+                  )
+                );
+            }
+
+            if (videoRefs.current[userId]) {
+              videoRefs.current[userId].srcObject = localStreamRef.current;
+              videoRefs.current[userId]
+                .play()
+                .catch(() =>
+                  setTimeout(
+                    () => videoRefs.current[userId].play().catch(() => {}),
+                    100
+                  )
+                );
+            }
+
+            setIsStreamReady(true);
+            return;
+          }
+        }
+
+        // === 2️⃣ Nếu chưa có stream nào hoặc đã bị stop hoàn toàn ===
         if (isVideoOff) {
-          if (videoTrack) videoTrack.enabled = false;
-          console.log("🚫 Camera disabled (track muted, not stopped)");
-          setIsStreamReady(true); // vẫn có stream, chỉ disable track
+          console.log("📷 Camera off, not creating stream");
+          setIsStreamReady(false);
           return;
         }
 
-        // --- Nếu đang bật camera lại ---
-        if (videoTrack) {
-          videoTrack.enabled = true;
-          console.log("🎥 Re-enabled existing video track");
-
-          // 🚀 Đảm bảo video render lại
-          if (mainVideoRef.current) {
-            mainVideoRef.current.srcObject = localStreamRef.current;
-            mainVideoRef.current
-              .play()
-              .catch(() =>
-                setTimeout(() => mainVideoRef.current.play().catch(() => {}), 100)
-              );
-          }
-
-          if (videoRefs.current[userId]) {
-            videoRefs.current[userId].srcObject = localStreamRef.current;
-            videoRefs.current[userId]
-              .play()
-              .catch(() =>
-                setTimeout(() => videoRefs.current[userId].play().catch(() => {}), 100)
-              );
-          }
-
-          setIsStreamReady(true);
-          return;
-        }
-      }
-
-      // === 2️⃣ Nếu chưa có stream nào hoặc đã bị stop hoàn toàn ===
-      if (isVideoOff) {
-        console.log("📷 Camera off, not creating stream");
-        setIsStreamReady(false);
-        return;
-      }
-
-      console.log("📹 Requesting camera access...");
-      const newStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: true,
-      });
-
-      if (!isMounted) {
-        newStream.getTracks().forEach((t) => t.stop());
-        return;
-      }
-
-      // === 3️⃣ Nếu có stream cũ thì replace video track ===
-      if (localStreamRef.current) {
-        const oldStream = localStreamRef.current;
-        const oldAudioTrack = oldStream.getAudioTracks()[0];
-        const newVideoTrack = newStream.getVideoTracks()[0];
-
-        // Replace video track trong mọi peer connection
-        Object.values(peerConnectionsRef.current).forEach((pc) => {
-          const sender = pc
-            .getSenders()
-            .find((s) => s.track?.kind === "video");
-          if (sender && newVideoTrack) sender.replaceTrack(newVideoTrack);
+        console.log("📹 Requesting camera access...");
+        const newStream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true,
         });
 
-        oldStream.getVideoTracks().forEach((t) => t.stop());
-        localStreamRef.current = new MediaStream([
-          newVideoTrack,
-          ...(oldAudioTrack ? [oldAudioTrack] : []),
-        ]);
-      } else {
-        localStreamRef.current = newStream;
+        if (!isMounted) {
+          newStream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        // === 3️⃣ Nếu có stream cũ thì replace video track ===
+        if (localStreamRef.current) {
+          const oldStream = localStreamRef.current;
+          const oldAudioTrack = oldStream.getAudioTracks()[0];
+          const newVideoTrack = newStream.getVideoTracks()[0];
+
+          // Replace video track trong mọi peer connection
+          Object.values(peerConnectionsRef.current).forEach((pc) => {
+            const sender = pc
+              .getSenders()
+              .find((s) => s.track?.kind === "video");
+            if (sender && newVideoTrack) sender.replaceTrack(newVideoTrack);
+          });
+
+          oldStream.getVideoTracks().forEach((t) => t.stop());
+          localStreamRef.current = new MediaStream([
+            newVideoTrack,
+            ...(oldAudioTrack ? [oldAudioTrack] : []),
+          ]);
+        } else {
+          localStreamRef.current = newStream;
+        }
+
+        // === 4️⃣ Hiển thị lại video local ===
+        setIsStreamReady(true);
+
+        const playSafely = (videoEl, stream) => {
+          if (!videoEl) return;
+          videoEl.srcObject = stream;
+          videoEl
+            .play()
+            .catch(() => setTimeout(() => videoEl.play().catch(() => {}), 100));
+        };
+
+        playSafely(mainVideoRef.current, localStreamRef.current);
+        playSafely(videoRefs.current[userId], localStreamRef.current);
+
+        console.log("✅ Camera started or replaced track");
+      } catch (err) {
+        console.error("❌ Camera error:", err);
+        if (err.name === "NotReadableError") {
+          alert("Camera is being used by another app.");
+        }
       }
+    };
 
-      // === 4️⃣ Hiển thị lại video local ===
-      setIsStreamReady(true);
+    handleStartVideo();
 
-      const playSafely = (videoEl, stream) => {
-        if (!videoEl) return;
-        videoEl.srcObject = stream;
-        videoEl.play().catch(() =>
-          setTimeout(() => videoEl.play().catch(() => {}), 100)
-        );
-      };
-
-      playSafely(mainVideoRef.current, localStreamRef.current);
-      playSafely(videoRefs.current[userId], localStreamRef.current);
-
-      console.log("✅ Camera started or replaced track");
-    } catch (err) {
-      console.error("❌ Camera error:", err);
-      if (err.name === "NotReadableError") {
-        alert("Camera is being used by another app.");
-      }
-    }
-  };
-
-  handleStartVideo();
-
-  return () => {
-    isMounted = false;
-    // Không stop track ở đây — chỉ stop khi rời phòng
-  };
-}, [isVideoOff, userId]);
-
+    return () => {
+      isMounted = false;
+      // Không stop track ở đây — chỉ stop khi rời phòng
+    };
+  }, [isVideoOff, userId]);
 
   // ===== Add participant to Firestore =====
   useEffect(() => {
@@ -577,6 +582,57 @@ useEffect(() => {
     setMessage("");
   };
 
+  const leaveRoom = async () => {
+    try {
+      console.log("🚪 Leaving room...");
+
+      // 1️⃣ Xóa khỏi participants
+      if (roomId && userId) {
+        const participantRef = doc(db, "rooms", roomId, "participants", userId);
+        await deleteDoc(participantRef).catch(() => {});
+      }
+
+      // 2️⃣ Stop local stream
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
+
+      // 3️⃣ Close all peer connections
+      Object.values(peerConnectionsRef.current).forEach((pc) => {
+        try {
+          pc.getSenders().forEach((s) => s.track?.stop?.());
+        } catch (err) {}
+        pc.close();
+      });
+      peerConnectionsRef.current = {};
+
+      // 4️⃣ Clear UI
+      setRemoteStreams({});
+      setParticipants([]);
+
+      // 5️⃣ Thoát về trang trước
+      navigate(-1, { replace: true });
+
+      // 6️⃣ Fallback nếu không có history → điều hướng theo role
+      setTimeout(() => {
+        if (window.location.pathname.includes("call")) {
+          const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+          const role = storedUser.role || "student"; // default student
+
+          if (role === "Teacher") {
+            navigate("/teacher/manage_class", { replace: true });
+          } else if (role === "Customer") {
+            navigate("/coursepage", { replace: true });
+          } else {
+            navigate("/", { replace: true }); // fallback chung
+          }
+        }
+      }, 150);
+    } catch (err) {
+      console.error("❌ Error leaving room:", err);
+    }
+  };
+
   return (
     <div
       className={`vc-container ${
@@ -667,9 +723,13 @@ useEffect(() => {
               <button className="vc-control-btn vc-control-cc">
                 <span>CC</span>
               </button>
-              <button className="vc-control-btn vc-control-end">
+              <button
+                className="vc-control-btn vc-control-end"
+                onClick={leaveRoom}
+              >
                 <Phone size={24} />
               </button>
+
               <button
                 className={`vc-control-btn ${
                   !isVideoOff ? "vc-control-active" : ""
