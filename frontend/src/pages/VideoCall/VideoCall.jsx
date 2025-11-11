@@ -31,7 +31,7 @@ const VideoCall = () => {
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
   const [participants, setParticipants] = useState([]);
-  const [remoteStreams, setRemoteStreams] = useState({}); // 🔹 State for triggering re-renders
+  const [remoteStreams, setRemoteStreams] = useState({}); //State for triggering re-renders
   const [chatMessages, setChatMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [showChat, setShowChat] = useState(false);
@@ -62,24 +62,24 @@ const VideoCall = () => {
 
     const handleStartVideo = async () => {
       try {
-        // === 1️⃣ Nếu đã có stream cũ
+        // neu da co stream cu
         if (localStreamRef.current) {
           const videoTrack = localStreamRef.current.getVideoTracks()[0];
 
-          // --- Nếu đang tắt camera ---
+          // neu tat camera
           if (isVideoOff) {
             if (videoTrack) videoTrack.enabled = false;
-            console.log("🚫 Camera disabled (track muted, not stopped)");
-            setIsStreamReady(true); // vẫn có stream, chỉ disable track
+            console.log("Camera disabled (track muted, not stopped)");
+            setIsStreamReady(true); // van stream binh thuong khong turn off strack
             return;
           }
 
-          // --- Nếu đang bật camera lại ---
+          // neu bat camera lai
           if (videoTrack) {
             videoTrack.enabled = true;
-            console.log("🎥 Re-enabled existing video track");
+            console.log("Re-enabled existing video track");
 
-            // 🚀 Đảm bảo video render lại
+            // dam bao video render lai
             if (mainVideoRef.current) {
               mainVideoRef.current.srcObject = localStreamRef.current;
               mainVideoRef.current
@@ -109,14 +109,14 @@ const VideoCall = () => {
           }
         }
 
-        // === 2️⃣ Nếu chưa có stream nào hoặc đã bị stop hoàn toàn ===
+        // neu chua co stream nao hoac bi stop hoan toan
         if (isVideoOff) {
-          console.log("📷 Camera off, not creating stream");
+          console.log("Camera off, not creating stream");
           setIsStreamReady(false);
           return;
         }
 
-        console.log("📹 Requesting camera access...");
+        console.log("Requesting camera access...");
         const newStream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: true,
@@ -127,13 +127,13 @@ const VideoCall = () => {
           return;
         }
 
-        // === 3️⃣ Nếu có stream cũ thì replace video track ===
+        // neu da co stream cu thi replace video track
         if (localStreamRef.current) {
           const oldStream = localStreamRef.current;
           const oldAudioTrack = oldStream.getAudioTracks()[0];
           const newVideoTrack = newStream.getVideoTracks()[0];
 
-          // Replace video track trong mọi peer connection
+          // Replace video track trong moi peer connection
           Object.values(peerConnectionsRef.current).forEach((pc) => {
             const sender = pc
               .getSenders()
@@ -150,7 +150,7 @@ const VideoCall = () => {
           localStreamRef.current = newStream;
         }
 
-        // === 4️⃣ Hiển thị lại video local ===
+        // hien thi lai video camera cua local user
         setIsStreamReady(true);
 
         const playSafely = (videoEl, stream) => {
@@ -164,9 +164,9 @@ const VideoCall = () => {
         playSafely(mainVideoRef.current, localStreamRef.current);
         playSafely(videoRefs.current[userId], localStreamRef.current);
 
-        console.log("✅ Camera started or replaced track");
+        console.log("Camera started or replaced track");
       } catch (err) {
-        console.error("❌ Camera error:", err);
+        console.error("Camera error:", err);
         if (err.name === "NotReadableError") {
           alert("Camera is being used by another app.");
         }
@@ -177,7 +177,7 @@ const VideoCall = () => {
 
     return () => {
       isMounted = false;
-      // Không stop track ở đây — chỉ stop khi rời phòng
+      // khong stop track chi stop khi roi khoi phong
     };
   }, [isVideoOff, userId]);
 
@@ -202,23 +202,23 @@ const VideoCall = () => {
       const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       setParticipants(list);
       console.log(
-        "👥 Participants:",
+        "Participants:",
         list.map((p) => p.id)
       );
     });
     return () => unsub();
   }, [roomId]);
 
-  // 🔹 Assign remote streams to video elements
+  // gan luong tu xa cho cac video element khac
   useEffect(() => {
     Object.entries(remoteStreams).forEach(([peerId, stream]) => {
       const videoEl = videoRefs.current[peerId];
       if (videoEl && stream && videoEl.srcObject !== stream) {
-        console.log(`📺 Assigning stream to video element for ${peerId}`);
+        console.log(`Assigning stream to video element for ${peerId}`);
         videoEl.srcObject = stream;
         videoEl.play().catch((e) => {
           console.warn(
-            `⚠️ Autoplay blocked for ${peerId}, retrying...`,
+            `Autoplay blocked for ${peerId}, retrying...`,
             e.message
           );
           setTimeout(() => videoEl.play().catch(() => {}), 1000);
@@ -227,14 +227,14 @@ const VideoCall = () => {
     });
   }, [remoteStreams]);
 
-  // ===== WebRTC - Completely rewritten =====//
+  // ===== WebRTC Logic =====//
   useEffect(() => {
     if (!roomId || !userId || !isStreamReady || !localStreamRef.current) {
-      console.log("⏳ Waiting for setup...", { roomId, userId, isStreamReady });
+      console.log("Waiting for setup...", { roomId, userId, isStreamReady });
       return;
     }
 
-    console.log("🚀 Starting WebRTC signaling (per-peer)");
+    console.log("Starting WebRTC signaling (per-peer)");
 
     const pcConfig = {
       iceServers: [
@@ -313,10 +313,10 @@ const VideoCall = () => {
             try {
               if (pc.remoteDescription && pc.remoteDescription.type) {
                 await pc.addIceCandidate(new RTCIceCandidate(cand));
-                console.log(`✅ Applied pending candidate for ${peerId}`);
+                console.log(`Applied pending candidate for ${peerId}`);
               } else {
                 console.log(
-                  `⏳ Still waiting remoteDesc before applying pending candidate for ${peerId}`
+                  `Still waiting remoteDesc before applying pending candidate for ${peerId}`
                 );
               }
             } catch (err) {
@@ -352,15 +352,15 @@ const VideoCall = () => {
           try {
             if (pc && pc.remoteDescription && pc.remoteDescription.type) {
               await pc.addIceCandidate(new RTCIceCandidate(candidate));
-              console.log(`✅ Added ICE candidate from ${fromId}`);
+              console.log(`Added ICE candidate from ${fromId}`);
             } else {
               // buffer candidate until remoteDescription is set
               pendingCandidates[fromId] = pendingCandidates[fromId] || [];
               pendingCandidates[fromId].push(candidate);
-              console.log(`🗄 Buffered ICE candidate from ${fromId}`);
+              console.log(`Buffered ICE candidate from ${fromId}`);
             }
           } catch (err) {
-            console.error("❌ Error adding remote ICE candidate", err);
+            console.error("Error adding remote ICE candidate", err);
           }
         });
       }
@@ -380,7 +380,7 @@ const VideoCall = () => {
         if (data.to !== userId) continue;
 
         const fromId = data.from;
-        console.log("📥 Received offer doc", docId, "from", fromId);
+        console.log("Received offer doc", docId, "from", fromId);
 
         const pc = createPeerConnection(fromId);
 
@@ -389,12 +389,12 @@ const VideoCall = () => {
           await pc.setRemoteDescription(
             new RTCSessionDescription({ type: data.type, sdp: data.sdp })
           );
-          console.log(`✅ setRemoteDescription (offer) from ${fromId}`);
+          console.log(`setRemoteDescription (offer) from ${fromId}`);
 
           // create answer
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
-          console.log(`📤 Created answer for ${fromId}`);
+          console.log(`Created answer for ${fromId}`);
 
           // write answer document with id `${from}_${to}` where from=offer.from, to=offer.to
           // We'll write answer doc id as `${fromId}_${userId}` so the offerer can listen for it.
@@ -418,7 +418,7 @@ const VideoCall = () => {
             for (const cand of pendingCandidates[fromId]) {
               try {
                 await pc.addIceCandidate(new RTCIceCandidate(cand));
-                console.log(`✅ Applied buffered candidate for ${fromId}`);
+                console.log(`Applied buffered candidate for ${fromId}`);
               } catch (err) {
                 console.warn("Error applying buffered candidate", err);
               }
@@ -426,7 +426,7 @@ const VideoCall = () => {
             pendingCandidates[fromId] = [];
           }
         } catch (err) {
-          console.error("❌ Error handling incoming offer", err);
+          console.error("Error handling incoming offer", err);
         }
       }
     });
@@ -446,7 +446,7 @@ const VideoCall = () => {
         if (data.to !== userId) continue;
 
         const responderId = data.from;
-        console.log("📥 Received answer from", responderId, "doc:", docId);
+        console.log("Received answer from", responderId, "doc:", docId);
 
         const pc =
           peerConnectionsRef.current[responderId] ||
@@ -456,7 +456,7 @@ const VideoCall = () => {
           await pc.setRemoteDescription(
             new RTCSessionDescription({ type: data.type, sdp: data.sdp })
           );
-          console.log(`✅ setRemoteDescription (answer) for ${responderId}`);
+          console.log(`setRemoteDescription (answer) for ${responderId}`);
 
           // apply any buffered candidates
           if (
@@ -466,7 +466,7 @@ const VideoCall = () => {
             for (const cand of pendingCandidates[responderId]) {
               try {
                 await pc.addIceCandidate(new RTCIceCandidate(cand));
-                console.log(`✅ Applied buffered candidate for ${responderId}`);
+                console.log(`Applied buffered candidate for ${responderId}`);
               } catch (err) {
                 console.warn(
                   "Error applying buffered candidate after answer",
@@ -477,7 +477,7 @@ const VideoCall = () => {
             pendingCandidates[responderId] = [];
           }
         } catch (err) {
-          console.error("❌ Error handling incoming answer", err);
+          console.error("Error handling incoming answer", err);
         }
       }
     });
@@ -516,9 +516,9 @@ const VideoCall = () => {
                 sdp: offer.sdp,
                 ts: Date.now(),
               });
-              console.log(`✅ Sent offer doc ${userId}_${peerId}`);
+              console.log(`Sent offer doc ${userId}_${peerId}`);
             } catch (err) {
-              console.error("❌ Error creating/sending offer", err);
+              console.error("Error creating/sending offer", err);
             }
           }
         }
@@ -556,48 +556,75 @@ const VideoCall = () => {
     };
   }, [roomId, userId, isStreamReady]);
 
+  // === chat realtime ===
+  useEffect(() => {
+    if (!roomId) return;
+
+    const messagesCol = collection(db, "rooms", roomId, "messages");
+    const unsub = onSnapshot(
+      messagesCol,
+      (snapshot) => {
+        const msgs = snapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => a.ts - b.ts); // sorted by time
+        setChatMessages(
+          msgs.map((m) => ({
+            user: m.userName,
+            text: m.text,
+            time: new Date(m.ts).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            isOwn: m.from === userId,
+          }))
+        );
+      },
+      (err) => console.error("Chat listener error:", err)
+    );
+
+    return () => unsub();
+  }, [roomId, userId]);
+
   const toggleMic = () => {
     if (!localStreamRef.current) return;
     const audioTrack = localStreamRef.current.getAudioTracks()[0];
     if (!audioTrack) return;
     audioTrack.enabled = !audioTrack.enabled;
     setIsMuted(!audioTrack.enabled);
-    console.log(audioTrack.enabled ? "🎙️ Mic unmuted" : "🔇 Mic muted");
+    console.log(audioTrack.enabled ? "Mic unmuted" : "Mic muted");
   };
 
-  const handleSendMessage = () => {
+  const sendMessage = async () => {
     if (!message.trim()) return;
-    setChatMessages([
-      ...chatMessages,
-      {
-        user: "You",
-        text: message,
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        isOwn: true,
-      },
-    ]);
-    setMessage("");
+    if (!roomId || !userId) return;
+
+    const messagesCol = collection(db, "rooms", roomId, "messages");
+    await addDoc(messagesCol, {
+      text: message.trim(),
+      from: userId,
+      userName: userName,
+      ts: Date.now(),
+    });
+
+    setMessage(""); // clear input
   };
 
   const leaveRoom = async () => {
     try {
-      console.log("🚪 Leaving room...");
+      console.log("Leaving room...");
 
-      // 1️⃣ Xóa khỏi participants
+      // xoa khoi mang "participants trong room"
       if (roomId && userId) {
         const participantRef = doc(db, "rooms", roomId, "participants", userId);
         await deleteDoc(participantRef).catch(() => {});
       }
 
-      // 2️⃣ Stop local stream
+      // Stop local stream
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((t) => t.stop());
       }
 
-      // 3️⃣ Close all peer connections
+      // Close all peer connections
       Object.values(peerConnectionsRef.current).forEach((pc) => {
         try {
           pc.getSenders().forEach((s) => s.track?.stop?.());
@@ -606,14 +633,14 @@ const VideoCall = () => {
       });
       peerConnectionsRef.current = {};
 
-      // 4️⃣ Clear UI
+      // Clear UI
       setRemoteStreams({});
       setParticipants([]);
 
-      // 5️⃣ Thoát về trang trước
+      // thoat ve trang truoc
       navigate(-1, { replace: true });
 
-      // 6️⃣ Fallback nếu không có history → điều hướng theo role
+      // fallback neu khong co history thi dieu huong theo role cua participant
       setTimeout(() => {
         if (window.location.pathname.includes("call")) {
           const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -629,7 +656,7 @@ const VideoCall = () => {
         }
       }, 150);
     } catch (err) {
-      console.error("❌ Error leaving room:", err);
+      console.error("Error leaving room:", err);
     }
   };
 
@@ -757,7 +784,7 @@ const VideoCall = () => {
       {(showChat || showPending) && (
         <div className="vc-sidebar">
           <div className="vc-sidebar-tabs">
-            <button
+            {/* <button
               className={`vc-tab ${showPending ? "vc-tab-active" : ""}`}
               onClick={() => {
                 setShowPending(true);
@@ -765,7 +792,7 @@ const VideoCall = () => {
               }}
             >
               Pending<span className="vc-tab-badge">1</span>
-            </button>
+            </button> */}
             <button
               className={`vc-tab ${showChat ? "vc-tab-active" : ""}`}
               onClick={() => {
@@ -777,7 +804,7 @@ const VideoCall = () => {
             </button>
           </div>
 
-          {showPending && (
+          {/* {showPending && (
             <div className="vc-pending-section">
               <div className="vc-pending-user">
                 <div className="vc-pending-avatar"></div>
@@ -791,7 +818,7 @@ const VideoCall = () => {
                 <button className="vc-btn-deny">Deny</button>
               </div>
             </div>
-          )}
+          )} */}
 
           {showChat && (
             <div className="vc-chat-section">
@@ -820,10 +847,10 @@ const VideoCall = () => {
                   placeholder="Type a message..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                   className="vc-message-input"
                 />
-                <button className="vc-send-btn" onClick={handleSendMessage}>
+                <button className="vc-send-btn" onClick={sendMessage}>
                   Send
                 </button>
               </div>
