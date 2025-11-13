@@ -171,6 +171,79 @@
   font-weight: 500;
 }
 
+.vc-recording-label {
+  font-weight: 500;
+  color: #fff;
+}
+
+.vc-recording-time {
+  color: #9ca3af;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+/* Nút Resume có thể tái sử dụng style của Pause */
+.vc-resume-icon {
+  font-size: 12px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nút Stop đồng bộ phong cách */
+.vc-recording-stop {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.vc-recording-stop:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Nút Start */
+.vc-recording-start {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.vc-recording-start:hover {
+  background: #dc2626;
+}
+
+/* Nút Download sau khi quay */
+.vc-recording-download {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-top: 10px;
+  transition: 0.2s;
+}
+
+.vc-recording-download:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 /* Speaker Video */
 .vc-speaker-video {
   width: 100%;

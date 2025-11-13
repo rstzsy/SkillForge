@@ -49,6 +49,16 @@ const VideoCall = () => {
   const videoRefs = useRef({});
   const navigate = useNavigate();
 
+  // record
+  const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [recordedBlob, setRecordedBlob] = useState(null);
+
+  const mediaRecorderRef = useRef(null);
+  const recordedChunksRef = useRef([]);
+  const timerRef = useRef(null);
+
   const pendingUser = {
     name: "Ruben Dias",
     message: "Want to join the meeting!",
@@ -660,6 +670,80 @@ const VideoCall = () => {
     }
   };
 
+  // record
+  const startRecording = async () => {
+    try {
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: "motion" },
+        audio: true,
+      });
+
+      recordedChunksRef.current = [];
+      const recorder = new MediaRecorder(screenStream, {
+        mimeType: "video/webm; codecs=vp9",
+      });
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        clearInterval(timerRef.current);
+        const blob = new Blob(recordedChunksRef.current, {
+          type: "video/webm",
+        });
+        setRecordedBlob(blob);
+        setIsRecording(false);
+        setRecordingTime(0);
+        screenStream.getTracks().forEach((t) => t.stop());
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setIsPaused(false);
+      setRecordingTime(0);
+
+      // Đếm giờ
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } catch (err) {
+      console.error("Recording failed:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+    }
+  };
+
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.pause();
+      setIsPaused(true);
+      clearInterval(timerRef.current);
+    }
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current?.state === "paused") {
+      mediaRecorderRef.current.resume();
+      setIsPaused(false);
+      timerRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return [h, m, s].map((v) => String(v).padStart(2, "0")).join(":");
+  };
+
   return (
     <div
       className={`vc-container ${
@@ -692,14 +776,51 @@ const VideoCall = () => {
 
       <div className="vc-main-content">
         <div className="vc-main-video">
-          <div className="vc-recording-badge">
-            <div className="vc-recording-dot"></div>
-            Recording 1:04:20
-            <button className="vc-recording-pause">
-              <span className="vc-pause-icon"></span>
+          {isRecording && (
+            <div className="vc-recording-badge">
+              <div className="vc-recording-dot"></div>
+              <span className="vc-recording-label">Recording</span>
+              <span className="vc-recording-time">
+                {formatTime(recordingTime)}
+              </span>
+
+              <button
+                className="vc-recording-pause"
+                onClick={isPaused ? resumeRecording : pauseRecording}
+                title={isPaused ? "Resume Recording" : "Pause Recording"}
+              >
+                {isPaused ? (
+                  <span className="vc-resume-icon">▶</span>
+                ) : (
+                  <span className="vc-pause-icon"></span>
+                )}
+              </button>
+
+              <button
+                className="vc-recording-stop"
+                onClick={stopRecording}
+                title="Stop Recording"
+              >
+                ⏹
+              </button>
+            </div>
+          )}
+
+          {!isRecording && (
+            <button className="vc-recording-start" onClick={startRecording}>
+              ⏺ Start Recording
             </button>
-            <span className="vc-recording-time">00</span>
-          </div>
+          )}
+
+          {recordedBlob && (
+            <a
+              href={URL.createObjectURL(recordedBlob)}
+              download={`recording_${Date.now()}.webm`}
+              className="vc-recording-download"
+            >
+              🎞 Download Recording
+            </a>
+          )}
 
           <div className="vc-speaker-video">
             {isVideoOff ? (
