@@ -5,6 +5,7 @@ import "./AdminEditClass.css";
 
 const AdminAddClass = () => {
   const navigate = useNavigate();
+
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,7 @@ const AdminAddClass = () => {
     subject: "",
     schedule: "",
     driveLink: "",
-    zoomLink: "",
+    zoomLink: "", // Đây là room link WebRTC
     teacherId: "",
     students: [], // {id, name}
   });
@@ -23,11 +24,15 @@ const AdminAddClass = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const teacherRes = await fetch("http://localhost:3002/api/admin/classes/teachers");
+        const teacherRes = await fetch(
+          "http://localhost:3002/api/admin/classes/teachers"
+        );
         const teacherData = await teacherRes.json();
         setTeachers(teacherData);
 
-        const studentRes = await fetch("http://localhost:3002/api/admin/classes/students");
+        const studentRes = await fetch(
+          "http://localhost:3002/api/admin/classes/students"
+        );
         const studentData = await studentRes.json();
         setStudents(studentData);
       } catch (err) {
@@ -40,13 +45,11 @@ const AdminAddClass = () => {
     fetchData();
   }, []);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setClassData({ ...classData, [e.target.name]: e.target.value });
-  };
 
-  const handleSelectTeacher = (teacherId) => {
+  const handleSelectTeacher = (teacherId) =>
     setClassData({ ...classData, teacherId });
-  };
 
   const handleSelectStudent = (index, studentId) => {
     const student = students.find((s) => s.id === studentId);
@@ -55,8 +58,25 @@ const AdminAddClass = () => {
     setClassData({ ...classData, students: updated });
   };
 
-  const handleAddStudent = () => {
-    setClassData({ ...classData, students: [...classData.students, { id: "", name: "" }] });
+  const handleAddStudent = () =>
+    setClassData({
+      ...classData,
+      students: [...classData.students, { id: "", name: "" }],
+    });
+
+  // --- Tạo WebRTC room: chỉ cần tạo roomId, navigate sang VideoCall ---
+  const handleCreateRoom = () => {
+    if (!classData.name) {
+      alert("Vui lòng nhập tên lớp trước khi tạo room");
+      return;
+    }
+
+    const roomId = `class-${classData.name.replace(/\s+/g, "-")}-${Date.now()}`;
+    const roomLink = `/video_call/${roomId}`; // local route WebRTC
+
+    setClassData((prev) => ({ ...prev, zoomLink: roomLink }));
+
+    alert("Room WebRTC đã được tạo! Click Save để lưu lớp hoặc chia sẻ link.");
   };
 
   const handleRemoveStudent = (index) => {
@@ -67,7 +87,6 @@ const AdminAddClass = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // convert schedule sang ISO string
       const payload = {
         ...classData,
         schedule: new Date(classData.schedule).toISOString(),
@@ -100,7 +119,6 @@ const AdminAddClass = () => {
       <AdminHeader />
       <div className="admineditclass-container">
         <h2 className="admineditclass-title">Add New Class</h2>
-
         <form onSubmit={handleSubmit} className="admineditclass-form">
           <label>
             Name:
@@ -146,16 +164,17 @@ const AdminAddClass = () => {
           </label>
 
           <label>
-            Zoom Link:
-            <input
-              type="text"
-              name="zoomLink"
-              value={classData.zoomLink}
-              onChange={handleChange}
-            />
+            Zoom/WebRTC Link:
+            <input type="text" name="zoomLink" value={classData.zoomLink} readOnly />
+            <button
+              type="button"
+              onClick={handleCreateRoom}
+              className="btn-save-admineditclass"
+            >
+              Create Room
+            </button>
           </label>
 
-          {/* Chọn giáo viên */}
           <label>
             Teacher:
             <select
@@ -172,7 +191,6 @@ const AdminAddClass = () => {
             </select>
           </label>
 
-          {/* Danh sách sinh viên */}
           <div className="student-list-admineditclass">
             <h3>Student List</h3>
             {classData.students.map((student, index) => (
@@ -189,12 +207,7 @@ const AdminAddClass = () => {
                     </option>
                   ))}
                 </select>
-                <input
-                  type="text"
-                  value={student.name}
-                  disabled
-                  placeholder="Student Name"
-                />
+                <input type="text" value={student.name} disabled placeholder="Student Name" />
                 <button
                   type="button"
                   onClick={() => handleRemoveStudent(index)}
@@ -204,11 +217,7 @@ const AdminAddClass = () => {
                 </button>
               </div>
             ))}
-            <button
-              type="button"
-              onClick={handleAddStudent}
-              className="btn-add-student-admineditclass"
-            >
+            <button type="button" onClick={handleAddStudent} className="btn-add-student-admineditclass">
               Add Student
             </button>
           </div>
@@ -217,11 +226,7 @@ const AdminAddClass = () => {
             <button type="submit" className="btn-save-admineditclass">
               Save
             </button>
-            <button
-              type="button"
-              className="btn-cancel-admineditclass"
-              onClick={() => navigate("/admin/manage_class")}
-            >
+            <button type="button" className="btn-cancel-admineditclass" onClick={() => navigate("/admin/manage_class")}>
               Cancel
             </button>
           </div>

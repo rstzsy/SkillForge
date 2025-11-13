@@ -23,6 +23,11 @@ import resultRoutes from "./routes/userResultRoute.js";
 import adminLearningPathRoute from "./routes/adminLearningPathRoute.js";
 import roadmapRoutes from "./routes/roadmapRoutes.js";
 
+// video call
+import roomRoutes from "./routes/roomRoute.js";
+import chatRoutes from "./routes/chatRoute.js";
+import participantRoutes from "./routes/participantRoute.js";
+
 
 dotenv.config();
 const app = express();
@@ -58,6 +63,11 @@ app.use("/api/results", resultRoutes);
 app.use("/api/admin/learningpath", adminLearningPathRoute);
 app.use("/:userId/progress", userRoutes); 
 app.use("/api/roadmaps", roadmapRoutes);
+
+// video call
+app.use("/api/rooms", roomRoutes);
+app.use("/api/chats", chatRoutes);
+app.use("/api/participants", participantRoutes);
 
 
 app.get("/", (req, res) => {
