@@ -16,48 +16,81 @@ const AdminAddRead = () => {
     type: "",
     image: null,
     imageURL: "",
-    passage: "", 
-    contentText: "", // content_text trong Firestore
+    passage: "",
+    contentText: "",
     correctAnswer: "",
     timeLimit: "",
     file: null,
   });
 
-  // thay doi du lieu trong form neu dung file
+  // handle change
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
     if (files && files.length > 0) {
       const file = files[0];
 
-      // excel file
+      // Excel File
       if (
         name === "file" &&
         (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))
       ) {
         const reader = new FileReader();
+
         reader.onload = (evt) => {
           const data = new Uint8Array(evt.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          const tasksSheet =
-            workbook.Sheets["Tasks"] || workbook.Sheets[workbook.SheetNames[0]];
-          const tasksJson = XLSX.utils.sheet_to_json(tasksSheet);
+          // Read Task Sheet
+          const tasksSheet = workbook.Sheets["Tasks"];
+          const tasksJson = tasksSheet
+            ? XLSX.utils.sheet_to_json(tasksSheet)
+            : [];
 
+          // Read Blanks (Gap Filling)
           const blanksSheet = workbook.Sheets["Blanks"];
           const blanksJson = blanksSheet
             ? XLSX.utils.sheet_to_json(blanksSheet)
             : [];
 
+          // Read MultipleChoice
+          const mcqSheet = workbook.Sheets["MultipleChoice"];
+          const mcqJson = mcqSheet ? XLSX.utils.sheet_to_json(mcqSheet) : [];
+
           if (tasksJson.length > 0) {
             const task = tasksJson[0];
 
+            let contentFinal = task.passage || "";
+            let correctAnsFinal = "";
+
+            // GAP FILLING
             const blanksForTask = blanksJson.filter(
               (b) => b.taskId === task.taskId
             );
-            const correctAnswersStr = blanksForTask
-              .map((b) => b.correctAnswer)
-              .join(", ");
+            if (blanksForTask.length > 0) {
+              correctAnsFinal = blanksForTask
+                .map((b) => b.correctAnswer)
+                .join(", ");
+            }
+
+            // MULTIPLE CHOICE
+            const mcqForTask = mcqJson.filter((q) => q.taskId === task.taskId);
+            if (mcqForTask.length > 0) {
+              let mcqText = "";
+
+              mcqForTask.forEach((q, index) => {
+                mcqText += `Question ${index + 1}: ${q.question}
+A. ${q.optionA}
+B. ${q.optionB}
+C. ${q.optionC}
+D. ${q.optionD}
+
+`;
+              });
+
+              contentFinal = mcqText;
+              correctAnsFinal = mcqForTask.map((q) => q.correct).join(", ");
+            }
 
             setFormData((prev) => ({
               ...prev,
@@ -65,17 +98,18 @@ const AdminAddRead = () => {
               title: task.title || "",
               type: task.type || "",
               passage: task.passageText || "",
-              contentText: task.passage || "",
+              contentText: contentFinal,
               timeLimit: task.timeLimit || "",
-              correctAnswer: correctAnswersStr,
+              correctAnswer: correctAnsFinal,
               file,
             }));
           }
         };
+
         reader.readAsArrayBuffer(file);
       }
 
-      // image
+      // Upload image
       else if (name === "image") {
         const folder = "reading_images";
         const fileName = `${Date.now()}_${file.name}`;
@@ -91,8 +125,8 @@ const AdminAddRead = () => {
             }));
           })
           .catch((err) => {
-            console.error("Upload image failed:", err);
-            alert("Upload image failed!");
+            console.error("Upload error:", err);
+            alert("Image upload failed!");
           });
       }
     } else {
@@ -100,47 +134,64 @@ const AdminAddRead = () => {
     }
   };
 
-  // send to backend
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const data = {
-        section: formData.section,
-        title: formData.title,
-        type: formData.type,
-        imageURL: formData.imageURL || "",
-        passage: formData.passage,
-        content: formData.contentText,
-        correctAnswer: formData.correctAnswer,
-        timeLimit: formData.timeLimit,
-      };
-
-      const res = await fetch("http://localhost:3002/api/reading", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.message || "Failed to add task");
-
-      alert("New Reading Task Added!");
-      navigate("/admin/practice_reading");
-    } catch (err) {
-      console.error("Error submitting form:", err);
-      alert("Failed to add reading task. Check console for details.");
-    }
-  };
-
-  // download excel template
+  // download template
   const handleDownloadTemplate = () => {
     const wb = XLSX.utils.book_new();
 
+    // SHEET 1: TASKS
     const tasksSheet = XLSX.utils.aoa_to_sheet([
-      ["taskId", "section", "title", "type", "passageText", "passage", "timeLimit"],
-      [1, "Section 1", "Sample Reading Title", "Gap Filling", "This is a passage...", "Question content here", 30],
+      [
+        "taskId",
+        "section",
+        "title",
+        "type",
+        "passageText",
+        "passage",
+        "timeLimit",
+      ],
+      [
+        1,
+        "Section 1",
+        "Sample Reading",
+        "Multiple Choice",
+        "This is the passage text...",
+        "",
+        30,
+      ],
     ]);
 
+    // SHEET 2: MULTIPLE CHOICE
+    const mcqSheet = XLSX.utils.aoa_to_sheet([
+      [
+        "taskId",
+        "question",
+        "optionA",
+        "optionB",
+        "optionC",
+        "optionD",
+        "correct",
+      ],
+      [
+        1,
+        "What is the main idea?",
+        "Choice A",
+        "Choice B",
+        "Choice C",
+        "Choice D",
+        "A",
+      ],
+      [
+        1,
+        "Why did the event happen?",
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D",
+        "C",
+      ],
+    ]);
+
+    // SHEET 3: BLANKS
     const blanksSheet = XLSX.utils.aoa_to_sheet([
       ["taskId", "blankId", "correctAnswer"],
       [1, 1, "answer1"],
@@ -148,11 +199,46 @@ const AdminAddRead = () => {
     ]);
 
     XLSX.utils.book_append_sheet(wb, tasksSheet, "Tasks");
+    XLSX.utils.book_append_sheet(wb, mcqSheet, "MultipleChoice");
     XLSX.utils.book_append_sheet(wb, blanksSheet, "Blanks");
 
     XLSX.writeFile(wb, "reading_template.xlsx");
   };
 
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      section: formData.section,
+      title: formData.title,
+      type: formData.type,
+      imageURL: formData.imageURL || "",
+      passage: formData.passage,
+      content: formData.contentText,
+      correctAnswer: formData.correctAnswer,
+      timeLimit: formData.timeLimit,
+    };
+
+    try {
+      const res = await fetch("http://localhost:3002/api/reading", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message);
+
+      alert("New Reading Task Added!");
+      navigate("/admin/practice_reading");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add reading task!");
+    }
+  };
+
+  
   return (
     <div className="addlisten-container">
       <AdminHeader />
@@ -197,11 +283,17 @@ const AdminAddRead = () => {
           <option value="Gap Filling">Gap Filling</option>
           <option value="Matching Headings">Matching Headings</option>
           <option value="True/False">True/False</option>
+          <option value="Multiple Choice">Multiple Choice</option>
         </select>
 
         {/* Image */}
         <label>Image (optional)</label>
-        <input type="file" name="image" accept="image/*" onChange={handleChange} />
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+        />
 
         {/* Passage */}
         <label>Passage (Main Reading Text)</label>
@@ -212,7 +304,7 @@ const AdminAddRead = () => {
           onChange={handleChange}
         />
 
-        {/* Content Passage */}
+        {/* Content */}
         <label>Content Passage (Questions, Instructions...)</label>
         <textarea
           name="contentText"
@@ -255,12 +347,23 @@ const AdminAddRead = () => {
 
         {/* Buttons */}
         <div className="addlisten-buttons">
-          <button type="button" onClick={handleDownloadTemplate} className="addlisten-btn" style={{ marginRight: "15px", marginBottom: "10px" }}>
+          <button
+            type="button"
+            className="addlisten-btn"
+            style={{ marginRight: "10px" }}
+            onClick={handleDownloadTemplate}
+          >
             Download Excel Template
           </button>
+
           <button type="submit" className="addlisten-btn">
             Save Task
           </button>
+
+          {/* note */}
+          <small style={{ display: "block", color: "#555", marginTop: "4px" }}>
+            If you choose type is Multiple Choice, please delete Blank Sheet in file excel
+          </small>
         </div>
       </form>
     </div>

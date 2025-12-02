@@ -61,24 +61,67 @@ const AdminEditRead = () => {
     if (files && files.length > 0) {
       const file = files[0];
 
-      // excel
-      if (name === "file" && (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))) {
+      // Excel File
+      if (
+        name === "file" &&
+        (file.name.endsWith(".xlsx") || file.name.endsWith(".xls"))
+      ) {
         const reader = new FileReader();
+
         reader.onload = (evt) => {
           const data = new Uint8Array(evt.target.result);
           const workbook = XLSX.read(data, { type: "array" });
 
-          const tasksSheet = workbook.Sheets["Tasks"] || workbook.Sheets[workbook.SheetNames[0]];
-          const tasksJson = XLSX.utils.sheet_to_json(tasksSheet);
+          // Read Task Sheet
+          const tasksSheet = workbook.Sheets["Tasks"];
+          const tasksJson = tasksSheet
+            ? XLSX.utils.sheet_to_json(tasksSheet)
+            : [];
 
+          // Read Blanks (Gap Filling)
           const blanksSheet = workbook.Sheets["Blanks"];
-          const blanksJson = blanksSheet ? XLSX.utils.sheet_to_json(blanksSheet) : [];
+          const blanksJson = blanksSheet
+            ? XLSX.utils.sheet_to_json(blanksSheet)
+            : [];
+
+          // Read MultipleChoice
+          const mcqSheet = workbook.Sheets["MultipleChoice"];
+          const mcqJson = mcqSheet ? XLSX.utils.sheet_to_json(mcqSheet) : [];
 
           if (tasksJson.length > 0) {
             const task = tasksJson[0];
 
-            const blanksForTask = blanksJson.filter((b) => b.taskId === task.taskId);
-            const correctAnswersStr = blanksForTask.map((b) => b.correctAnswer).join(", ");
+            let contentFinal = task.passage || "";
+            let correctAnsFinal = "";
+
+            // GAP FILLING
+            const blanksForTask = blanksJson.filter(
+              (b) => b.taskId === task.taskId
+            );
+            if (blanksForTask.length > 0) {
+              correctAnsFinal = blanksForTask
+                .map((b) => b.correctAnswer)
+                .join(", ");
+            }
+
+            // MULTIPLE CHOICE
+            const mcqForTask = mcqJson.filter((q) => q.taskId === task.taskId);
+            if (mcqForTask.length > 0) {
+              let mcqText = "";
+
+              mcqForTask.forEach((q, index) => {
+                mcqText += `Question ${index + 1}: ${q.question}
+  A. ${q.optionA}
+  B. ${q.optionB}
+  C. ${q.optionC}
+  D. ${q.optionD}
+  
+  `;
+              });
+
+              contentFinal = mcqText;
+              correctAnsFinal = mcqForTask.map((q) => q.correct).join(", ");
+            }
 
             setFormData((prev) => ({
               ...prev,
@@ -86,16 +129,18 @@ const AdminEditRead = () => {
               title: task.title || "",
               type: task.type || "",
               passage: task.passageText || "",
-              content: task.passage || "",
+              contentText: contentFinal,
               timeLimit: task.timeLimit || "",
-              correctAnswer: correctAnswersStr,
+              correctAnswer: correctAnsFinal,
+              file,
             }));
           }
         };
+
         reader.readAsArrayBuffer(file);
       }
 
-      // image urrl
+      // Upload image
       else if (name === "image") {
         const folder = "reading_images";
         const fileName = `${Date.now()}_${file.name}`;
@@ -111,8 +156,8 @@ const AdminEditRead = () => {
             }));
           })
           .catch((err) => {
-            console.error("Upload image failed:", err);
-            alert("Upload image failed!");
+            console.error("Upload error:", err);
+            alert("Image upload failed!");
           });
       }
     } else {
@@ -162,7 +207,12 @@ const AdminEditRead = () => {
       <form className="addlisten-form" onSubmit={handleSubmit}>
         {/* Section */}
         <label>Section</label>
-        <select name="section" value={formData.section} onChange={handleChange} required>
+        <select
+          name="section"
+          value={formData.section}
+          onChange={handleChange}
+          required
+        >
           <option value="">Select Section</option>
           <option value="Section 1">Section 1</option>
           <option value="Section 2">Section 2</option>
@@ -173,42 +223,88 @@ const AdminEditRead = () => {
 
         {/* Title */}
         <label>Title</label>
-        <input type="text" name="title" value={formData.title} onChange={handleChange} required />
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          required
+        />
 
         {/* Type */}
         <label>Type</label>
-        <select name="type" value={formData.type} onChange={handleChange} required>
+        <select
+          name="type"
+          value={formData.type}
+          onChange={handleChange}
+          required
+        >
           <option value="">Select Type</option>
           <option value="Gap Filling">Gap Filling</option>
           <option value="Map">Map</option>
           <option value="True/False">True/False</option>
+          <option value="Multiple Choice">Multiple Choice</option>
         </select>
 
         {/* Image */}
         <label>Image</label>
-        <input type="file" name="image" accept="image/*" onChange={handleChange} />
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+        />
         {formData.imageURL && (
-          <img src={formData.imageURL} alt="preview" width="120" style={{ marginTop: "10px", borderRadius: "8px" }} />
+          <img
+            src={formData.imageURL}
+            alt="preview"
+            width="120"
+            style={{ marginTop: "10px", borderRadius: "8px" }}
+          />
         )}
 
         {/* Passage */}
         <label>Content Passage</label>
-        <textarea name="passage" value={formData.passage} onChange={handleChange} placeholder="Edit passage here..." />
+        <textarea
+          name="passage"
+          value={formData.passage}
+          onChange={handleChange}
+          placeholder="Edit passage here..."
+        />
 
         {/* Content */}
         <label>Content Text</label>
-        <textarea name="content" value={formData.content} onChange={handleChange} placeholder="Edit content here..." />
+        <textarea
+          name="content"
+          value={formData.content}
+          onChange={handleChange}
+          placeholder="Edit content here..."
+        />
 
         <p className="addlisten-or">OR</p>
-        <input type="file" name="file" accept=".xlsx,.xls" onChange={handleChange} />
+        <input
+          type="file"
+          name="file"
+          accept=".xlsx,.xls"
+          onChange={handleChange}
+        />
 
         {/* Correct Answer */}
         <label>Correct Answer</label>
-        <input type="text" name="correctAnswer" value={formData.correctAnswer} onChange={handleChange} />
+        <input
+          type="text"
+          name="correctAnswer"
+          value={formData.correctAnswer}
+          onChange={handleChange}
+        />
 
         {/* Time Limit */}
         <label>Time Limit</label>
-        <select name="timeLimit" value={formData.timeLimit} onChange={handleChange}>
+        <select
+          name="timeLimit"
+          value={formData.timeLimit}
+          onChange={handleChange}
+        >
           <option value="">Select Time</option>
           <option value="20">20 minutes</option>
           <option value="30">30 minutes</option>
@@ -216,7 +312,9 @@ const AdminEditRead = () => {
           <option value="45">45 minutes</option>
         </select>
 
-        <button type="submit" className="addlisten-btn">Update Task</button>
+        <button type="submit" className="addlisten-btn">
+          Update Task
+        </button>
       </form>
     </div>
   );
