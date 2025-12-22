@@ -10,18 +10,17 @@ const ReadDetail = () => {
   const [test, setTest] = useState(null);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [submissionId, setSubmissionId] = useState(null);
 
-  // Fetch reading detail from backend
+  // ---------------- FETCH DATA ----------------
   useEffect(() => {
     const fetchReading = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(
-          `http://localhost:3002/api/user/reading/${id}`
-        );
+        const res = await axios.get(`http://localhost:3002/api/user/reading/${id}`);
         const data = res.data.data;
 
         if (!data) {
@@ -30,7 +29,7 @@ const ReadDetail = () => {
         }
 
         setTest(data);
-        setTimeLeft((data.time_limit || 0) * 60); 
+        setTimeLeft((data.time_limit || 0) * 60);
       } catch (err) {
         console.error("Error fetching reading detail:", err);
         setError("Failed to load reading detail.");
@@ -42,7 +41,7 @@ const ReadDetail = () => {
     fetchReading();
   }, [id]);
 
-  // Countdown Timer
+  // ---------------- COUNTDOWN ----------------
   useEffect(() => {
     if (!test || timeLeft <= 0) return;
 
@@ -61,15 +60,53 @@ const ReadDetail = () => {
     return () => clearInterval(timer);
   }, [test, timeLeft]);
 
-  // Handle answer input
+  // ---------------- HANDLE ANSWERS ----------------
+  const handleSelect = (qNum, value) => {
+    setAnswers((prev) => ({ ...prev, [qNum]: value }));
+  };
   const handleChange = (blankId, value) => {
     setAnswers((prev) => ({ ...prev, [blankId]: value }));
   };
 
-  // Render passage inline
+  // ---------------- PARSE MCQ ----------------
+  const parseMCQ = () => {
+    const text = test?.content_text || "";
+    const blocks = text.split(/Question\s*\d+:/g);
+    let questions = [];
+    let counter = 0;
+
+    blocks.forEach((raw) => {
+      const block = raw.trim();
+      if (!block) return;
+
+      counter++;
+      const questionMatch = block.match(/^(.*?)(?=A\.)/s);
+      const questionText = questionMatch ? questionMatch[1].trim() : "";
+
+      const choice = (letter) => {
+        const regex = new RegExp(`${letter}\\.\s*(.*?)(?=(A\\.|B\\.|C\\.|D\\.|$))`, "s");
+        const match = block.match(regex);
+        return match ? match[1].trim() : "";
+      };
+
+      questions.push({
+        number: counter,
+        question: questionText,
+        A: choice("A"),
+        B: choice("B"),
+        C: choice("C"),
+        D: choice("D"),
+      });
+    });
+
+    return questions;
+  };
+
+  const mcqList = test?.type === "Multiple Choice" ? parseMCQ() : [];
+
+  // ---------------- RENDER INLINE PASSAGE ----------------
   const renderPassageInline = () => {
     if (!test?.content_text) return null;
-
     const regex = /\((\d+)\) ___/g;
     const parts = [];
     let lastIndex = 0;
@@ -96,11 +133,10 @@ const ReadDetail = () => {
     }
 
     parts.push(test.content_text.slice(lastIndex));
-
     return parts;
   };
 
-  //  Handle submit
+  // ---------------- SUBMIT ----------------
   const handleSubmit = async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser?.id) {
@@ -108,52 +144,30 @@ const ReadDetail = () => {
       return;
     }
 
-    if (!test || !test.id) {
-      alert("Test data not loaded yet!");
-      return;
-    }
-
     const user_id = storedUser.id;
     const practice_id = test.id;
     const time_spent = test.time_limit
       ? Math.floor((test.time_limit * 60 - timeLeft) / 60)
-      : 0; // thoi gian lam bai tinh bang phut
+      : 0;
 
     try {
-      const res = await axios.post(
-        "http://localhost:3002/api/user/read/submit",
-        {
-          user_id,
-          practice_id,
-          user_answers: answers,
-          time_spent,
-        }
-      );
+      const res = await axios.post("http://localhost:3002/api/user/read/submit", {
+        user_id,
+        practice_id,
+        user_answers: answers,
+        time_spent,
+      });
 
-      const data = res.data;
-
-      if (!res.status || res.status !== 200) {
-        throw new Error(
-          data.message || "Network error while submitting your test."
-        );
-      }
-
-      alert("Submission saved successfully!");
-      setShowModal(true);
-
-      // save submissionId
-      const submissionId = res.data.data.id;
-      console.log("Firestore doc ID:", submissionId);
-
-      // navigate to score page
-      navigate(`/score/read/${submissionId}`, { state: { userAnswers: answers } });
+      const subId = res.data.data.id;
+      setSubmissionId(subId);
+      setShowModal(true); // Hiện modal
     } catch (err) {
       console.error("Error submitting test:", err);
       alert("Error submitting test. See console.");
     }
   };
 
-  // Format MM:SS
+  // ---------------- TIMER FORMAT ----------------
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -169,12 +183,12 @@ const ReadDetail = () => {
       <h2 className="read-detail-title">{test.title}</h2>
 
       <div className="read-detail-main">
-        {/* LEFT: full passage */}
+        {/* LEFT SIDE – PASSAGE */}
         <div className="read-detail-left">
           <h3>Reading Passage</h3>
           <div className="read-detail-full-passage">
             {test.content
-              ?.split(/\\n|\n/g)
+              ?.split(/\n/g)
               .filter((line) => line.trim())
               .map((line, index) => (
                 <p key={index}>{line}</p>
@@ -182,26 +196,43 @@ const ReadDetail = () => {
           </div>
         </div>
 
-        {/* RIGHT: inline answer passage */}
-        {test.image_url && (
-          <div className="read-detail-right">
-            <div className="read-detail-right-inner">
+        {/* RIGHT SIDE */}
+        <div className="read-detail-right">
+          <div className="read-detail-right-inner">
+            {test.type === "Multiple Choice" ? (
+              mcqList.map((q) => (
+                <div key={q.number} className="mcq-question-card">
+                  <p className="mcq-question-text">
+                    <span className="mcq-question-number">Question {q.number}:</span>
+                    {q.question}
+                  </p>
+                  {["A", "B", "C", "D"].map((opt) => (
+                    <label 
+                      key={opt} 
+                      className={`mcq-option-label ${answers[q.number] === opt ? 'selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name={`q-${q.number}`}
+                        value={opt}
+                        checked={answers[q.number] === opt}
+                        onChange={() => handleSelect(q.number, opt)}
+                      />
+                      <span className="mcq-option-letter">{opt}.</span>
+                      <span className="mcq-option-text">{q[opt]}</span>
+                    </label>
+                  ))}
+                </div>
+              ))
+            ) : (
               <div className="read-detail-passage">{renderPassageInline()}</div>
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Bottom controls */}
-      <div
-        className="read-detail-bottom-controls"
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          gap: "10px",
-          alignItems: "center",
-        }}
-      >
+      {/* SUBMIT + TIMER */}
+      <div className="read-detail-bottom-controls">
         <div className="read-detail-timer">
           <strong>{formatTime(timeLeft)}</strong>
         </div>
@@ -210,7 +241,7 @@ const ReadDetail = () => {
         </button>
       </div>
 
-      {/* Modal */}
+      {/* ---------------- MODAL ---------------- */}
       {showModal && (
         <div className="read-detail-modal">
           <div className="read-detail-modal-content">
@@ -219,7 +250,7 @@ const ReadDetail = () => {
               <button onClick={() => navigate("/")}>Return Course Page</button>
               <button
                 onClick={() =>
-                  navigate(`/score/read/${test.id}`, {
+                  navigate(`/score/read/${submissionId}`, {
                     state: { userAnswers: answers },
                   })
                 }
