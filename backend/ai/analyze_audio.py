@@ -6,11 +6,11 @@ import ssl
 import os
 import gc
 import wave
+import subprocess
 
 warnings.filterwarnings("ignore")
 ssl._create_default_https_context = ssl._create_unverified_context
 
-# ✅ MODEL LOAD 1 LẦN DUY NHẤT
 MODEL = None
 
 def load_model_once():
@@ -19,31 +19,42 @@ def load_model_once():
         MODEL = whisper.load_model("tiny", device="cpu")
     return MODEL
 
+def convert_webm_to_wav(input_path):
+    wav_path = input_path.replace(".webm", ".wav")
+    subprocess.run([
+        "ffmpeg", "-y",
+        "-i", input_path,
+        "-ar", "16000",
+        "-ac", "1",
+        wav_path
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return wav_path
+
 def get_audio_duration(path):
     with wave.open(path, 'rb') as f:
         return f.getnframes() / f.getframerate()
 
 def analyze(audio_path, expected_text=""):
+    wav_path = None
     try:
-        # ✅ Giới hạn audio (BẮT BUỘC)
-        if get_audio_duration(audio_path) > 30:
-            print(json.dumps({"error": "Audio too long (max 30 seconds)"}), flush=True)
+        wav_path = convert_webm_to_wav(audio_path)
+
+        if get_audio_duration(wav_path) > 30:
+            print(json.dumps({"error": "Audio too long (max 30 seconds)"}))
             return
 
         model = load_model_once()
 
         result = model.transcribe(
-            audio_path,
+            wav_path,
             language="en",
             fp16=False,
             verbose=False
         )
 
-        text = result.get("text", "").strip()
-        if not text:
-            text = "No speech detected in the audio."
+        text = result.get("text", "").strip() or "No speech detected."
 
-        analysis = {
+        print(json.dumps({
             "transcript": text,
             "pronunciation_score": 7.5,
             "fluency_score": 7.0,
@@ -51,35 +62,21 @@ def analyze(audio_path, expected_text=""):
             "vocab_score": 7.0,
             "ai_score": 7.0,
             "feedback": "Your pronunciation and fluency are acceptable. Improve your grammar in complex sentences."
-        }
-
-        print(json.dumps(analysis), flush=True)
+        }), flush=True)
 
     except Exception as e:
         print(json.dumps({
-            "error": str(e),
-            "transcript": "Error transcribing audio",
-            "pronunciation_score": 0,
-            "fluency_score": 0,
-            "grammar_score": 0,
-            "vocab_score": 0,
-            "ai_score": 0,
-            "feedback": f"Transcription failed: {str(e)}"
+            "success": False,
+            "error": f"Whisper error: {str(e)}"
         }), flush=True)
 
     finally:
-        # ✅ DỌN RAM
-        if os.path.exists(audio_path):
-            os.remove(audio_path)
+        for f in [audio_path, wav_path]:
+            if f and os.path.exists(f):
+                os.remove(f)
         gc.collect()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(json.dumps({"error": "No audio path provided"}), flush=True)
-        sys.exit(1)
-
     audio_path = sys.argv[1]
-    expected_text = sys.argv[2] if len(sys.argv) > 2 else ""
-
     sys.stderr = open(os.devnull, "w")
-    analyze(audio_path, expected_text)
+    analyze(audio_path)
