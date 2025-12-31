@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-
-// routes
 import bookingRoutes from "./routes/bookingRoutes.js";
 import userRoutes from "./routes/userRoutes.js"; 
 import goalRoutes from "./routes/goalRoutes.js";
@@ -30,58 +28,21 @@ import roomRoutes from "./routes/roomRoute.js";
 import chatRoutes from "./routes/chatRoute.js";
 import participantRoutes from "./routes/participantRoute.js";
 
+
 dotenv.config();
 const app = express();
-
-/* =========================
-   🔥 CORS CHUẨN – FIX LOGIN
-========================= */
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://skill-94f02.web.app",
-  "https://skillforge-99ct.onrender.com"
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // cho phép Postman / server call
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Accept"]
-}));
-
-/* =========================
-   BODY PARSER
-========================= */
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
-/* =========================
-   FIX __dirname (ESM)
-========================= */
+// ✅ Fix đường dẫn khi dùng ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* =========================
-   PUBLIC AUDIO FILES
-========================= */
+// ✅ Public thư mục uploads để có thể truy cập file trực tiếp
 const audioPath = path.join(process.cwd(), "uploads", "audio");
 app.use("/uploads/audio", express.static(audioPath));
 console.log("🗂️ Serving uploads from:", audioPath);
 
-/* =========================
-   API ROUTES
-========================= */
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes); 
 app.use("/api/goals", goalRoutes);
@@ -92,16 +53,15 @@ app.use("/api/listening", listeningRoutes);
 app.use("/api/reading", readingRoutes);
 app.use("/api/ai-writing", aiWritingRoutes);
 app.use("/api/speaking", speakingRoutes);
-
 app.use("/api/user/listening", userListeningRoutes);
 app.use("/api/user/listen/submit", userListeningSubmissionRoutes);
 app.use("/api/user/reading", userReadingRoutes);
 app.use("/api/user/read/submit", userReadingSubmissionRoutes);
-
 app.use("/api/user/wishlist", wishlistRoute);
 app.use("/api/placement-tests", placementRoutes);
 app.use("/api/results", resultRoutes);
 app.use("/api/admin/learningpath", adminLearningPathRoute);
+app.use("/:userId/progress", userRoutes); 
 app.use("/api/roadmaps", roadmapRoutes);
 
 // video call
@@ -109,17 +69,12 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/participants", participantRoutes);
 
-/* =========================
-   ROOT
-========================= */
+
 app.get("/", (req, res) => {
-  res.send("✅ Server is ready");
+  res.send("Server is ready");
 });
 
-/* =========================
-   START SERVER
-========================= */
 const port = process.env.PORT || 3002;
-app.listen(port, () => {
-  console.log(`🚀 Server running on port ${port}`);
-});
+app.listen(port, () =>
+  console.log(`Server is running at http://localhost:${port}`)
+);
