@@ -10,10 +10,9 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 def analyze(audio_path, expected_text=""):
     try:
-        # Load model (suppress output hoàn toàn)
-        model = whisper.load_model("base", download_root=None)
+        # ✅ Dùng model "tiny" thay vì "base" để tiết kiệm RAM
+        model = whisper.load_model("tiny", download_root=None)
         
-        # ✅ Transcribe với verbose=False và suppress warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             result = model.transcribe(
@@ -29,7 +28,6 @@ def analyze(audio_path, expected_text=""):
         if not text:
             text = "No speech detected in the audio."
         
-        # Phần chấm điểm mô phỏng
         feedback = "Your pronunciation and fluency are acceptable. Improve your grammar in complex sentences."
         
         analysis = {
@@ -42,7 +40,6 @@ def analyze(audio_path, expected_text=""):
             "feedback": feedback
         }
         
-        # ✅ CRITICAL: Chỉ print JSON ra stdout, không có gì khác
         print(json.dumps(analysis), flush=True)
         
     except Exception as e:
@@ -67,7 +64,6 @@ if __name__ == "__main__":
     audio_path = sys.argv[1]
     expected_text = sys.argv[2] if len(sys.argv) > 2 else ""
     
-    # ✅ Redirect stderr để tránh nhiễu output
     sys.stderr = open(os.devnull, 'w')
     
     analyze(audio_path, expected_text)
