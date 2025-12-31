@@ -1,4 +1,4 @@
-import { Booking } from "../models/BookingModel.js";
+import { Booking } from "../models/bookingModel.js";
 import { db } from "../config/firebase.js";
 
 const COLLECTION_NAME = "speaking_bookings";
