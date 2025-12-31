@@ -45,43 +45,48 @@ export const aiSpeakingGeminiService = {
       const model = "gemini-2.0-flash";
 
       const prompt = `
-        You are an expert IELTS Speaking examiner with over 10 years of experience.
-        Evaluate this spoken response based on IELTS Speaking criteria.
+        Bạn là một giám khảo IELTS Speaking chuyên nghiệp với hơn 10 năm kinh nghiệm.
+        Đánh giá bài nói này dựa trên tiêu chí chấm điểm IELTS Speaking.
 
-        **Section:** ${section}
-        **Question:** ${questionText}
-        **Student's transcribed answer:** ${transcript}
+        **Phần thi:** ${section}
+        **Câu hỏi:** ${questionText}
+        **Câu trả lời của học viên (đã chuyển âm):** ${transcript}
 
-        Respond **ONLY in valid JSON format** with no extra text.
+        Trả lời **CHỈ BẰNG JSON HỢP LỆ**, không có text thừa.
 
-        ### EVALUATION CRITERIA:
-        - **Pronunciation:** Clarity, accent, word stress, intonation (0-9 scale)
-        - **Fluency & Coherence:** Natural flow, pauses, hesitation, logical organization (0-9 scale)
-        - **Lexical Resource:** Vocabulary range, accuracy, collocations, paraphrasing (0-9 scale)
-        - **Grammatical Range & Accuracy:** Sentence variety, grammar correctness, complexity (0-9 scale)
+        ### TIÊU CHÍ ĐÁNH GIÁ:
+        - **Pronunciation (Phát âm):** Độ rõ ràng, giọng điệu, trọng âm từ, ngữ điệu (thang điểm 0-9)
+        - **Fluency & Coherence (Độ trưu chảy & Mạch lạc):** Tự nhiên, dừng nghỉ, do dự, tổ chức logic (0-9)
+        - **Lexical Resource (Vốn từ vựng):** Phạm vi từ vựng, độ chính xác, cụm từ, diễn đạt (0-9)
+        - **Grammatical Range & Accuracy (Ngữ pháp):** Đa dạng cấu trúc câu, độ chính xác, độ phức tạp (0-9)
 
-        ### OUTPUT FORMAT (MUST BE VALID JSON):
+        ### ĐỊNH DẠNG ĐẦU RA (PHẢI LÀ JSON HỢP LỆ):
         {
-          "overall_band": number (0-9, can be decimal like 6.5),
+          "overall_band": number (0-9, có thể là số thập phân như 6.5),
           "pronunciation_score": number (0-9),
           "fluency_score": number (0-9),
           "lexical_score": number (0-9),
           "grammar_score": number (0-9),
-          "feedback": "2-3 sentences summarizing the response quality.",
+          "feedback": "2-3 câu nhận xét tổng quan về chất lượng bài nói BẰNG TIẾNG VIỆT",
           "errors": [
             { 
               "type": "pronunciation/grammar/vocabulary", 
-              "text": "problem phrase",
-              "correction": "suggestion",
-              "explanation": "why"
+              "text": "cụm từ/câu có lỗi",
+              "correction": "đề xuất sửa",
+              "explanation": "giải thích lỗi BẰNG TIẾNG VIỆT"
             }
           ],
           "suggestions": [
-            "Specific tip 1",
-            "Specific tip 2",
-            "Specific tip 3"
+            "Gợi ý cụ thể 1 BẰNG TIẾNG VIỆT",
+            "Gợi ý cụ thể 2 BẰNG TIẾNG VIỆT",
+            "Gợi ý cụ thể 3 BẰNG TIẾNG VIỆT"
           ]
         }
+
+        **LƯU Ý QUAN TRỌNG:**
+        - Tất cả feedback, explanation và suggestions PHẢI BẰNG TIẾNG VIỆT
+        - Chỉ giữ nguyên tiếng Anh ở phần "text" và "correction" trong errors
+        - Phản hồi phải chi tiết, cụ thể và có tính xây dựng
       `;
 
       console.log("📤 Sending request to Gemini...");
@@ -107,7 +112,9 @@ export const aiSpeakingGeminiService = {
 
       let parsed;
       try {
-        parsed = JSON.parse(text);
+        // Loại bỏ markdown code blocks nếu có
+        const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+        parsed = JSON.parse(cleanText);
       } catch {
         console.warn("⚠️ Response not valid JSON, attempting fallback parse...");
         const match = text.match(/\{[\s\S]*\}/);
@@ -121,18 +128,18 @@ export const aiSpeakingGeminiService = {
         lexical_score: 5.5,
         grammar_score: 5.5,
         feedback:
-          "Your answer needs improvement in pronunciation and fluency. Try to speak more naturally.",
+          "Bài nói của bạn cần cải thiện về phát âm và độ trưu chảy. Hãy cố gắng nói tự nhiên hơn và giảm các từ lấp đầy.",
         errors: [],
         suggestions: [
-          "Practice pronunciation of difficult words",
-          "Reduce hesitation and filler words",
-          "Use more varied vocabulary",
+          "Luyện phát âm các từ khó",
+          "Giảm sự do dự và các từ lấp đầy như 'um', 'uh'",
+          "Sử dụng từ vựng đa dạng hơn",
         ],
       };
 
       console.log("💾 Saving to Firestore...");
 
-      // ✅ CHECK EXISTING SUBMISSION (CHỈ PHẦN NÀY ĐƯỢC SỬA)
+      // ✅ CHECK EXISTING SUBMISSION
       const submissionsRef = db.collection("speaking_question_submissions");
       const existingSnap = await submissionsRef
         .where("user_id", "==", userId)
@@ -201,7 +208,7 @@ export const aiSpeakingGeminiService = {
         .get();
 
       if (snapshot.empty) {
-        throw new Error("No submissions found for this speaking practice");
+        throw new Error("Không tìm thấy bài nộp nào cho bài luyện tập này");
       }
 
       const submissions = snapshot.docs.map((doc) => doc.data());
@@ -219,13 +226,13 @@ export const aiSpeakingGeminiService = {
         (avgPronunciation + avgFluency + avgGrammar + avgVocab) / 4;
 
       const overallFeedback = `
-        Overall Speaking Performance:
-        - Pronunciation: ${avgPronunciation.toFixed(1)}/9
-        - Fluency & Coherence: ${avgFluency.toFixed(1)}/9
-        - Grammatical Range: ${avgGrammar.toFixed(1)}/9
-        - Lexical Resource: ${avgVocab.toFixed(1)}/9
+        Kết quả tổng thể kỹ năng Speaking:
+        - Phát âm: ${avgPronunciation.toFixed(1)}/9
+        - Độ trưu chảy & Mạch lạc: ${avgFluency.toFixed(1)}/9
+        - Ngữ pháp: ${avgGrammar.toFixed(1)}/9
+        - Vốn từ vựng: ${avgVocab.toFixed(1)}/9
         
-        You have completed all questions in this topic. Keep practicing to improve!
+        Bạn đã hoàn thành tất cả các câu hỏi trong chủ đề này. Hãy tiếp tục luyện tập để cải thiện!
       `;
 
       const submissionRef = db.collection("speaking_submissions").doc();

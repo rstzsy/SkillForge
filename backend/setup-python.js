@@ -1,0 +1,123 @@
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const projectRoot = path.resolve(__dirname);
+
+const isWindows = os.platform() === "win32";
+const venvPath = path.join(projectRoot, "venv");
+const pythonExe = isWindows 
+  ? path.join(venvPath, "Scripts", "python.exe")
+  : path.join(venvPath, "bin", "python3");
+const pipExe = isWindows
+  ? path.join(venvPath, "Scripts", "pip")
+  : path.join(venvPath, "bin", "pip");
+
+console.log("🐍 Checking Python virtual environment...");
+console.log("📂 Project root:", projectRoot);
+
+// Kiểm tra xem packages đã được cài đủ chưa
+function checkPackagesInstalled() {
+  if (!fs.existsSync(pythonExe)) {
+    return false;
+  }
+  
+  try {
+    console.log("🔍 Verifying installed packages...");
+    execSync(`"${pythonExe}" -c "import whisper; import torch; import numpy"`, { 
+      stdio: "pipe" 
+    });
+    console.log("✅ All packages are installed correctly");
+    return true;
+  } catch {
+    console.log("⚠️  Packages are missing or incomplete");
+    return false;
+  }
+}
+
+// Nếu packages đã đủ, không cần setup
+if (checkPackagesInstalled()) {
+  console.log("✅ Python environment is ready!");
+  process.exit(0);
+}
+
+// Nếu venv tồn tại nhưng packages không đủ, xóa đi tạo lại
+if (fs.existsSync(venvPath)) {
+  console.log("🗑️  Removing incomplete venv...");
+  try {
+    fs.rmSync(venvPath, { recursive: true, force: true });
+    console.log("✅ Old venv removed");
+  } catch (error) {
+    console.error("❌ Failed to remove old venv:", error.message);
+    console.error("Please manually delete the 'venv' folder and try again");
+    process.exit(1);
+  }
+}
+
+console.log("🔧 Setting up fresh Python environment...");
+
+try {
+  // Kiểm tra python3 có sẵn không
+  try {
+    const pythonVersion = execSync("python3 --version", { stdio: "pipe" }).toString();
+    console.log("✅ Found:", pythonVersion.trim());
+  } catch {
+    console.error("❌ Python 3 is not installed or not in PATH");
+    console.error("Please install Python 3 from https://www.python.org/downloads/");
+    process.exit(1);
+  }
+
+  // Bước 1: Tạo venv
+  console.log("\n📦 Step 1/3: Creating Python virtual environment...");
+  execSync("python3 -m venv venv", { 
+    cwd: projectRoot,
+    stdio: "inherit" 
+  });
+  console.log("✅ Virtual environment created");
+  
+  // Bước 2: Upgrade pip
+  console.log("\n🔄 Step 2/3: Upgrading pip...");
+  execSync(`"${pipExe}" install --upgrade pip`, { 
+    cwd: projectRoot,
+    stdio: "inherit" 
+  });
+  console.log("✅ Pip upgraded");
+  
+  // Bước 3: Cài packages
+  console.log("\n📥 Step 3/3: Installing Python packages...");
+  console.log("⏳ This may take 2-5 minutes, please wait...");
+  
+  execSync(`"${pipExe}" install openai-whisper torch numpy`, { 
+    cwd: projectRoot,
+    stdio: "inherit" 
+  });
+  
+  // Verify lại sau khi cài
+  console.log("\n🔍 Verifying installation...");
+  execSync(`"${pythonExe}" -c "import whisper; import torch; import numpy; print('All modules imported successfully')"`, { 
+    cwd: projectRoot,
+    stdio: "inherit" 
+  });
+  
+  console.log("\n✅ Python packages installed successfully!");
+  console.log("🎉 Setup complete! You can now start the server with: npm run dev");
+  
+} catch (error) {
+  console.error("\n❌ Failed to setup Python environment!");
+  console.error("Error:", error.message);
+  console.error("\n📝 Please try manual setup:");
+  console.error("  cd backend");
+  console.error("  rm -rf venv");
+  console.error("  python3 -m venv venv");
+  console.error(isWindows 
+    ? "  venv\\Scripts\\activate" 
+    : "  source venv/bin/activate");
+  console.error("  pip install --upgrade pip");
+  console.error("  pip install openai-whisper torch numpy");
+  process.exit(1);
+}

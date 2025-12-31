@@ -39,3 +39,8 @@ venv/
 backend/venv/
 __pycache__/
 
+# Python
+venv/
+*.pyc
+__pycache__/
+
