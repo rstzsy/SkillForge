@@ -20,9 +20,33 @@ import { db } from "../../firebase/config";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import html2canvas from "html2canvas";
 import "./UserProgress.css";
 
 const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444"];
+
+// Helper function to convert image to base64
+const getImageBase64 = (imgPath) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        const dataURL = canvas.toDataURL('image/png');
+        resolve(dataURL);
+      } catch (e) {
+        reject(e);
+      }
+    };
+    img.onerror = reject;
+    img.src = imgPath;
+  });
+};
 
 const UserProgress = () => {
   const [userScores, setUserScores] = useState([
@@ -147,7 +171,6 @@ const UserProgress = () => {
           aiFeedback: data.aiFeedback,
         });
         
-        // Ưu tiên overband, nếu không có thì dùng score
         const score = data.overband || data.score || 0;
         
         if (score > 0) {
@@ -179,7 +202,6 @@ const UserProgress = () => {
           aiFeedback: data.aiFeedback,
         });
         
-        // Ưu tiên overband, nếu không có thì dùng score
         const score = data.overband || data.score || 0;
         
         if (score > 0) {
@@ -200,13 +222,9 @@ const UserProgress = () => {
       console.log("📊 All submissions:", submissions);
       setAllSubmissions(submissions);
 
-      // Calculate current scores (average of all attempts for each skill)
+      // Calculate current scores
       calculateCurrentScores(submissions);
-
-      // Generate quiz attempts data (last 5 attempts)
       generateQuizAttempts(submissions);
-
-      // Generate weekly progress data
       generateWeeklyProgress(submissions);
 
       setLoading(false);
@@ -268,7 +286,6 @@ const UserProgress = () => {
       return;
     }
 
-    // Group submissions by date and calculate average for each day
     const attemptsByDate = {};
     
     submissions.forEach((sub) => {
@@ -285,7 +302,6 @@ const UserProgress = () => {
       attemptsByDate[dateKey][sub.skill.toLowerCase()].push(sub.score);
     });
 
-    // Convert to array and get last 5 attempts
     const attempts = Object.values(attemptsByDate)
       .sort((a, b) => a.date - b.date)
       .map((attempt, index) => ({
@@ -296,7 +312,7 @@ const UserProgress = () => {
         Speaking: calculateAverage(attempt.speaking),
         date: attempt.date,
       }))
-      .slice(-5); // Get last 5 attempts
+      .slice(-5);
 
     setQuizAttempts(attempts);
   };
@@ -307,7 +323,6 @@ const UserProgress = () => {
       return;
     }
 
-    // Calculate progress based on score improvements over time
     const weeks = [];
     const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
     const firstDate = submissions[0].date.getTime();
@@ -324,7 +339,7 @@ const UserProgress = () => {
 
       if (weekSubmissions.length > 0) {
         const avgScore = calculateAverage(weekSubmissions.map((s) => s.score));
-        const progress = Math.min((avgScore / 9) * 100, 100); // Convert to percentage (9 is max IELTS score)
+        const progress = Math.min((avgScore / 9) * 100, 100);
 
         weeks.push({
           week: `Week ${i + 1}`,
@@ -333,7 +348,6 @@ const UserProgress = () => {
       }
     }
 
-    // If no weekly data, create at least one entry
     if (weeks.length === 0 && submissions.length > 0) {
       const avgScore = calculateAverage(submissions.map((s) => s.score));
       weeks.push({
@@ -345,57 +359,296 @@ const UserProgress = () => {
     setProgressData(weeks);
   };
 
-  const exportToExcel = () => {
-    const wb = XLSX.utils.book_new();
-    const ws1 = XLSX.utils.json_to_sheet(userScores);
-    const ws2 = XLSX.utils.json_to_sheet(quizAttempts);
-    const ws3 = XLSX.utils.json_to_sheet(progressData);
-    XLSX.utils.book_append_sheet(wb, ws1, "IELTS Scores");
-    XLSX.utils.book_append_sheet(wb, ws2, "Attempts");
-    XLSX.utils.book_append_sheet(wb, ws3, "Progress");
-    XLSX.writeFile(wb, "IELTS_Progress.xlsx");
+  const captureChartAsImage = async (elementId) => {
+    const element = document.getElementById(elementId);
+    if (!element) return null;
+    
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+      return canvas.toDataURL('image/png');
+    } catch (error) {
+      console.error(`Error capturing ${elementId}:`, error);
+      return null;
+    }
   };
 
-  const exportToPDF = () => {
+  const exportToPDF = async () => {
     try {
       const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      // === HEADER WITH LOGO ===
+      // Background color matching header
+      doc.setFillColor(255, 251, 222); // #FFFBDE
+      doc.rect(0, 0, pageWidth, 40, 'F');
+      
+      // Load and add logo
+      try {
+        const logoBase64 = await getImageBase64('/assets/logo2.png');
+        doc.addImage(logoBase64, 'PNG', 15, 10, 20, 20);
+      } catch (error) {
+        console.warn('Logo loading failed, using fallback');
+        // Fallback: Draw a styled circle with "SF" text if logo fails
+        doc.setFillColor(213, 163, 10); // #d5a30a
+        doc.circle(25, 20, 10, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('SF', 20, 23);
+      }
+      
+      // Title
+      doc.setTextColor(213, 163, 10); // #d5a30a
+      doc.setFontSize(24);
+      doc.setFont(undefined, 'bold');
+      doc.text('SkillForge', 40, 18);
+      
+      doc.setFontSize(18);
+      doc.setTextColor(254, 93, 1); // #fe5d01
+      doc.text('IELTS Progress Report', 40, 28);
+      
+      // Date
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })}`, pageWidth - 15, 20, { align: 'right' });
+      
+      let currentY = 50;
 
-      doc.setFontSize(16);
-      doc.text("Report Your IELTS Progress", 60, 15);
+      // === USER INFO SECTION ===
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      if (user.name || user.email) {
+        doc.setFillColor(255, 245, 192); // #fff5c0
+        doc.roundedRect(15, currentY, pageWidth - 30, 20, 3, 3, 'F');
+        
+        doc.setFontSize(11);
+        doc.setTextColor(213, 163, 10);
+        doc.setFont(undefined, 'bold');
+        if (user.name) {
+          doc.text(`Student: ${user.name}`, 20, currentY + 8);
+        }
+        if (user.email) {
+          doc.text(`Email: ${user.email}`, 20, currentY + 15);
+        }
+        currentY += 30;
+      }
 
+      // === CURRENT SCORES SECTION ===
+      // Draw icon circle
+      doc.setFillColor(99, 102, 241); // Blue
+      doc.circle(20, currentY + 5, 3, 'F');
+      
+      doc.setFillColor(255, 220, 104); // Matching theme
+      doc.roundedRect(15, currentY, pageWidth - 30, 10, 2, 2, 'F');
+      doc.setFontSize(14);
+      doc.setTextColor(213, 163, 10);
+      doc.setFont(undefined, 'bold');
+      doc.text('Current Average Scores', 25, currentY + 7);
+      currentY += 15;
+
+      // Scores table with styled header
       autoTable(doc, {
-        head: [["Skills", "Current Score"]],
-        body: userScores.map((s) => [s.skill, s.score || "N/A"]),
-        startY: 25,
+        head: [['Skill', 'Average Score', 'Level']],
+        body: userScores.map((s) => {
+          const score = s.score || 0;
+          let level = 'Beginner';
+          if (score >= 7) level = 'Advanced';
+          else if (score >= 5.5) level = 'Intermediate';
+          return [s.skill, score > 0 ? score.toFixed(1) : 'N/A', level];
+        }),
+        startY: currentY,
+        theme: 'striped',
+        headStyles: {
+          fillColor: [213, 163, 10], // #d5a30a
+          textColor: [255, 255, 255],
+          fontSize: 11,
+          fontStyle: 'bold',
+        },
+        alternateRowStyles: {
+          fillColor: [255, 251, 222], // #FFFBDE
+        },
+        styles: {
+          fontSize: 10,
+          cellPadding: 5,
+        },
+        columnStyles: {
+          0: { fontStyle: 'bold', textColor: [254, 93, 1] }, // #fe5d01
+          1: { halign: 'center', fontStyle: 'bold' },
+          2: { halign: 'center' },
+        },
       });
 
+      currentY = doc.lastAutoTable.finalY + 15;
+
+      // === OVERALL BAND SCORE ===
+      const overallScore = calculateAverage(userScores.map(s => s.score).filter(s => s > 0));
+      if (overallScore > 0) {
+        doc.setFillColor(250, 214, 114); // #fad672
+        doc.roundedRect(15, currentY, pageWidth - 30, 15, 3, 3, 'F');
+        doc.setFontSize(12);
+        doc.setTextColor(254, 93, 1);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Overall IELTS Band Score: ${overallScore.toFixed(1)}`, pageWidth / 2, currentY + 10, { align: 'center' });
+        currentY += 25;
+      }
+
+      // === QUIZ ATTEMPTS SECTION ===
       if (quizAttempts.length > 0) {
+        // Check if we need a new page
+        if (currentY > pageHeight - 80) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        // Draw icon
+        doc.setFillColor(34, 197, 94); // Green
+        doc.circle(20, currentY + 5, 3, 'F');
+        
+        doc.setFillColor(255, 220, 104);
+        doc.roundedRect(15, currentY, pageWidth - 30, 10, 2, 2, 'F');
+        doc.setFontSize(14);
+        doc.setTextColor(213, 163, 10);
+        doc.text('Recent Test Attempts', 25, currentY + 7);
+        currentY += 15;
+
         autoTable(doc, {
-          head: [["Attempt", "Listening", "Reading", "Writing", "Speaking"]],
+          head: [['Attempt', 'Listening', 'Reading', 'Writing', 'Speaking']],
           body: quizAttempts.map((q) => [
             q.attempt,
-            q.Listening || "N/A",
-            q.Reading || "N/A",
-            q.Writing || "N/A",
-            q.Speaking || "N/A",
+            q.Listening > 0 ? q.Listening.toFixed(1) : 'N/A',
+            q.Reading > 0 ? q.Reading.toFixed(1) : 'N/A',
+            q.Writing > 0 ? q.Writing.toFixed(1) : 'N/A',
+            q.Speaking > 0 ? q.Speaking.toFixed(1) : 'N/A',
           ]),
-          startY: doc.lastAutoTable.finalY + 10,
+          startY: currentY,
+          theme: 'grid',
+          headStyles: {
+            fillColor: [213, 163, 10],
+            textColor: [255, 255, 255],
+            fontSize: 10,
+            fontStyle: 'bold',
+          },
+          styles: {
+            fontSize: 9,
+            cellPadding: 4,
+            halign: 'center',
+          },
+          columnStyles: {
+            0: { fontStyle: 'bold' },
+          },
         });
+
+        currentY = doc.lastAutoTable.finalY + 15;
       }
 
+      // === PROGRESS DATA ===
       if (progressData.length > 0) {
+        if (currentY > pageHeight - 60) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        // Draw icon
+        doc.setFillColor(245, 158, 11); // Orange
+        doc.circle(20, currentY + 5, 3, 'F');
+        
+        doc.setFillColor(255, 220, 104);
+        doc.roundedRect(15, currentY, pageWidth - 30, 10, 2, 2, 'F');
+        doc.setFontSize(14);
+        doc.setTextColor(213, 163, 10);
+        doc.text('Weekly Progress', 25, currentY + 7);
+        currentY += 15;
+
         autoTable(doc, {
-          head: [["Week", "Progress (%)"]],
-          body: progressData.map((p) => [p.week, p.progress]),
-          startY: doc.lastAutoTable.finalY + 10,
+          head: [['Week', 'Progress (%)']],
+          body: progressData.map((p) => [p.week, `${p.progress}%`]),
+          startY: currentY,
+          theme: 'plain',
+          headStyles: {
+            fillColor: [213, 163, 10],
+            textColor: [255, 255, 255],
+            fontSize: 10,
+          },
+          styles: {
+            fontSize: 9,
+            cellPadding: 4,
+          },
+          columnStyles: {
+            1: { halign: 'center', fontStyle: 'bold', textColor: [16, 185, 129] },
+          },
         });
       }
 
-      doc.save("IELTS_Progress.pdf");
+      // === FOOTER ===
+      const totalPages = doc.internal.pages.length - 1;
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFillColor(255, 251, 222);
+        doc.rect(0, pageHeight - 15, pageWidth, 15, 'F');
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(
+          `SkillForge IELTS - Page ${i} of ${totalPages}`,
+          pageWidth / 2,
+          pageHeight - 8,
+          { align: 'center' }
+        );
+        doc.text(
+          `© ${new Date().getFullYear()} SkillForge. All rights reserved.`,
+          pageWidth / 2,
+          pageHeight - 4,
+          { align: 'center' }
+        );
+      }
+
+      // Save PDF
+      doc.save(`SkillForge_IELTS_Progress_${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      console.log("✅ PDF exported successfully!");
     } catch (err) {
-      console.error("Error exporting PDF:", err);
+      console.error("❌ Error exporting PDF:", err);
       alert("Failed to export PDF! Please check console for details.");
     }
+  };
+
+  const exportToExcel = () => {
+    const wb = XLSX.utils.book_new();
+    
+    // Sheet 1: Current Scores
+    const ws1 = XLSX.utils.json_to_sheet(userScores.map(s => ({
+      Skill: s.skill,
+      'Average Score': s.score > 0 ? s.score.toFixed(1) : 'N/A',
+      Level: s.score >= 7 ? 'Advanced' : s.score >= 5.5 ? 'Intermediate' : 'Beginner'
+    })));
+    
+    // Sheet 2: Attempts
+    const ws2 = XLSX.utils.json_to_sheet(quizAttempts.map(q => ({
+      Attempt: q.attempt,
+      Listening: q.Listening > 0 ? q.Listening.toFixed(1) : 'N/A',
+      Reading: q.Reading > 0 ? q.Reading.toFixed(1) : 'N/A',
+      Writing: q.Writing > 0 ? q.Writing.toFixed(1) : 'N/A',
+      Speaking: q.Speaking > 0 ? q.Speaking.toFixed(1) : 'N/A',
+    })));
+    
+    // Sheet 3: Progress
+    const ws3 = XLSX.utils.json_to_sheet(progressData.map(p => ({
+      Week: p.week,
+      'Progress (%)': p.progress
+    })));
+    
+    XLSX.utils.book_append_sheet(wb, ws1, "Current Scores");
+    XLSX.utils.book_append_sheet(wb, ws2, "Test Attempts");
+    XLSX.utils.book_append_sheet(wb, ws3, "Weekly Progress");
+    
+    XLSX.writeFile(wb, `SkillForge_IELTS_Progress_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   if (loading) {
@@ -446,7 +699,7 @@ const UserProgress = () => {
       {/* Charts */}
       <div className="chart-grid-userprogress">
         {progressData.length > 0 && (
-          <div className="chart-card-userprogress">
+          <div className="chart-card-userprogress" id="progress-chart">
             <h2 className="chart-title-userprogress">Weekly Learning Progress</h2>
             <div className="chart-content-userprogress">
               <ResponsiveContainer width="100%" height={250}>
@@ -469,7 +722,7 @@ const UserProgress = () => {
           </div>
         )}
 
-        <div className="chart-card-userprogress">
+        <div className="chart-card-userprogress" id="pie-chart">
           <h2 className="chart-title-userprogress">Score Ratio For Each Skill</h2>
           <div className="chart-content-userprogress">
             <ResponsiveContainer width="100%" height={250}>
@@ -499,7 +752,7 @@ const UserProgress = () => {
       {/* Bar Chart */}
       {quizAttempts.length > 0 && (
         <div className="bar-section-userprogress">
-          <div className="bar-card-userprogress">
+          <div className="bar-card-userprogress" id="bar-chart">
             <h2 className="chart-title-userprogress">Compare Scores</h2>
             <div className="chart-content-userprogress">
               <ResponsiveContainer width="100%" height={300}>
