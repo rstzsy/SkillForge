@@ -14,7 +14,7 @@ const TeacherStudent = () => {
 
       try {
         const res = await fetch(
-          `http://localhost:3002/api/admin/users/teacher/students/${storedUser.id}`
+          `https://skillforge-99ct.onrender.com/api/admin/users/teacher/students/${storedUser.id}`
         );
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch students");

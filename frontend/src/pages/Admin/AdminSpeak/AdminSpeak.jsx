@@ -23,7 +23,7 @@ const AdminSpeak = () => {
 
   const fetchSpeakings = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/speaking");
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking");
       const data = await res.json();
       setSpeakings(data);
       console.log("🔥 Loaded speakings:", data);
@@ -44,7 +44,7 @@ const AdminSpeak = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this speaking topic?")) {
       try {
-        const res = await fetch(`http://localhost:3002/api/speaking/${id}`, {
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/speaking/${id}`, {
           method: "DELETE",
         });
         const result = await res.json();
@@ -73,7 +73,7 @@ const AdminSpeak = () => {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:3002/api/speaking/import-excel", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking/import-excel", {
         method: "POST",
         body: formData,
       });

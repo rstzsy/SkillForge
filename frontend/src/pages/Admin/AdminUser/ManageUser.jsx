@@ -14,7 +14,7 @@ const ManageUser = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:3002/api/admin/users");
+        const response = await fetch("https://skillforge-99ct.onrender.com/api/admin/users");
         if (!response.ok) throw new Error("Failed to fetch users");
 
         const data = await response.json();

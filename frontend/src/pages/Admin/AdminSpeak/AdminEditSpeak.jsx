@@ -21,7 +21,7 @@ const AdminEditSpeak = () => {
   useEffect(() => {
     const fetchSpeaking = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/speaking`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/speaking`);
         const data = await res.json();
 
         // tìm theo speaking_practices_id
@@ -88,7 +88,7 @@ const AdminEditSpeak = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`http://localhost:3002/api/speaking/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/speaking/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

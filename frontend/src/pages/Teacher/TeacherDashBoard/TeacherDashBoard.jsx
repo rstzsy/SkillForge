@@ -103,7 +103,7 @@ const TeacherDashBoard = () => {
       try {
         // Fetch classes from API
         console.log("📡 Fetching classes...");
-        const classesRes = await fetch("http://localhost:3002/api/admin/classes");
+        const classesRes = await fetch("https://skillforge-99ct.onrender.com/api/admin/classes");
         const classesData = await classesRes.json();
         console.log("📦 All classes:", classesData);
         console.log("📦 Number of classes:", classesData.length);
@@ -145,7 +145,7 @@ const TeacherDashBoard = () => {
 
         // Fetch bookings for upcoming sessions
         console.log("📡 Fetching bookings...");
-        const bookingsRes = await fetch("http://localhost:3002/api/bookings");
+        const bookingsRes = await fetch("https://skillforge-99ct.onrender.com/api/bookings");
         const bookingsData = await bookingsRes.json();
         console.log("📦 Bookings data:", bookingsData);
         

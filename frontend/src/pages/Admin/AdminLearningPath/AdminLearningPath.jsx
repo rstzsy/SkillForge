@@ -17,7 +17,7 @@ const AdminLearningPath = () => {
     const fetchLearningPath = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3002/api/admin/learningpath/user/${user.id}`
+          `https://skillforge-99ct.onrender.com/api/admin/learningpath/user/${user.id}`
         );
         const data = await res.json();
         console.log("Fetched learning path:", data);

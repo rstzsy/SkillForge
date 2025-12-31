@@ -20,7 +20,7 @@ const ReadDetail = () => {
     const fetchReading = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3002/api/user/reading/${id}`);
+        const res = await axios.get(`https://skillforge-99ct.onrender.com/api/user/reading/${id}`);
         const data = res.data.data;
 
         if (!data) {
@@ -151,7 +151,7 @@ const ReadDetail = () => {
       : 0;
 
     try {
-      const res = await axios.post("http://localhost:3002/api/user/read/submit", {
+      const res = await axios.post("https://skillforge-99ct.onrender.com/api/user/read/submit", {
         user_id,
         practice_id,
         user_answers: answers,

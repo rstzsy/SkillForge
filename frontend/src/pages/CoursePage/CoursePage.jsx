@@ -21,7 +21,7 @@ const CoursePage = () => {
         }
 
         const res = await fetch(
-          `http://localhost:3002/api/admin/classes/user/${userId}`
+          `https://skillforge-99ct.onrender.com/api/admin/classes/user/${userId}`
         );
         const data = await res.json();
 

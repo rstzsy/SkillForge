@@ -42,12 +42,12 @@ const ListeningPage = () => {
         setLoading(true);
 
         // 1. Get all listening tasks
-        const resListening = await axios.get("http://localhost:3002/api/user/listening");
+        const resListening = await axios.get("https://skillforge-99ct.onrender.com/api/user/listening");
         const listenings = resListening.data.data || [];
 
         // 2. Get user submissions
         const resSubs = await axios.get(
-          `http://localhost:3002/api/user/listen/submit/listening/${userId}`
+          `https://skillforge-99ct.onrender.com/api/user/listen/submit/listening/${userId}`
         );
         const userSubs = resSubs.data.data || [];
 
@@ -80,7 +80,7 @@ const ListeningPage = () => {
     const fetchWishlist = async () => {
       try {
         if (!userId) return;
-        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        const res = await axios.get(`https://skillforge-99ct.onrender.com/api/user/wishlist/${userId}`);
         setWishlist(res.data.data || []);
       } catch (err) {
         console.error("Error fetching wishlist:", err);
@@ -107,7 +107,7 @@ const ListeningPage = () => {
 
     if (existing) {
       try {
-        await axios.delete(`http://localhost:3002/api/user/wishlist/${existing.id}`);
+        await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${existing.id}`);
         setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
         setMessage("Đã xóa khỏi wishlist");
       } catch (err) {
@@ -118,7 +118,7 @@ const ListeningPage = () => {
       }
     } else {
       try {
-        const res = await axios.post("http://localhost:3002/api/user/wishlist", {
+        const res = await axios.post("https://skillforge-99ct.onrender.com/api/user/wishlist", {
           user_id: userId,
           practice_id: item.id,
           type: "listening",

@@ -221,7 +221,7 @@ D. ${q.optionD}
     };
 
     try {
-      const res = await fetch("http://localhost:3002/api/reading", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/reading", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

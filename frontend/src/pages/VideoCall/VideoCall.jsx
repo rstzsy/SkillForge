@@ -569,7 +569,7 @@ const VideoCall = () => {
       for (const p of participants) {
         if (p.id !== userId) {
           try {
-            const response = await fetch(`http://localhost:3002/api/users/${p.id}`);
+            const response = await fetch(`https://skillforge-99ct.onrender.com/api/users/${p.id}`);
             const data = await response.json();
             avatars[p.id] = data.user?.avatar || "/assets/avatar.jpg";
           } catch (err) {

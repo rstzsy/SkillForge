@@ -84,7 +84,7 @@ const SpeakPage = () => {
     const fetchWishlist = async () => {
       try {
         if (!userId) return;
-        const res = await axios.get(`http://localhost:3002/api/user/wishlist/${userId}`);
+        const res = await axios.get(`https://skillforge-99ct.onrender.com/api/user/wishlist/${userId}`);
         setWishlist(res.data.data || []);
       } catch (err) {
         console.error("Error fetching wishlist:", err);
@@ -114,7 +114,7 @@ const SpeakPage = () => {
 
     if (existing) {
       try {
-        await axios.delete(`http://localhost:3002/api/user/wishlist/${existing.id}`);
+        await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${existing.id}`);
         setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
         setMessage("Đã xóa khỏi wishlist");
       } catch (err) {
@@ -124,7 +124,7 @@ const SpeakPage = () => {
     } else {
       // ✅ Thêm vào wishlist
       try {
-        const res = await axios.post("http://localhost:3002/api/user/wishlist", {
+        const res = await axios.post("https://skillforge-99ct.onrender.com/api/user/wishlist", {
           user_id: userId,
           practice_id: item.id,
           type: "speaking",

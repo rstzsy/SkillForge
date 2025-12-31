@@ -29,7 +29,7 @@ const AdminEditRead = () => {
   useEffect(() => {
     const fetchReading = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/reading/${id}`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/reading/${id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Failed to fetch reading");
 
@@ -180,7 +180,7 @@ const AdminEditRead = () => {
         imageURL: formData.imageURL,
       };
 
-      const res = await fetch(`http://localhost:3002/api/reading/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/reading/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

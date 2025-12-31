@@ -15,7 +15,7 @@ const UpdateUserPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`http://localhost:3002/api/admin/users/${id}`);
+        const response = await fetch(`https://skillforge-99ct.onrender.com/api/admin/users/${id}`);
         if (!response.ok) throw new Error("Không tìm thấy user");
         const data = await response.json();
         setUserData(data);
@@ -41,7 +41,7 @@ const UpdateUserPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:3002/api/admin/users/${id}`, {
+      const response = await fetch(`https://skillforge-99ct.onrender.com/api/admin/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

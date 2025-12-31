@@ -111,7 +111,7 @@ const AdminAddListen = () => {
         audioURL: formData.audioURL,
       };
 
-      const res = await fetch("http://localhost:3002/api/listening", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/listening", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

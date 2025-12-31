@@ -409,8 +409,8 @@ const AdminTestResult = () => {
     return audio_url.startsWith("http")
       ? audio_url
       : audio_url.startsWith("/uploads/")
-        ? `http://localhost:3002${audio_url}`
-        : `http://localhost:3002/uploads/audio/${audio_url}`;
+        ? `https://skillforge-99ct.onrender.com${audio_url}`
+        : `https://skillforge-99ct.onrender.com/uploads/audio/${audio_url}`;
   };
 
   const handlePlayAudio = (audioUrl) => {

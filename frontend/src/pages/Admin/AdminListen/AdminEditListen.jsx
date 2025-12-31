@@ -29,7 +29,7 @@ const AdminEditListen = () => {
   useEffect(() => {
     const fetchLesson = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/listening/${id}`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/listening/${id}`);
         if (!res.ok) throw new Error("Failed to fetch lesson");
         const data = await res.json();
         const lesson = data.data; // backend return { data: lesson }
@@ -143,7 +143,7 @@ const AdminEditListen = () => {
         if (val) data.append(key, val);
       });
 
-      const res = await fetch(`http://localhost:3002/api/listening/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/listening/${id}`, {
         method: "PUT",
         body: data,
       });

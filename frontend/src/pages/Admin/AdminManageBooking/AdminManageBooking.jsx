@@ -9,7 +9,7 @@ const AdminManageBooking = () => {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/bookings");
+        const res = await fetch("https://skillforge-99ct.onrender.com/api/bookings");
         const data = await res.json();
         console.log("📦 API returned:", data);
 
@@ -36,7 +36,7 @@ const AdminManageBooking = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:3002/api/bookings/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/bookings/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {

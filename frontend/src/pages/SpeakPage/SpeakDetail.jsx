@@ -34,8 +34,8 @@ const SpeakDetail = () => {
     return audio_url.startsWith("http")
       ? audio_url
       : audio_url.startsWith("/uploads/")
-        ? `http://localhost:3002${audio_url}`  // nối đúng
-        : `http://localhost:3002/uploads/audio/${audio_url}`; // trường hợp chỉ có tên file
+        ? `https://skillforge-99ct.onrender.com${audio_url}`  // nối đúng
+        : `https://skillforge-99ct.onrender.com/uploads/audio/${audio_url}`; // trường hợp chỉ có tên file
   };
 
   
@@ -59,7 +59,7 @@ const SpeakDetail = () => {
   useEffect(() => {
     const fetchSpeaking = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/speaking/${id}`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/speaking/${id}`);
         const data = await res.json();
         
         if (data.speaking_practices_id) {
@@ -93,7 +93,7 @@ const SpeakDetail = () => {
       try {
         console.log("📥 Loading user submissions...");
         const res = await fetch(
-          `http://localhost:3002/api/speaking/submissions/${userId}/${id}`
+          `https://skillforge-99ct.onrender.com/api/speaking/submissions/${userId}/${id}`
         );
         const data = await res.json();
 
@@ -244,7 +244,7 @@ const SpeakDetail = () => {
 
       console.log("📤 Submitting audio for evaluation...");
 
-      const res = await fetch("http://localhost:3002/api/speaking/submit-answer", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking/submit-answer", {
         method: "POST",
         body: formData,
       });
@@ -301,7 +301,7 @@ const SpeakDetail = () => {
   // Finalize - Gửi điểm tổng khi hoàn thành
   const handleFinalize = async () => {
     try {
-      const res = await fetch("http://localhost:3002/api/speaking/finalize", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking/finalize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, speakingId: id }),

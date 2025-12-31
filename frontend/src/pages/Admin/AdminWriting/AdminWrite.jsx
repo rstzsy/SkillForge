@@ -67,7 +67,7 @@ const AdminWrite = () => {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:3002/api/writing/import-excel", {
+      const response = await fetch("https://skillforge-99ct.onrender.com/api/writing/import-excel", {
         method: "POST",
         body: formData,
       });

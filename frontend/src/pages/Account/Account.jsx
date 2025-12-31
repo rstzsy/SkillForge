@@ -60,7 +60,7 @@ const AccountPage = () => {
       const downloadURL = await getDownloadURL(avatarRef);
 
       // call backend update Firestore
-      const response = await fetch(`http://localhost:3002/api/users/${storedUser.id}`, {
+      const response = await fetch(`https://skillforge-99ct.onrender.com/api/users/${storedUser.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ avatar: downloadURL }),
@@ -97,7 +97,7 @@ const AccountPage = () => {
       if (formData.password) payload.password = formData.password;
       if (formData.avatar) payload.avatar = formData.avatar;
 
-      const response = await fetch(`http://localhost:3002/api/users/${storedUser.id}`, {
+      const response = await fetch(`https://skillforge-99ct.onrender.com/api/users/${storedUser.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

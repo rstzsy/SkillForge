@@ -49,7 +49,7 @@ const AdminAddSpeak = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3002/api/speaking", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

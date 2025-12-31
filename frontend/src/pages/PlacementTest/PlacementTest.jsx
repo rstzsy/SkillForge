@@ -31,7 +31,7 @@ const PlacementTest = () => {
         if (!userId) throw new Error("User not logged in");
 
         // get all test
-        const resTests = await axios.get("http://localhost:3002/api/placement-tests");
+        const resTests = await axios.get("https://skillforge-99ct.onrender.com/api/placement-tests");
         const allTests = resTests.data.data.map((item) => ({
           ...item,
           section: `Test ${item.skill}`,
@@ -40,7 +40,7 @@ const PlacementTest = () => {
 
         // get user submission
         const resUser = await axios.get(
-          `http://localhost:3002/api/placement-tests/user/${userId}`
+          `https://skillforge-99ct.onrender.com/api/placement-tests/user/${userId}`
         );
         const userTests = resUser.data.data;
 

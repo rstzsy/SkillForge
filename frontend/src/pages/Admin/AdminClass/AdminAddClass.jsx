@@ -25,13 +25,13 @@ const AdminAddClass = () => {
     const fetchData = async () => {
       try {
         const teacherRes = await fetch(
-          "http://localhost:3002/api/admin/classes/teachers"
+          "https://skillforge-99ct.onrender.com/api/admin/classes/teachers"
         );
         const teacherData = await teacherRes.json();
         setTeachers(teacherData);
 
         const studentRes = await fetch(
-          "http://localhost:3002/api/admin/classes/students"
+          "https://skillforge-99ct.onrender.com/api/admin/classes/students"
         );
         const studentData = await studentRes.json();
         setStudents(studentData);
@@ -92,7 +92,7 @@ const AdminAddClass = () => {
         schedule: new Date(classData.schedule).toISOString(),
       };
 
-      const res = await fetch("http://localhost:3002/api/admin/classes", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/admin/classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -30,7 +30,7 @@ export default function ResultPage() {
           return;
         }
 
-        const res = await fetch(`http://localhost:3002/api/results/user/${userId}`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/results/user/${userId}`);
         const data = await res.json();
 
         const submissions = (data.submissions || []).map((s) => ({

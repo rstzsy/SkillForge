@@ -14,7 +14,7 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://localhost:3002/api/users/login", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -62,7 +62,7 @@ export default function Login() {
 
       const idToken = await googleUser.getIdToken();
 
-      const res = await fetch("http://localhost:3002/api/users/google-login", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/users/google-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),

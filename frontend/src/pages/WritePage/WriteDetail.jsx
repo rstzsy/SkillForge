@@ -67,7 +67,7 @@ const WriteDetail = () => {
     });
 
     try {
-      const res = await fetch("http://localhost:3002/api/ai-writing/evaluate", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/ai-writing/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

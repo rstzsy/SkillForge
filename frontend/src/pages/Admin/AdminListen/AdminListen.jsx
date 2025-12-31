@@ -16,7 +16,7 @@ const AdminListen = () => {
   useEffect(() => {
     const fetchLessons = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/listening");
+        const res = await fetch("https://skillforge-99ct.onrender.com/api/listening");
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message || "Failed to fetch lessons");
@@ -44,7 +44,7 @@ const AdminListen = () => {
     if (!window.confirm("Are you sure you want to delete this lesson?")) return;
 
     try {
-      const res = await fetch(`http://localhost:3002/api/listening/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/listening/${id}`, {
         method: "DELETE",
       });
       const data = await res.json();

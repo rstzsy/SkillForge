@@ -26,7 +26,7 @@ const BookOnline = () => {
         userId: storedUser.id, 
       }));
 
-      fetch(`http://localhost:3002/api/bookings/user/${storedUser.id}`) // ✅ đổi userId -> id
+      fetch(`https://skillforge-99ct.onrender.com/api/bookings/user/${storedUser.id}`) // ✅ đổi userId -> id
         .then((res) => res.json())
         .then((data) => setBookings(data))
         .catch((err) => console.error("Error loading user bookings:", err));
@@ -57,7 +57,7 @@ const BookOnline = () => {
     console.log("📤 Booking sent to backend:", newBooking); // 👈 thêm log kiểm tra
 
     try {
-      const res = await fetch("http://localhost:3002/api/bookings", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newBooking),
@@ -67,7 +67,7 @@ const BookOnline = () => {
         alert(`Successfully booked for ${name} on ${date} at ${time}`);
 
         const resBookings = await fetch(
-          `http://localhost:3002/api/bookings/user/${userId}`
+          `https://skillforge-99ct.onrender.com/api/bookings/user/${userId}`
         );
         const updated = await resBookings.json();
         setBookings(updated);

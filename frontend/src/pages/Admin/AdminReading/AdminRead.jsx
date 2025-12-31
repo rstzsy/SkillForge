@@ -16,7 +16,7 @@ const AdminRead = () => {
   useEffect(() => {
     const fetchReadings = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/reading");
+        const res = await fetch("https://skillforge-99ct.onrender.com/api/reading");
         const data = await res.json();
         if (!res.ok)
           throw new Error(data.message || "Failed to fetch readings");
@@ -55,7 +55,7 @@ const AdminRead = () => {
       return;
 
     try {
-      const res = await fetch(`http://localhost:3002/api/reading/${id}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/reading/${id}`, {
         method: "DELETE",
       });
 

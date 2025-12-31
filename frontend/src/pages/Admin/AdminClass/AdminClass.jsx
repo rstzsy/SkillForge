@@ -18,7 +18,7 @@ const AdminClass = () => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const res = await fetch("http://localhost:3002/api/admin/classes");
+        const res = await fetch("https://skillforge-99ct.onrender.com/api/admin/classes");
         if (!res.ok) throw new Error("Failed to fetch classes");
         const data = await res.json();
 
@@ -48,7 +48,7 @@ const AdminClass = () => {
     if (!window.confirm("Are you sure to delete this class?")) return;
 
     try {
-      await fetch(`http://localhost:3002/api/admin/classes/${id}`, {
+      await fetch(`https://skillforge-99ct.onrender.com/api/admin/classes/${id}`, {
         method: "DELETE",
       });
       setClasses(classes.filter((c) => c.id !== id));

@@ -11,7 +11,7 @@ const AdminPersonalAim = () => {
   useEffect(() => {
     const fetchUserGoals = async () => {
       try {
-        const res = await fetch(`http://localhost:3002/api/goals/${id}`);
+        const res = await fetch(`https://skillforge-99ct.onrender.com/api/goals/${id}`);
         if (!res.ok) throw new Error("Failed to fetch user goal");
         const data = await res.json();
 
@@ -29,7 +29,7 @@ const AdminPersonalAim = () => {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(`http://localhost:3002/api/goals/${goalId}`, {
+      const res = await fetch(`https://skillforge-99ct.onrender.com/api/goals/${goalId}`, {
         method: "DELETE",
       });
 

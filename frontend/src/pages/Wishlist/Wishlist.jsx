@@ -29,7 +29,7 @@ const Wishlist = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `http://localhost:3002/api/user/wishlist/${userId}`
+          `https://skillforge-99ct.onrender.com/api/user/wishlist/${userId}`
         );
         setWishlist(res.data.data || []);
       } catch (err) {
@@ -44,7 +44,7 @@ const Wishlist = () => {
   // Remove item from wishlist
   const handleRemove = async (id) => {
     try {
-      await axios.delete(`http://localhost:3002/api/user/wishlist/${id}`);
+      await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${id}`);
       setWishlist((prev) => prev.filter((item) => item.id !== id));
       setConfirmItem(null);
     } catch (err) {

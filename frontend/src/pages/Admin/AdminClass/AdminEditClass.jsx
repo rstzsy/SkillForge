@@ -33,17 +33,17 @@ const AdminEditClass = () => {
     const fetchData = async () => {
       try {
         // get class by id
-        const classRes = await fetch(`http://localhost:3002/api/admin/classes/${id}`);
+        const classRes = await fetch(`https://skillforge-99ct.onrender.com/api/admin/classes/${id}`);
         if (!classRes.ok) throw new Error("Failed to fetch class data");
         const cls = await classRes.json();
 
         // teacher list
-        const teacherRes = await fetch("http://localhost:3002/api/admin/classes/teachers");
+        const teacherRes = await fetch("https://skillforge-99ct.onrender.com/api/admin/classes/teachers");
         const teachers = await teacherRes.json();
         setAllTeachers(teachers);
 
         // student list
-        const studentRes = await fetch("http://localhost:3002/api/admin/classes/students");
+        const studentRes = await fetch("https://skillforge-99ct.onrender.com/api/admin/classes/students");
         const students = await studentRes.json();
         setAllStudents(students);
 
@@ -116,7 +116,7 @@ const AdminEditClass = () => {
         schedule: formatInputToUTC(classData.schedule), 
       };
 
-      await fetch(`http://localhost:3002/api/admin/classes/${id}`, {
+      await fetch(`https://skillforge-99ct.onrender.com/api/admin/classes/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),

@@ -46,7 +46,7 @@ const GoalSetup = () => {
 
   useEffect(() => {
     if (userId) {
-      fetch(`http://localhost:3002/api/roadmaps/user/${userId}`)
+      fetch(`https://skillforge-99ct.onrender.com/api/roadmaps/user/${userId}`)
         .then((res) => res.json())
         .then((data) => {
           console.log("Fetched roadmap:", data);
@@ -82,7 +82,7 @@ const GoalSetup = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:3002/api/goals", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/goals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -104,7 +104,7 @@ const GoalSetup = () => {
           goal_id: goalId,
         };
 
-        const roadmapRes = await fetch("http://localhost:3002/api/roadmaps/generate", {
+        const roadmapRes = await fetch("https://skillforge-99ct.onrender.com/api/roadmaps/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(roadmapPayload),

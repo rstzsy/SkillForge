@@ -20,7 +20,7 @@ const TeacherClass = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:3002/api/admin/classes/teacher/${storedUser.id}`
+          `https://skillforge-99ct.onrender.com/api/admin/classes/teacher/${storedUser.id}`
         );
         const data = await response.json();
         if (!response.ok)

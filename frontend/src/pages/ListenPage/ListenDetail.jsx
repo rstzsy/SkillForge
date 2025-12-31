@@ -19,7 +19,7 @@ const ListenDetail = () => {
     const fetchDetail = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3002/api/user/listening/${id}`
+          `https://skillforge-99ct.onrender.com/api/user/listening/${id}`
         );
         const data = await res.json();
         if (res.ok || res.status === 200) {
@@ -116,7 +116,7 @@ const ListenDetail = () => {
       : 0;
 
     try {
-      const res = await fetch("http://localhost:3002/api/user/listen/submit", {
+      const res = await fetch("https://skillforge-99ct.onrender.com/api/user/listen/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

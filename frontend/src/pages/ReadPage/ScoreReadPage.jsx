@@ -17,7 +17,7 @@ const ScoreReadPage = () => {
       try {
         setLoading(true);
         const res = await axios.get(
-          `http://localhost:3002/api/user/read/submit/grade/${submissionId}`
+          `https://skillforge-99ct.onrender.com/api/user/read/submit/grade/${submissionId}`
         );
         setData(res.data.data);
       } catch (err) {

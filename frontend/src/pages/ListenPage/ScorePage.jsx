@@ -13,7 +13,7 @@ const ScorePage = () => {
     const fetchGrade = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3002/api/user/listen/submit/grade/${id}`
+          `https://skillforge-99ct.onrender.com/api/user/listen/submit/grade/${id}`
         );
 
         if (!res.ok) {
