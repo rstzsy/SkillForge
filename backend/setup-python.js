@@ -73,7 +73,7 @@ try {
   }
 
   // Bước 1: Tạo venv
-  console.log("\n📦 Step 1/3: Creating Python virtual environment...");
+  console.log("\n📦 Step 1/4: Creating Python virtual environment...");
   execSync("python3 -m venv venv", { 
     cwd: projectRoot,
     stdio: "inherit" 
@@ -81,21 +81,42 @@ try {
   console.log("✅ Virtual environment created");
   
   // Bước 2: Upgrade pip
-  console.log("\n🔄 Step 2/3: Upgrading pip...");
+  console.log("\n🔄 Step 2/4: Upgrading pip...");
   execSync(`"${pipExe}" install --upgrade pip`, { 
     cwd: projectRoot,
-    stdio: "inherit" 
+    stdio: "inherit",
+    timeout: 120000 // 2 minutes
   });
   console.log("✅ Pip upgraded");
   
-  // Bước 3: Cài packages
-  console.log("\n📥 Step 3/3: Installing Python packages...");
-  console.log("⏳ This may take 2-5 minutes, please wait...");
-  
-  execSync(`"${pipExe}" install openai-whisper torch numpy`, { 
+  // Bước 3: Cài numpy trước (dependency của các package khác)
+  console.log("\n📥 Step 3/4: Installing numpy...");
+  execSync(`"${pipExe}" install numpy --no-cache-dir`, { 
     cwd: projectRoot,
-    stdio: "inherit" 
+    stdio: "inherit",
+    timeout: 180000 // 3 minutes
   });
+  console.log("✅ Numpy installed");
+  
+  // Bước 4: Cài torch và whisper
+  console.log("\n📥 Step 4/4: Installing PyTorch and Whisper...");
+  console.log("⏳ This may take 5-10 minutes on Render...");
+  
+  // Cài torch với CPU-only version (nhẹ hơn)
+  execSync(`"${pipExe}" install torch --index-url https://download.pytorch.org/whl/cpu --no-cache-dir`, { 
+    cwd: projectRoot,
+    stdio: "inherit",
+    timeout: 600000 // 10 minutes
+  });
+  console.log("✅ PyTorch installed");
+  
+  // Cài whisper
+  execSync(`"${pipExe}" install openai-whisper --no-cache-dir`, { 
+    cwd: projectRoot,
+    stdio: "inherit",
+    timeout: 300000 // 5 minutes
+  });
+  console.log("✅ Whisper installed");
   
   // Verify lại sau khi cài
   console.log("\n🔍 Verifying installation...");
@@ -110,14 +131,15 @@ try {
 } catch (error) {
   console.error("\n❌ Failed to setup Python environment!");
   console.error("Error:", error.message);
-  console.error("\n📝 Please try manual setup:");
+  console.error("\n📝 Manual setup instructions:");
   console.error("  cd backend");
-  console.error("  rm -rf venv");
   console.error("  python3 -m venv venv");
   console.error(isWindows 
     ? "  venv\\Scripts\\activate" 
     : "  source venv/bin/activate");
   console.error("  pip install --upgrade pip");
-  console.error("  pip install openai-whisper torch numpy");
+  console.error("  pip install numpy");
+  console.error("  pip install torch --index-url https://download.pytorch.org/whl/cpu");
+  console.error("  pip install openai-whisper");
   process.exit(1);
 }
