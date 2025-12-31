@@ -4,9 +4,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "setup:mac": "bash setup-local-mac.sh",
     "setup:python": "node setup-python.js",
     "dev": "nodemon src/index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "test:whisper": "node test-whisper.js"
   },
   "author": "",
   "license": "ISC",

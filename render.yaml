@@ -3,9 +3,8 @@ services:
     name: skillforge-backend
     env: node
     region: singapore
-    plan: free
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    buildCommand: npm install && npm run setup:python
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
