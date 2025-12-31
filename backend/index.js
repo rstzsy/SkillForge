@@ -31,8 +31,23 @@ import participantRoutes from "./routes/participantRoute.js";
 
 dotenv.config();
 const app = express();
+
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://skill-94f02.web.app',
+    'https://skillforge-99ct.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors()); // Preflight
+
 app.use(express.json());
-app.use(cors());
+
 
 // ✅ Fix đường dẫn khi dùng ES module
 const __filename = fileURLToPath(import.meta.url);
