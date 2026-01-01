@@ -4,6 +4,54 @@ import path from "path";
 import { SpeakingService } from "../services/speakingService.js";
 import { aiSpeakingGeminiService } from "../ai/aiSpeakingGeminiService.js";
 import { transcribeAudio } from "../services/whisperService.js";
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+
+// ✅ Set ffmpeg path
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+
+/**
+ * ✅ Convert audio file to MP3 for iOS compatibility
+ */
+const convertToMP3 = (inputPath) => {
+  return new Promise((resolve, reject) => {
+    const outputPath = inputPath.replace(/\.(webm|m4a|wav)$/, '.mp3');
+    
+    console.log("🔄 Converting audio to MP3...");
+    console.log("  Input:", inputPath);
+    console.log("  Output:", outputPath);
+
+    ffmpeg(inputPath)
+      .toFormat('mp3')
+      .audioBitrate(128)
+      .audioChannels(1)
+      .audioFrequency(44100)
+      .on('start', (cmd) => {
+        console.log("▶️ FFmpeg command:", cmd);
+      })
+      .on('progress', (progress) => {
+        if (progress.percent) {
+          console.log(`⏳ Converting: ${Math.floor(progress.percent)}%`);
+        }
+      })
+      .on('end', () => {
+        console.log("✅ Audio conversion completed");
+        // Delete original file to save space
+        try {
+          fs.unlinkSync(inputPath);
+          console.log("🗑️ Deleted original file:", inputPath);
+        } catch (err) {
+          console.warn("⚠️ Could not delete original file:", err.message);
+        }
+        resolve(outputPath);
+      })
+      .on('error', (err) => {
+        console.error("❌ FFmpeg conversion error:", err.message);
+        reject(new Error(`Audio conversion failed: ${err.message}`));
+      })
+      .save(outputPath);
+  });
+};
 
 export const SpeakingController = {
   // ✅ Lấy toàn bộ speaking từ Firestore
@@ -186,6 +234,9 @@ export const SpeakingController = {
   async submitSpeakingAnswer(req, res) {
     console.log("🎤 Received audio submission request");
     
+    let audioPath = null;
+    let mp3Path = null;
+    
     try {
       const { userId, speakingId, questionId, questionText, section } = req.body;
       
@@ -199,7 +250,7 @@ export const SpeakingController = {
         });
       }
 
-      const audioPath = path.resolve(req.file.path);
+      audioPath = path.resolve(req.file.path);
       console.log("📁 Audio file received:", audioPath);
       console.log("📦 File details:", {
         originalname: req.file.originalname,
@@ -217,9 +268,22 @@ export const SpeakingController = {
         });
       }
 
+      // ✅ Convert to MP3 for iOS compatibility
+      try {
+        mp3Path = await convertToMP3(audioPath);
+        console.log("✅ Audio converted to MP3:", mp3Path);
+        audioPath = mp3Path; // Use MP3 for transcription
+      } catch (conversionError) {
+        console.error("❌ Audio conversion failed:", conversionError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to convert audio format. Please try recording again.",
+          error: conversionError.message
+        });
+      }
+
       // 1️⃣ Transcribe audio bằng Whisper
       let transcript = "";
-      let transcriptError = null;
       
       try {
         console.log("🎯 Starting Whisper transcription...");
@@ -237,12 +301,10 @@ export const SpeakingController = {
         }
         
       } catch (error) {
-        transcriptError = error;
         console.error("❌ Whisper transcription failed:");
         console.error("  - Error message:", error.message);
         console.error("  - Error stack:", error.stack);
         
-        // ❌ KHÔNG dùng fallback nữa - throw error để user biết
         return res.status(500).json({
           success: false,
           message: "Failed to transcribe audio. Please check your audio file and try again.",
@@ -265,8 +327,9 @@ export const SpeakingController = {
         });
       }
 
-      // 2️⃣ Audio URL để lưu vào database
-      const audioUrl = `/uploads/audio/${req.file.filename}`;
+      // 2️⃣ Audio URL để lưu vào database (MP3 file)
+      const mp3Filename = path.basename(mp3Path);
+      const audioUrl = `/uploads/audio/${mp3Filename}`;
       console.log("🔗 Audio URL:", audioUrl);
 
       // 3️⃣ Gửi transcript cho AI Gemini để chấm điểm
@@ -288,6 +351,7 @@ export const SpeakingController = {
           success: true,
           message: "Speaking answer evaluated successfully",
           transcript,
+          audio_url: audioUrl,
           evaluation: aiResult,
         });
       } catch (aiError) {
@@ -299,6 +363,17 @@ export const SpeakingController = {
     } catch (error) {
       console.error("🔥 Error submitting speaking answer:", error);
       console.error("🔥 Error stack:", error.stack);
+      
+      // Cleanup files on error
+      if (audioPath && fs.existsSync(audioPath)) {
+        try {
+          fs.unlinkSync(audioPath);
+          console.log("🗑️ Cleaned up audio file after error");
+        } catch (cleanupErr) {
+          console.error("⚠️ Could not cleanup audio file:", cleanupErr.message);
+        }
+      }
+      
       res.status(500).json({
         success: false,
         message: "Failed to evaluate speaking answer",
