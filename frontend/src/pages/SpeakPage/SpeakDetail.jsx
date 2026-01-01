@@ -20,7 +20,7 @@ const SpeakDetail = () => {
   const [note, setNote] = useState("");
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
-  const [recordedQuestions, setRecordedQuestions] = useState(new Map()); // Map: questionIndex -> evaluation
+  const [recordedQuestions, setRecordedQuestions] = useState(new Map());
   const [loading, setLoading] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -37,12 +37,10 @@ const SpeakDetail = () => {
     return audio_url.startsWith("http")
       ? audio_url
       : audio_url.startsWith("/uploads/")
-        ? `https://skillforge-99ct.onrender.com${audio_url}`  // nối đúng
-        : `https://skillforge-99ct.onrender.com/uploads/audio/${audio_url}`; // trường hợp chỉ có tên file
+        ? `https://skillforge-99ct.onrender.com${audio_url}`
+        : `https://skillforge-99ct.onrender.com/uploads/audio/${audio_url}`;
   };
 
-  
-  // ✅ FIX: Lấy userId từ localStorage thay vì hardcode
   const getUserId = () => {
     try {
       const userStr = localStorage.getItem("user");
@@ -58,7 +56,7 @@ const SpeakDetail = () => {
 
   const userId = getUserId();
 
-  // 🔹 Lấy dữ liệu Speaking từ backend
+  // Lấy dữ liệu Speaking từ backend
   useEffect(() => {
     const fetchSpeaking = async () => {
       try {
@@ -86,9 +84,7 @@ const SpeakDetail = () => {
     fetchSpeaking();
   }, [id]);
 
-  // ✅ NEW: Load lịch sử bài làm của user
-  // ✅ NEW: Load lịch sử bài làm của user
-  // ✅ NEW: Load lịch sử bài làm của user
+  // Load lịch sử bài làm của user
   useEffect(() => {
     const loadUserSubmissions = async () => {
       if (!selectedTopic || !userId) return;
@@ -103,7 +99,6 @@ const SpeakDetail = () => {
         if (data.success && data.submissions.length > 0) {
           console.log("✅ Found submissions:", data.submissions.length);
 
-          // Map submissions to question indices
           const newRecordedQuestions = new Map();
           
           data.submissions.forEach((submission) => {
@@ -122,7 +117,6 @@ const SpeakDetail = () => {
                 }
               }
 
-              // ✅ Đảm bảo có audio_url từ server
               if (submission.audio_url) {
                 evaluation.audio_url = submission.audio_url;
               }
@@ -131,16 +125,13 @@ const SpeakDetail = () => {
             }
           });
 
-
           setRecordedQuestions(newRecordedQuestions);
 
-          // Nếu có submission cho câu hỏi hiện tại, hiển thị feedback
           if (newRecordedQuestions.has(currentQuestionIndex)) {
             const currentEval = newRecordedQuestions.get(currentQuestionIndex);
             setCurrentEvaluation(currentEval);
             setShowFeedback(true);
             
-            // ✅ FIX: Set audioURL ngay khi load submissions
             if (currentEval?.audio_url) {
               const fullURL = getFullAudioURL(currentEval.audio_url);
               console.log("🔊 Setting audio URL on load:", fullURL);
@@ -160,7 +151,6 @@ const SpeakDetail = () => {
     }
   }, [selectedTopic, userId, id, currentQuestionIndex]);
 
-  // 🔹 Kiểm tra xem đã hoàn thành hết chưa
   useEffect(() => {
     if (selectedTopic && recordedQuestions.size === selectedTopic.questions.length) {
       setAllCompleted(true);
@@ -173,25 +163,54 @@ const SpeakDetail = () => {
   const currentQuestion = selectedTopic.questions[currentQuestionIndex];
   const isRecorded = recordedQuestions.has(currentQuestionIndex);
 
-  // Điều khiển câu hỏi
   const handlePrev = () => setCurrentQuestionIndex((i) => Math.max(i - 1, 0));
   const handleNext = () =>
     setCurrentQuestionIndex((i) =>
       Math.min(i + 1, selectedTopic.questions.length - 1)
     );
 
-  // Đọc câu hỏi bằng giọng nói
+  // ✅ FIX: Đọc câu hỏi bằng giọng tiếng Anh chuẩn
   const handleSpeak = () => {
     const utterance = new SpeechSynthesisUtterance(currentQuestion.text);
     utterance.lang = "en-US";
-    speechSynthesis.speak(utterance);
+    
+    const setVoice = () => {
+      const voices = speechSynthesis.getVoices();
+      const englishVoice = voices.find(
+        (voice) => voice.lang.startsWith("en-") && voice.name.includes("US")
+      ) || voices.find((voice) => voice.lang.startsWith("en-"));
+      
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+      speechSynthesis.speak(utterance);
+    };
+
+    if (speechSynthesis.getVoices().length > 0) {
+      setVoice();
+    } else {
+      speechSynthesis.onvoiceschanged = setVoice;
+    }
   };
 
-  // Ghi âm
+  // ✅ FIX: Ghi âm với định dạng tương thích iOS
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      
+      // ✅ Kiểm tra MediaRecorder support formats
+      const mimeType = MediaRecorder.isTypeSupported('audio/mp4') 
+        ? 'audio/mp4'
+        : MediaRecorder.isTypeSupported('audio/webm') 
+        ? 'audio/webm'
+        : '';
+      
+      console.log("🎙️ Recording with format:", mimeType);
+      
+      mediaRecorderRef.current = new MediaRecorder(stream, {
+        mimeType: mimeType || undefined
+      });
+      
       audioChunksRef.current = [];
 
       mediaRecorderRef.current.ondataavailable = (e) => {
@@ -199,18 +218,18 @@ const SpeakDetail = () => {
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        const audioBlob = new Blob(audioChunksRef.current, { 
+          type: mimeType || 'audio/webm' 
+        });
         const url = URL.createObjectURL(audioBlob);
         setAudioURL(url);
 
-        // Gửi lên server để AI chấm điểm
-        await submitAudio(audioBlob);
+        await submitAudio(audioBlob, mimeType);
       };
 
       mediaRecorderRef.current.start();
       setRecording(true);
 
-      // Tự động dừng sau 20 giây
       setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           mediaRecorderRef.current.stop();
@@ -230,20 +249,24 @@ const SpeakDetail = () => {
     }
   };
 
-  // Submit audio lên server
-  const submitAudio = async (audioBlob) => {
+  // ✅ FIX: Submit audio với format info
+  const submitAudio = async (audioBlob, mimeType) => {
     setEvaluating(true);
     setShowFeedback(false);
-    setCurrentEvaluation(null); // Clear old feedback immediately
+    setCurrentEvaluation(null);
 
     try {
       const formData = new FormData();
-      formData.append("audio", audioBlob, "recording.webm");
+      
+      // ✅ Đặt tên file theo định dạng
+      const extension = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
+      formData.append("audio", audioBlob, `recording.${extension}`);
       formData.append("userId", userId);
       formData.append("speakingId", id);
       formData.append("questionId", currentQuestion.id);
       formData.append("questionText", currentQuestion.text);
       formData.append("section", selectedTopic.section);
+      formData.append("audioFormat", mimeType); // ✅ Gửi format info
 
       console.log("📤 Submitting audio for evaluation...");
 
@@ -252,7 +275,6 @@ const SpeakDetail = () => {
         body: formData,
       });
 
-      // ✅ Debug: Log raw response
       const responseText = await res.text();
       console.log("📥 Raw server response:", responseText);
       
@@ -268,15 +290,13 @@ const SpeakDetail = () => {
       }
       
       if (result.success) {
-        // ✅ Gộp transcript vào evaluation object để dễ xử lý
         const evaluation = {
           ...result.evaluation,
-          transcript: result.transcript, // Thêm transcript từ root level
+          transcript: result.transcript,
           audio_url: result.audio_url
         };
         console.log("✅ AI Evaluation received:", evaluation);
         
-        // Cập nhật state một cách rõ ràng và tuần tự
         setRecordedQuestions((prev) => {
           const newMap = new Map(prev);
           newMap.set(currentQuestionIndex, evaluation);
@@ -284,10 +304,9 @@ const SpeakDetail = () => {
           return newMap;
         });
 
-        // Set evaluation và show feedback ngay lập tức
         setCurrentEvaluation(evaluation);
         setShowFeedback(true);
-        setEvaluating(false); // Stop loading state
+        setEvaluating(false);
         
         console.log("✅ UI should now show feedback");
       } else {
@@ -301,7 +320,6 @@ const SpeakDetail = () => {
     }
   };
 
-  // Finalize - Gửi điểm tổng khi hoàn thành
   const handleFinalize = async () => {
     try {
       const res = await fetch("https://skillforge-99ct.onrender.com/api/speaking/finalize", {
@@ -322,7 +340,6 @@ const SpeakDetail = () => {
     }
   };
 
-  // Khi click vào câu hỏi đã ghi âm
   const handleQuestionClick = (index) => {
     setCurrentQuestionIndex(index);
     const evaluation = recordedQuestions.get(index);
@@ -335,13 +352,10 @@ const SpeakDetail = () => {
       setCurrentEvaluation(null);
       setAudioURL(null);
     }
-
   };
-
 
   return (
     <div className="speak-detail-page">
-      {/* Sidebar trái */}
       <aside className="sidebar-left">
         <h3 className="sidebar-title">{selectedTopic.title}</h3>
         <div className="questions-list">
@@ -362,7 +376,6 @@ const SpeakDetail = () => {
           })}
         </div>
 
-        {/* Nút hoàn thành */}
         {allCompleted && !overallScore && (
           <button className="finalize-btn" onClick={handleFinalize}>
             🎯 Submit Final Score
@@ -380,7 +393,6 @@ const SpeakDetail = () => {
         )}
       </aside>
 
-      {/* Main content */}
       <main className="question-area">
         <div className="question-box">
           <p>{currentQuestion.text}</p>
@@ -401,15 +413,22 @@ const SpeakDetail = () => {
           </button>
         </div>
 
-        {/* 🔊 Phát lại audio nằm trên AI Feedback */}
         {audioURL && (
           <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
             <h4>🔊 Listen to your answer:</h4>
-            <audio src={audioURL} controls />
+            <audio 
+              src={audioURL} 
+              controls 
+              onError={(e) => {
+                console.error("❌ Audio load error:", e);
+                toast("Cannot play audio. Please check your connection.");
+              }}
+              onLoadStart={() => console.log("⏳ Loading audio...")}
+              onCanPlay={() => console.log("✅ Audio ready to play")}
+            />
           </div>
         )}
 
-        {/* AI Feedback */}
         {showFeedback && currentEvaluation && (
           <div className="ai-feedback">
             <h3>🤖 AI Evaluation</h3>
@@ -455,7 +474,6 @@ const SpeakDetail = () => {
         )}
       </main>
 
-      {/* Sidebar phải */}
       <aside className="sidebar-right">
         <div className="note-box">
           <div className="note-header">
@@ -470,7 +488,6 @@ const SpeakDetail = () => {
         </div>
       </aside>
 
-      {/* Thanh ghi âm */}
       <div className="bottom-bar">
         {evaluating ? (
           <button className="record-btn evaluating" disabled>
@@ -486,7 +503,6 @@ const SpeakDetail = () => {
           </button>
         )}
       </div>
-
     </div>
   );
 };
