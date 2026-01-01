@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { auth, googleProvider } from "../../firebase/config";
 import { signInWithPopup } from "firebase/auth";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./Login.css";
 
 export default function Login() {
@@ -9,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,17 +33,25 @@ export default function Login() {
 
         // check role
         if (user.role === "Admin") {
-          alert("Login to Admin successfully!");
-          navigate("/admin");
+          toast("Login to Admin successfully!");
+          setTimeout(() => {
+            navigate("/admin");
+          }, 3000); 
         } 
         else if (user.role === "Teacher") {
           alert("Login to Teacher successfully!");
-          navigate("/teacher/dashboard");
+          setTimeout(() => {
+            navigate("/teacher/dashboard");
+          }, 3000); 
         } 
         else {
-          alert("Login successfully!");
-          navigate("/"); 
+          toast("Login successfully!");
+
+          setTimeout(() => {
+            navigate("/");
+          }, 3000); 
         }
+
       } 
       else {
         alert(data.message);
@@ -77,19 +87,19 @@ export default function Login() {
           localStorage.setItem("token", data.token);
         }
 
-        alert("Login with Google successfully!");
-        navigate("/");
+        toast("Login with Google successfully!");
+        setTimeout(() => {
+            navigate("/");
+          }, 3000);
+
       } else {
         alert(data.message || "Failed to save user data");
       }
     } catch (error) {
       console.error("Error during Google login:", error);
-      alert("Google login failed");
+      toast("Google login failed");
     }
   };
-
-
-
 
   return (
     <div className="login-container">

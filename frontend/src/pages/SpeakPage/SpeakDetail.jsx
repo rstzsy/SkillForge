@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useToast } from "../../component/Toast/ToastContainer";
+
 import {
   faMicrophone,
   faVolumeUp,
@@ -28,6 +30,7 @@ const SpeakDetail = () => {
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const toast = useToast();
 
   const getFullAudioURL = (audio_url) => {
     if (!audio_url) return null;
@@ -216,7 +219,7 @@ const SpeakDetail = () => {
       }, 20000);
     } catch (err) {
       console.error("Microphone access denied:", err);
-      alert("Please allow microphone access!");
+      toast("Please allow microphone access!");
     }
   };
 
@@ -260,7 +263,7 @@ const SpeakDetail = () => {
       } catch (parseError) {
         console.error("❌ JSON parse error:", parseError);
         setEvaluating(false);
-        alert("Server returned invalid response format");
+        toast("Server returned invalid response format");
         return;
       }
       
@@ -289,12 +292,12 @@ const SpeakDetail = () => {
         console.log("✅ UI should now show feedback");
       } else {
         setEvaluating(false);
-        alert("Failed to evaluate your answer. Please try again.");
+        toast("Failed to evaluate your answer. Please try again.");
       }
     } catch (error) {
       console.error("❌ Error submitting audio:", error);
       setEvaluating(false);
-      alert("Error connecting to server.");
+      toast("Error connecting to server.");
     }
   };
 
@@ -311,11 +314,11 @@ const SpeakDetail = () => {
       
       if (result.success) {
         setOverallScore(result.overall_score);
-        alert(`🎉 Completed! Your overall band: ${result.overall_score.overall_band}`);
+        toast(`🎉 Completed! Your overall band: ${result.overall_score.overall_band}`);
       }
     } catch (error) {
       console.error("❌ Error finalizing:", error);
-      alert("Failed to save overall score.");
+      toast("Failed to save overall score.");
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./ListenDetail.css";
 
 const ListenDetail = () => {
@@ -10,6 +11,8 @@ const ListenDetail = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [durationSeconds, setDurationSeconds] = useState(0); // time tested
+  const toast = useToast();
+  
 
   // get usedid in local
   const userId = localStorage.getItem("userId") || 1;
@@ -49,7 +52,7 @@ const ListenDetail = () => {
         setDurationSeconds((prev) => prev + 1); // increase time do tesst
         if (prev <= 1) {
           clearInterval(timer);
-          alert("Time is up! The test will be submitted.");
+          toast("Time is up! The test will be submitted.");
           handleSubmit();
           return 0;
         }
@@ -100,12 +103,12 @@ const ListenDetail = () => {
   const handleSubmit = async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser?.id) {
-      alert("User not found!");
+      toast("User not found!");
       return;
     }
 
     if (!test || !test.id) {
-      alert("Test data not loaded yet!");
+      toast("Test data not loaded yet!");
       return;
     }
 
@@ -133,7 +136,7 @@ const ListenDetail = () => {
           data.message || "Network error while submitting your test."
         );
 
-      alert("Submission saved successfully!");
+      toast("Submission saved successfully!");
       setShowModal(true);
 
       // save submissionId
@@ -145,7 +148,7 @@ const ListenDetail = () => {
       });
     } catch (err) {
       console.error("Error submitting test:", err);
-      alert("Error submitting test. See console.");
+      toast("Error submitting test. See console.");
     }
   };
 

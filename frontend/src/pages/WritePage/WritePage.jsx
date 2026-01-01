@@ -21,6 +21,8 @@ const WritePage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const sections = ["Task 1", "Task 2", "Full Test"];
@@ -28,8 +30,15 @@ const WritePage = () => {
   const userId = storedUser?.id;
 
   useEffect(() => {
+    if (!userId) {
+      setError("Please, login first");
+      setLoading(false);
+      return;
+    }
     const fetchPractices = async () => {
       try {
+        setLoading(true);
+        setError(null)
         const querySnapshot = await getDocs(collection(db, "writing_practices"));
         const items = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -38,6 +47,8 @@ const WritePage = () => {
         setWritingData(items);
       } catch (err) {
         console.error("Error loading writing_practices:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchPractices();
@@ -101,7 +112,7 @@ const WritePage = () => {
       try {
         await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${existing.id}`);
         setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
-        setMessage("Đã xóa khỏi wishlist");
+        setMessage("Removed from wishlist");
       } catch (err) {
         console.error("Lỗi khi xóa khỏi wishlist:", err);
         setMessage("Không thể xóa khỏi wishlist");
@@ -115,7 +126,7 @@ const WritePage = () => {
         });
         const newItem = { id: res.data.id, user_id: userId, practice_id: item.id, type: "writing" };
         setWishlist((prev) => [...prev, newItem]);
-        setMessage("Đã thêm vào wishlist");
+        setMessage("Added into wishlist");
       } catch (err) {
         console.error("Lỗi khi thêm vào wishlist:", err);
         setMessage("Không thể thêm vào wishlist");
@@ -183,50 +194,56 @@ const WritePage = () => {
           </div>
         </div>
 
-        <div className="cards-write">
-          {filteredData.length > 0 ? (
-            filteredData.map((item) => {
-              const inWishlist = wishlist.some((w) => w.practice_id === item.id);
-              return (
-                <div
-                  className={`card-write ${
-                    item.status === "Completed" ? "completed" : ""
-                  }`}
-                  key={item.id}
-                  onClick={() => navigate(`/write/${item.id}`)}
-                  style={{ cursor: "pointer", position: "relative" }}
-                >
-                  {/* ❤️ Wishlist toggle */}
+        {loading ? (
+          <p>Loading tasks...</p>
+        ) : error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : (
+          <div className="cards-write">
+            {filteredData.length > 0 ? (
+              filteredData.map((item) => {
+                const inWishlist = wishlist.some((w) => w.practice_id === item.id);
+                return (
                   <div
-                    className="wishlist-heart"
-                    onClick={(e) => handleWishlistToggle(item, e)}
-                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`card-write ${
+                      item.status === "Completed" ? "completed" : ""
+                    }`}
+                    key={item.id}
+                    onClick={() => navigate(`/write/${item.id}`)}
+                    style={{ cursor: "pointer", position: "relative" }}
                   >
-                    <FontAwesomeIcon icon={faHeart} color={inWishlist ? "#ff4757" : "#ccc"} />
-                  </div>
-
-                  <img src={"/assets/listpic.jpg"} alt={item.title} />
-                  <div className="card-info-write">
-                    <span
-                      className="section-write"
-                      style={{ backgroundColor: sectionColors[item.section] }}
+                    {/* ❤️ Wishlist toggle */}
+                    <div
+                      className="wishlist-heart"
+                      onClick={(e) => handleWishlistToggle(item, e)}
+                      title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                     >
-                      {item.section}
-                    </span>
-                    <h4>{item.title}</h4>
-                    <p className="type-write">{item.type}</p>
-                    <p className="attempts-write">{item.attempts || 0} attempts</p>
-                    {item.status === "Completed" && (
-                      <span className="completed-label">Completed</span>
-                    )}
+                      <FontAwesomeIcon icon={faHeart} color={inWishlist ? "#ff4757" : "#ccc"} />
+                    </div>
+
+                    <img src={"/assets/listpic.jpg"} alt={item.title} />
+                    <div className="card-info-write">
+                      <span
+                        className="section-write"
+                        style={{ backgroundColor: sectionColors[item.section] }}
+                      >
+                        {item.section}
+                      </span>
+                      <h4>{item.title}</h4>
+                      <p className="type-write">{item.type}</p>
+                      <p className="attempts-write">{item.attempts || 0} attempts</p>
+                      {item.status === "Completed" && (
+                        <span className="completed-label">Completed</span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })
-          ) : (
-            <p>No tasks found.</p>
-          )}
-        </div>
+                );
+              })
+            ) : (
+              <p>No tasks found.</p>
+            )}
+          </div>
+        )}
 
         {message && <div className="wishlist-message">{message}</div>}
       </main>

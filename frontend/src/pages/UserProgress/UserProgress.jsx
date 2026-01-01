@@ -22,8 +22,11 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 import "./UserProgress.css";
+import { useToast } from "../../component/Toast/ToastContainer";
+
 
 const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444"];
+
 
 // Helper function to convert image to base64
 const getImageBase64 = (imgPath) => {
@@ -59,6 +62,8 @@ const UserProgress = () => {
   const [progressData, setProgressData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [allSubmissions, setAllSubmissions] = useState([]);
+  const toast = useToast();
+
 
   useEffect(() => {
     fetchUserData();
@@ -73,7 +78,7 @@ const UserProgress = () => {
       console.log("🔍 User object:", user);
       
       if (!userId) {
-        alert("Please login first!");
+        toast("Please login first!");
         setLoading(false);
         return;
       }
@@ -230,7 +235,7 @@ const UserProgress = () => {
       setLoading(false);
     } catch (error) {
       console.error("❌ Error fetching user data:", error);
-      alert("Failed to load your progress data: " + error.message);
+      toast("Failed to load your progress data: " + error.message);
       setLoading(false);
     }
   };
@@ -615,7 +620,7 @@ const UserProgress = () => {
       console.log("✅ PDF exported successfully!");
     } catch (err) {
       console.error("❌ Error exporting PDF:", err);
-      alert("Failed to export PDF! Please check console for details.");
+      toast("Failed to export PDF! Please check console for details.");
     }
   };
 

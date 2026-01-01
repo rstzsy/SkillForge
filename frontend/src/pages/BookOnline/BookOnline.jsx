@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./BookOnline.css";
 
 const BookOnline = () => {
@@ -14,6 +15,8 @@ const BookOnline = () => {
   const [allBookings, setAllBookings] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+  const toast = useToast();
+  
 
   const loadBookings = async (userId) => {
     try {
@@ -86,17 +89,17 @@ const BookOnline = () => {
   const handleBooking = async () => {
     const { name, email, date, time, userId } = formData;
     if (!name || !email || !date || !time) {
-      alert("Please fill in all required fields!");
+      toast("Please fill in all required fields!");
       return;
     }
 
     if (isPastTime(date, time)) {
-      alert("Cannot book for past date/time. Please select a future time slot.");
+      toast("Cannot book for past date/time. Please select a future time slot.");
       return;
     }
 
     if (isTimeSlotBooked(date, time)) {
-      alert(`The time slot ${time} on ${formatDate(date)} is already booked. Please select another time.`);
+      toast(`The time slot ${time} on ${formatDate(date)} is already booked. Please select another time.`);
       return;
     }
 
@@ -120,17 +123,17 @@ const BookOnline = () => {
       });
 
       if (res.ok) {
-        alert(`Successfully booked for ${name} on ${formatDate(date)} at ${time}`);
+        toast(`Successfully booked for ${name} on ${formatDate(date)} at ${time}`);
         await loadBookings(userId);
         setFormData((prev) => ({ ...prev, date: "", time: "" }));
       } else {
         const err = await res.json();
         console.error("Backend error:", err);
-        alert("Error saving booking data to the server.");
+        toast("Error saving booking data to the server.");
       }
     } catch (error) {
       console.error("Connection error:", error);
-      alert("Unable to connect to the server.");
+      toast("Unable to connect to the server.");
     }
   };
 
@@ -144,14 +147,14 @@ const BookOnline = () => {
       });
 
       if (res.ok) {
-        alert("Booking cancelled successfully!");
+        toast("Booking cancelled successfully!");
         await loadBookings(formData.userId);
       } else {
-        alert("Failed to cancel booking. Please try again.");
+        toast("Failed to cancel booking. Please try again.");
       }
     } catch (error) {
       console.error("Error deleting booking:", error);
-      alert("Unable to connect to the server.");
+      toast("Unable to connect to the server.");
     }
   };
 

@@ -25,6 +25,8 @@ const SpeakPage = () => {
   const [userCompleted, setUserCompleted] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const sections = ["Part 1", "Part 2", "Part 3"];
@@ -32,8 +34,15 @@ const SpeakPage = () => {
   const userId = storedUser?.id;
 
   useEffect(() => {
+    if (!userId) {
+      setError("Please, login first");
+      setLoading(false);
+      return;
+    }
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
         // Fetch speaking practices
         const practicesSnap = await getDocs(collection(db, "speaking_practices"));
         const practices = practicesSnap.docs.map((doc) => ({
@@ -73,6 +82,8 @@ const SpeakPage = () => {
         setSpeakingData(combined);
       } catch (err) {
         console.error("Error fetching speaking data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -116,7 +127,7 @@ const SpeakPage = () => {
       try {
         await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${existing.id}`);
         setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
-        setMessage("Đã xóa khỏi wishlist");
+        setMessage("Removed from wishlist");
       } catch (err) {
         console.error("❌ Lỗi khi xóa khỏi wishlist:", err);
         setMessage("Không thể xóa khỏi wishlist");
@@ -132,7 +143,7 @@ const SpeakPage = () => {
 
         const newItem = { id: res.data.id, user_id: userId, practice_id: item.id, type: "speaking" };
         setWishlist((prev) => [...prev, newItem]);
-        setMessage("Đã thêm vào wishlist");
+        setMessage("Added into wishlist");
       } catch (err) {
         console.error("❌ Lỗi khi thêm vào wishlist:", err);
         setMessage("Không thể thêm vào wishlist");
@@ -201,55 +212,60 @@ const SpeakPage = () => {
             />
           </div>
         </div>
-
-        <div className="cards-speak">
-          {filteredData.length > 0 ? (
-            filteredData.map((item) => {
-              const inWishlist = wishlist.some((w) => w.practice_id === item.id);
-              return (
-                <div
-                  className={`card-speak ${
-                    userCompleted.includes(item.id) ? "completed" : ""
-                  }`}
-                  key={item.id}
-                  onClick={() => navigate(`/speak/${item.id}`)}
-                  style={{ cursor: "pointer", position: "relative" }}
-                >
-                  {/* Wishlist heart */}
+        
+        {loading ? (
+          <p>Loading tasks...</p>
+        ) : error ? (
+          <p style={{ color: "red" }}>{error}</p>
+        ) : (
+          <div className="cards-speak">
+            {filteredData.length > 0 ? (
+              filteredData.map((item) => {
+                const inWishlist = wishlist.some((w) => w.practice_id === item.id);
+                return (
                   <div
-                    className="wishlist-heart"
-                    onClick={(e) => handleWishlistToggle(item, e)}
-                    title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                    className={`card-speak ${
+                      userCompleted.includes(item.id) ? "completed" : ""
+                    }`}
+                    key={item.id}
+                    onClick={() => navigate(`/speak/${item.id}`)}
+                    style={{ cursor: "pointer", position: "relative" }}
                   >
-                    <FontAwesomeIcon
-                      icon={faHeart}
-                      color={inWishlist ? "#ff4757" : "#ccc"}
-                    />
-                  </div>
-
-                  <img src={"/assets/listpic.jpg"} alt={item.topic} />
-                  <div className="card-info-speak">
-                    <span
-                      className="section-speak"
-                      style={{ backgroundColor: sectionColors[item.section] }}
+                    {/* Wishlist heart */}
+                    <div
+                      className="wishlist-heart"
+                      onClick={(e) => handleWishlistToggle(item, e)}
+                      title={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
                     >
-                      {item.section}
-                    </span>
-                    <h4>{item.topic}</h4>
-                    <p className="type-speak">{item.type}</p>
-                    <p className="attempts-speak">{item.attempts} attempts</p>
-                    {userCompleted.includes(item.id) && (
-                      <p className="completed-label">Completed</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p>No speaking topics found.</p>
-          )}
-        </div>
+                      <FontAwesomeIcon
+                        icon={faHeart}
+                        color={inWishlist ? "#ff4757" : "#ccc"}
+                      />
+                    </div>
 
+                    <img src={"/assets/listpic.jpg"} alt={item.topic} />
+                    <div className="card-info-speak">
+                      <span
+                        className="section-speak"
+                        style={{ backgroundColor: sectionColors[item.section] }}
+                      >
+                        {item.section}
+                      </span>
+                      <h4>{item.topic}</h4>
+                      <p className="type-speak">{item.type}</p>
+                      <p className="attempts-speak">{item.attempts} attempts</p>
+                      {userCompleted.includes(item.id) && (
+                        <p className="completed-label">Completed</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p>No speaking topics found.</p>
+            )}
+          </div>
+        )}
         {message && <div className="wishlist-message">{message}</div>}
       </main>
     </div>
