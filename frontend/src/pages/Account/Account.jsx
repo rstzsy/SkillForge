@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { app } from "../../firebase/config";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./Account.css";
 
 const AccountPage = () => {
@@ -19,6 +20,8 @@ const AccountPage = () => {
   });
 
   const storage = getStorage(app);
+  const toast = useToast();
+  
 
   // Load user từ localStorage khi mount
   useEffect(() => {
@@ -59,14 +62,14 @@ const AccountPage = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Vui lòng chọn file ảnh!");
+      toast("Please, choosing image!");
       return;
     }
 
     try {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (!storedUser?.id) {
-        alert("User not found!");
+        toast("Please login first!");
         return;
       }
 
@@ -98,10 +101,10 @@ const AccountPage = () => {
       const updatedUser = { ...storedUser, avatar: downloadURL };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
-      alert("Ảnh đại diện đã được cập nhật!");
+      toast("Avatar is updated!");
     } catch (err) {
       console.error("Upload failed:", err);
-      alert("Upload ảnh thất bại!");
+      toast("Upload ảnh thất bại!");
     }
   };
 
@@ -110,7 +113,7 @@ const AccountPage = () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (!storedUser || !storedUser.id) {
-        alert("User not found!");
+        toast("Please login first!");
         return;
       }
 
@@ -144,10 +147,10 @@ const AccountPage = () => {
       // Reset password input
       setFormData((prev) => ({ ...prev, password: "" }));
 
-      alert("Thông tin người dùng đã được cập nhật!");
+      toast("User information is updated!");
     } catch (error) {
       console.error("Update failed:", error);
-      alert("Cập nhật thất bại!");
+      toast("Cập nhật thất bại!");
     }
   };
 

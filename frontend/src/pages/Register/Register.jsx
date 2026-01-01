@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../component/Toast/ToastContainer";
+
 
 export default function Register() {
   const [userName, setFullName] = useState("");
@@ -10,13 +12,15 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // check pass
     if (password !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast("Passwords do not match!");
       return;
     }
 
@@ -29,14 +33,14 @@ export default function Register() {
 
       const data = await response.json().catch(() => ({}));
       if (response.ok) {
-        alert("Register successfully!");
+        toast("Register successfully!");
         navigate("/login");
       } else {
-        alert("Error: " + (data.message || "Unknown error"));
+        toast("Error: " + (data.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Something went wrong while registering.");
+      toast("Something went wrong while registering.");
     }
   };
 

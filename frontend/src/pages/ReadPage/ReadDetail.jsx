@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./ReadDetail.css";
 
 const ReadDetail = () => {
@@ -14,6 +15,8 @@ const ReadDetail = () => {
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [submissionId, setSubmissionId] = useState(null);
+  const toast = useToast();
+  
 
   // ---------------- FETCH DATA ----------------
   useEffect(() => {
@@ -49,7 +52,7 @@ const ReadDetail = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          alert("Time is up! Bài sẽ tự động nộp.");
+          toast("Time is up! Bài sẽ tự động nộp.");
           handleSubmit();
           return 0;
         }
@@ -140,7 +143,7 @@ const ReadDetail = () => {
   const handleSubmit = async () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser?.id) {
-      alert("User not found!");
+      toast("User not found!");
       return;
     }
 
@@ -163,7 +166,7 @@ const ReadDetail = () => {
       setShowModal(true); // Hiện modal
     } catch (err) {
       console.error("Error submitting test:", err);
-      alert("Error submitting test. See console.");
+      toast("Error submitting test. See console.");
     }
   };
 

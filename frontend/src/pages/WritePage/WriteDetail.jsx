@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../../firebase/config";
+import { useToast } from "../../component/Toast/ToastContainer";
 import "./WriteDetail.css";
 
 const WriteDetail = () => {
@@ -18,6 +19,7 @@ const WriteDetail = () => {
     body2: "",
     conclusion: "",
   });
+  const toast = useToast();
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -112,12 +114,12 @@ const WriteDetail = () => {
         });
       } else {
         setIsSubmitting(false);
-        alert("AI evaluation failed: " + (data.message || "Unknown error"));
+        toast("AI evaluation failed: " + (data.message || "Unknown error"));
       }
     } catch (error) {
       setIsSubmitting(false);
       console.error("Submit error:", error);
-      alert("Server error during submission: " + error.message);
+      toast("Server error during submission: " + error.message);
     }
   };
 

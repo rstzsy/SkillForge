@@ -31,7 +31,7 @@ const ReadingPage = () => {
   // Fetch readings + submissions
   useEffect(() => {
     if (!userId) {
-      setError("User not found");
+      setError("Please, login first");
       setLoading(false);
       return;
     }
@@ -105,7 +105,7 @@ const ReadingPage = () => {
       try {
         await axios.delete(`https://skillforge-99ct.onrender.com/api/user/wishlist/${existing.id}`);
         setWishlist((prev) => prev.filter((w) => w.id !== existing.id));
-        setMessage("Đã xóa khỏi wishlist");
+        setMessage("Removed from wishlist");
       } catch (err) {
         console.error("Error removing from wishlist:", err);
         setMessage("Không thể xóa khỏi wishlist");
@@ -128,7 +128,7 @@ const ReadingPage = () => {
         };
 
         setWishlist((prev) => [...prev, newWishlistItem]);
-        setMessage("Đã thêm vào wishlist");
+        setMessage("Added into wishlist");
       } catch (err) {
         console.error("Error adding to wishlist:", err);
         setMessage("Không thể thêm vào wishlist");

@@ -1,11 +1,13 @@
 import React, { Fragment } from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import ToastContainer from "./component/Toast/ToastContainer";
 import Default from "./component/Default/Default";
 import { routes } from "./routes"
 
 function App() {
   return (
     <div>
+      <ToastContainer />
       <Router>
         <Routes>
           {routes.map((route) => {
