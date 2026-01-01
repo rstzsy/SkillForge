@@ -15,21 +15,12 @@ const BookOnline = () => {
     userId: "",
   });
 
-  const [bookings, setBookings] = useState([]);
   const [allBookings, setAllBookings] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
-  const loadBookings = async (userId) => {
+  const loadAllBookings = async () => {
     try {
-      // Load user bookings
-      const resUserBookings = await fetch(
-        `https://skillforge-99ct.onrender.com/api/bookings/user/${userId}`
-      );
-      const userBookingsData = await resUserBookings.json();
-      setBookings(userBookingsData);
-
-      // Load all bookings
       const resAllBookings = await fetch("https://skillforge-99ct.onrender.com/api/bookings");
       const allBookingsData = await resAllBookings.json();
       setAllBookings(allBookingsData);
@@ -50,7 +41,7 @@ const BookOnline = () => {
         userId: storedUser.id,
       }));
 
-      loadBookings(storedUser.id);
+      loadAllBookings();
     }
   }, []);
 
@@ -75,13 +66,6 @@ const BookOnline = () => {
     bookingDateTime.setHours(hours, minutes, 0, 0);
 
     return bookingDateTime < now;
-  };
-
-  const isTimeSlotAvailable = (date, time) => {
-    if (!date || !time) return false;
-    if (isPastTime(date, time)) return false;
-    if (isTimeSlotBooked(date, time)) return false;
-    return true;
   };
 
   const handleChange = (e) => {
@@ -111,7 +95,7 @@ const BookOnline = () => {
       userId,
       date,
       time,
-      status: "Pending", // Thay đổi từ "Scheduled" thành "Pending"
+      status: "Pending",
       bookedAt: new Date().toISOString(),
     };
 
@@ -127,7 +111,7 @@ const BookOnline = () => {
       if (res.ok) {
         toast(`Successfully booked for ${name} on ${formatDate(date)} at ${time}`);
         
-        // Đợi 1.5 giây để user đọc thông báo, sau đó chuyển trang
+        // Chuyển ngay sang trang My Course
         setTimeout(() => {
           navigate("/coursepage");
         }, 1500);
@@ -138,27 +122,6 @@ const BookOnline = () => {
       }
     } catch (error) {
       console.error("Connection error:", error);
-      toast("Unable to connect to the server.");
-    }
-  };
-
-  const handleDeleteBooking = async (bookingId) => {
-    const confirmDelete = window.confirm("Are you sure you want to cancel this booking?");
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(`https://skillforge-99ct.onrender.com/api/bookings/${bookingId}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        toast("Booking cancelled successfully!");
-        await loadBookings(formData.userId);
-      } else {
-        toast("Failed to cancel booking. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error deleting booking:", error);
       toast("Unable to connect to the server.");
     }
   };
@@ -255,41 +218,6 @@ const BookOnline = () => {
             Booking Online
           </button>
         </div>
-
-        {bookings.length > 0 && (
-          <div className="booking-history-bookonl">
-            <h2>Booking History</h2>
-            <div className="booking-list-bookonl">
-              {bookings.map((b, idx) => (
-                <div key={idx} className="booking-item-bookonl">
-                  <div className="booking-info-bookonl">
-                    <p>
-                      <strong>Name:</strong> {b.name}
-                    </p>
-                    <p>
-                      <strong>Email:</strong> {b.email}
-                    </p>
-                    <p>
-                      <strong>Date:</strong> {formatDate(b.date)}
-                    </p>
-                    <p>
-                      <strong>Time:</strong> {b.time}
-                    </p>
-                    <p>
-                      <strong>Status:</strong> {b.status}
-                    </p>
-                  </div>
-                  <button
-                    className="btn-delete-booking-bookonl"
-                    onClick={() => handleDeleteBooking(b.id)}
-                  >
-                    Cancel Booking
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
