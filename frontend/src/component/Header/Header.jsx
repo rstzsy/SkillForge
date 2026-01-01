@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './Header.css'
 import { FiUser, FiMenu, FiX, FiHeart } from 'react-icons/fi'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const coupons = [
   { couponValue: 20, minOrderValue: 50, code: 'SAVE20' },
@@ -16,8 +16,24 @@ const Header = () => {
   const [user, setUser] = useState(null)
   const scrollRef = useRef(null)
   const navigate = useNavigate()
+  const location = useLocation() // Thêm useLocation để lấy đường dẫn hiện tại
 
   const closeMenu = () => setMenuOpen(false)
+
+  // Hàm kiểm tra link có active không
+  const isActive = (path) => {
+    return location.pathname === path
+  }
+
+  // Hàm kiểm tra dropdown Skills có active không
+  const isSkillsActive = () => {
+    return ['/speak', '/read', '/listen', '/write'].includes(location.pathname)
+  }
+
+  // Hàm kiểm tra dropdown Pages có active không
+  const isPagesActive = () => {
+    return ['/about', '/contact', '/coursepage', '/goalsetup', '/result'].includes(location.pathname)
+  }
 
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -88,33 +104,42 @@ const Header = () => {
           <span className="logo-text">SkillForge</span>
         </Link>
 
-
         <nav className="header-nav">
-          <Link to="/" className="nav-link active">Home</Link>
-          <Link to="/bookonline" className="nav-link">Booking</Link>
+          <Link to="/" className={`nav-link ${isActive('/') ? 'active' : ''}`}>
+            Home
+          </Link>
+          <Link to="/bookonline" className={`nav-link ${isActive('/bookonline') ? 'active' : ''}`}>
+            Booking
+          </Link>
 
           <div className="nav-dropdown">
-            <button className="nav-link dropdown-btn">Skills</button>
+            <button className={`nav-link dropdown-btn ${isSkillsActive() ? 'active' : ''}`}>
+              Skills
+            </button>
             <div className="dropdown-menu">
-              <Link to="/speak">Speaking</Link>
-              <Link to="/read">Reading</Link>
-              <Link to="/listen">Listening</Link>
-              <Link to="/write">Writing</Link>
+              <Link to="/speak" className={isActive('/speak') ? 'active' : ''}>Speaking</Link>
+              <Link to="/read" className={isActive('/read') ? 'active' : ''}>Reading</Link>
+              <Link to="/listen" className={isActive('/listen') ? 'active' : ''}>Listening</Link>
+              <Link to="/write" className={isActive('/write') ? 'active' : ''}>Writing</Link>
             </div>
           </div>
 
           <div className="nav-dropdown">
-            <button className="nav-link dropdown-btn">Pages</button>
+            <button className={`nav-link dropdown-btn ${isPagesActive() ? 'active' : ''}`}>
+              Pages
+            </button>
             <div className="dropdown-menu">
-              <Link to="/about">About Us</Link>
-              <Link to="/contact">Contact</Link>
-              <Link to="/coursepage">My Course</Link>
-              <Link to="/goalsetup">Setup Goal</Link>
-              <Link to="/result">Result</Link>
+              <Link to="/about" className={isActive('/about') ? 'active' : ''}>About Us</Link>
+              <Link to="/contact" className={isActive('/contact') ? 'active' : ''}>Contact</Link>
+              <Link to="/coursepage" className={isActive('/coursepage') ? 'active' : ''}>My Course</Link>
+              <Link to="/goalsetup" className={isActive('/goalsetup') ? 'active' : ''}>Setup Goal</Link>
+              <Link to="/result" className={isActive('/result') ? 'active' : ''}>Result</Link>
             </div>
           </div>
 
-          <Link to="/progress" className="nav-link">Progress</Link>
+          <Link to="/progress" className={`nav-link ${isActive('/progress') ? 'active' : ''}`}>
+            Progress
+          </Link>
         </nav>
 
         <div className="header-icons">
@@ -155,17 +180,17 @@ const Header = () => {
           <div className={`responsive-menu ${menuOpen ? 'open' : ''}`}>
             <div className="menu-content">
               <ul>
-                <li><Link to="/" onClick={closeMenu}>Home</Link></li>
-                <li><Link to="/bookonline" onClick={closeMenu}>Booking</Link></li>
-                <li><Link to="/speak" onClick={closeMenu}>Speaking</Link></li>
-                <li><Link to="/read" onClick={closeMenu}>Reading</Link></li>
-                <li><Link to="/write" onClick={closeMenu}>Writing</Link></li>
-                <li><Link to="/listen" onClick={closeMenu}>Listening</Link></li>
-                <li><Link to="/about" onClick={closeMenu}>About Us</Link></li>
-                <li><Link to="/contact" onClick={closeMenu}>Contact</Link></li>
-                <li><Link to="/progress" onClick={closeMenu}>Progress</Link></li>
-                <li><Link to="/coursepage" onClick={closeMenu}>My Course</Link></li>
-                <li><Link to="/result" onClick={closeMenu}>Result</Link></li>
+                <li><Link to="/" onClick={closeMenu} className={isActive('/') ? 'active' : ''}>Home</Link></li>
+                <li><Link to="/bookonline" onClick={closeMenu} className={isActive('/bookonline') ? 'active' : ''}>Booking</Link></li>
+                <li><Link to="/speak" onClick={closeMenu} className={isActive('/speak') ? 'active' : ''}>Speaking</Link></li>
+                <li><Link to="/read" onClick={closeMenu} className={isActive('/read') ? 'active' : ''}>Reading</Link></li>
+                <li><Link to="/write" onClick={closeMenu} className={isActive('/write') ? 'active' : ''}>Writing</Link></li>
+                <li><Link to="/listen" onClick={closeMenu} className={isActive('/listen') ? 'active' : ''}>Listening</Link></li>
+                <li><Link to="/about" onClick={closeMenu} className={isActive('/about') ? 'active' : ''}>About Us</Link></li>
+                <li><Link to="/contact" onClick={closeMenu} className={isActive('/contact') ? 'active' : ''}>Contact</Link></li>
+                <li><Link to="/progress" onClick={closeMenu} className={isActive('/progress') ? 'active' : ''}>Progress</Link></li>
+                <li><Link to="/coursepage" onClick={closeMenu} className={isActive('/coursepage') ? 'active' : ''}>My Course</Link></li>
+                <li><Link to="/result" onClick={closeMenu} className={isActive('/result') ? 'active' : ''}>Result</Link></li>
               </ul>
             </div>
           </div>

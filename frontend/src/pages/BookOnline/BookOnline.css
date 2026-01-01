@@ -129,3 +129,46 @@
     margin-top: 20px;
   }
 }
+
+
+.time-slot-bookonl.disabled-bookonl {
+  background-color: #e0e0e0;
+  cursor: not-allowed !important;
+  color: #999;
+}
+
+.booking-list-bookonl {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.booking-item-bookonl {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.booking-info-bookonl p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.btn-delete-booking-bookonl {
+  padding: 8px 16px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn-delete-booking-bookonl:hover {
+  background-color: #d32f2f;
+}

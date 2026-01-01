@@ -11,20 +11,43 @@ const AccountPage = () => {
     avatar: "/assets/avatar.jpg",
   });
 
+  // Lưu trữ dữ liệu ban đầu để so sánh
+  const [initialData, setInitialData] = useState({
+    username: "",
+    email: "",
+    avatar: "/assets/avatar.jpg",
+  });
+
   const storage = getStorage(app);
 
   // Load user từ localStorage khi mount
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
-      setFormData({
+      const userData = {
         username: storedUser.userName || storedUser.displayName || storedUser.name || "Unknown User",
         email: storedUser.email || "",
         password: "",
         avatar: storedUser.avatar || "/assets/avatar.jpg",
+      };
+      setFormData(userData);
+      // Lưu dữ liệu ban đầu (không bao gồm password)
+      setInitialData({
+        username: userData.username,
+        email: userData.email,
+        avatar: userData.avatar,
       });
     }
   }, []);
+
+  // Kiểm tra xem có thay đổi nào không
+  const hasChanges = () => {
+    return (
+      formData.username !== initialData.username ||
+      formData.avatar !== initialData.avatar ||
+      formData.password.trim() !== "" // Nếu có nhập password mới
+    );
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -71,6 +94,7 @@ const AccountPage = () => {
 
       // update state and localStorage
       setFormData((prev) => ({ ...prev, avatar: downloadURL }));
+      setInitialData((prev) => ({ ...prev, avatar: downloadURL })); // Cập nhật initialData
       const updatedUser = { ...storedUser, avatar: downloadURL };
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
@@ -92,10 +116,10 @@ const AccountPage = () => {
 
       // tao payload chi gom cac gia tri
       const payload = {};
-      if (formData.username) payload.username = formData.username;
+      if (formData.username !== initialData.username) payload.username = formData.username;
       if (formData.email) payload.email = formData.email;
       if (formData.password) payload.password = formData.password;
-      if (formData.avatar) payload.avatar = formData.avatar;
+      if (formData.avatar !== initialData.avatar) payload.avatar = formData.avatar;
 
       const response = await fetch(`https://skillforge-99ct.onrender.com/api/users/${storedUser.id}`, {
         method: "PUT",
@@ -109,6 +133,13 @@ const AccountPage = () => {
       // Lưu user moi vao localStorage, khong lưu password
       const { password, ...userWithoutPassword } = data.updatedUser;
       localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+
+      // Cập nhật initialData với dữ liệu mới
+      setInitialData({
+        username: formData.username,
+        email: formData.email,
+        avatar: formData.avatar,
+      });
 
       // Reset password input
       setFormData((prev) => ({ ...prev, password: "" }));
@@ -168,7 +199,11 @@ const AccountPage = () => {
             onChange={handleChange}
           />
 
-          <button className="account-update-btn" onClick={handleUpdate}>
+          <button 
+            className="account-update-btn" 
+            onClick={handleUpdate}
+            disabled={!hasChanges()}
+          >
             Update Information
           </button>
         </div>
