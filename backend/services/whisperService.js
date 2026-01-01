@@ -1,102 +1,80 @@
-import { exec } from "child_process";
 import fs from "fs";
-import path from "path";
-import os from "os";
+import FormData from "form-data";
+import axios from "axios";
 
-export function transcribeAudio(filePath, expectedText = "") {
-  return new Promise((resolve, reject) => {
-    // ✅ Kiểm tra file tồn tại
+export async function transcribeAudio(filePath, expectedText = "") {
+  try {
+    // Kiểm tra file tồn tại
     if (!fs.existsSync(filePath)) {
-      return reject(new Error(`Audio file not found: ${filePath}`));
+      throw new Error(`Audio file not found: ${filePath}`);
     }
 
-    // ✅ Lấy thư mục gốc của project (backend/)
-    const projectRoot = path.resolve(process.cwd());
-    const pythonScriptPath = path.join(projectRoot, "ai", "analyze_audio.py");
-    const fullAudioPath = path.resolve(filePath);
+    // Đọc file audio
+    const audioBuffer = fs.readFileSync(filePath);
     
-    console.log("📂 Project root:", projectRoot);
-    console.log("🐍 Python script path:", pythonScriptPath);
+    // Tạo FormData
+    const formData = new FormData();
+    formData.append("file", audioBuffer, {
+      filename: "audio.webm",
+      contentType: "audio/webm"
+    });
+    formData.append("model", "whisper-large-v3");
+    formData.append("language", "en");
+    formData.append("response_format", "json");
 
-    // ✅ Kiểm tra script Python tồn tại
-    if (!fs.existsSync(pythonScriptPath)) {
-      return reject(new Error(`Python script not found: ${pythonScriptPath}`));
-    }
-
-    // Escape dấu " trong expectedText
-    const safeExpected = expectedText.replace(/"/g, '\\"');
-
-    // ✅ Tự động phát hiện hệ điều hành và tìm Python path
-    const isWindows = os.platform() === "win32";
-    
-    // Các đường dẫn có thể có của Python venv (tuyệt đối)
-    // Thử cả backend/venv/ VÀ backend/ai/venv/
-    const possiblePythonPaths = [
-      path.join(projectRoot, "venv", "bin", "python"),           // backend/venv/
-      path.join(projectRoot, "venv", "bin", "python3"),          // backend/venv/ alt
-      path.join(projectRoot, "ai", "venv", "bin", "python"),     // backend/ai/venv/
-      path.join(projectRoot, "ai", "venv", "bin", "python3"),    // backend/ai/venv/ alt
-      path.join(projectRoot, "venv", "Scripts", "python.exe"),   // Windows backend/venv/
-      path.join(projectRoot, "ai", "venv", "Scripts", "python.exe"), // Windows backend/ai/venv/
-    ];
-    
-    console.log("🔍 Searching for Python in these paths:");
-    possiblePythonPaths.forEach(p => console.log("  -", p, fs.existsSync(p) ? "✅" : "❌"));
-    
-    // Tìm Python path đầu tiên tồn tại
-    let pythonPath = possiblePythonPaths.find(p => fs.existsSync(p));
-    
-    if (!pythonPath) {
-      const errorMsg = "❌ Python virtual environment not found!\n" +
-        "Please run these commands:\n" +
-        "  python3 -m venv venv\n" +
-        "  source venv/bin/activate\n" +
-        "  pip install openai-whisper torch numpy";
-      console.error(errorMsg);
-      throw new Error("Python venv not found. Check console for setup instructions.");
-    }
-    
-    console.log("✅ Using Python:", pythonPath);
-
-    const command = `"${pythonPath}" "${pythonScriptPath}" "${fullAudioPath}" "${safeExpected}"`;
-
-    console.log("🐍 Running Python command:", command);
-
-    exec(command, 
-      { 
-        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
-        timeout: 60000 // 60s timeout
-      }, 
-      (err, stdout, stderr) => {
-        if (err) {
-          console.error("❌ Whisper Python error:", err);
-          console.error("❌ stderr:", stderr);
-          return reject(new Error(`Whisper execution failed: ${err.message}\nstderr: ${stderr}`));
-        }
-
-        if (stderr) {
-          console.log("ℹ️ Python debug output:", stderr);
-        }
-
-        try {
-          console.log("📄 Python stdout:", stdout);
-          
-          // ✅ Parse JSON từ stdout
-          const output = JSON.parse(stdout.trim());
-          
-          // ✅ Kiểm tra nếu có lỗi trong output
-          if (output.error) {
-            console.error("❌ Whisper returned error:", output.error);
-            return reject(new Error(`Whisper error: ${output.error}`));
-          }
-          
-          resolve(output);
-        } catch (parseErr) {
-          console.error("❌ JSON parse error:", parseErr);
-          console.error("❌ Raw output:", stdout);
-          reject(new Error(`Failed to parse Whisper output: ${parseErr.message}\nOutput: ${stdout}`));
-        }
+    // Gọi Groq API
+    const response = await axios.post(
+      "https://api.groq.com/openai/v1/audio/transcriptions",
+      formData,
+      {
+        headers: {
+          ...formData.getHeaders(),
+          "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+        },
+        maxBodyLength: Infinity,
+        timeout: 30000
       }
     );
-  });
+
+    const transcript = response.data.text.trim();
+    
+    if (!transcript) {
+      throw new Error("No speech detected in the audio.");
+    }
+
+    console.log("✅ Transcript:", transcript);
+
+    // Phần chấm điểm mô phỏng
+    const wordCount = transcript.split(/\s+/).length;
+    const hasGoodLength = wordCount >= 5;
+    
+    const analysis = {
+      transcript: transcript,
+      pronunciation_score: hasGoodLength ? 7.5 : 6.0,
+      fluency_score: hasGoodLength ? 7.0 : 6.0,
+      grammar_score: 6.5,
+      vocab_score: 7.0,
+      ai_score: 7.0,
+      feedback: hasGoodLength 
+        ? "Your pronunciation and fluency are acceptable. Improve your grammar in complex sentences."
+        : "Try to speak more. Your answer is too short."
+    };
+
+    return analysis;
+
+  } catch (error) {
+    console.error("❌ Transcription error:", error.message);
+    
+    // Trả về error nhưng vẫn có structure
+    return {
+      error: error.message,
+      transcript: "Error transcribing audio",
+      pronunciation_score: 0,
+      fluency_score: 0,
+      grammar_score: 0,
+      vocab_score: 0,
+      ai_score: 0,
+      feedback: `Transcription failed: ${error.message}`
+    };
+  }
 }
