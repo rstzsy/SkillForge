@@ -112,7 +112,7 @@
     .slider-container {
         min-height: 280px;
         max-height: 350px;
-        margin-left: calc(-80vw + 50%);
+        margin-left: calc(-50vw + 50%);
         width: 100vw;
     }
 

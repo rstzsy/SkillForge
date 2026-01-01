@@ -232,10 +232,10 @@ const HomePage = () => {
             </select>
 
             <select onChange={(e) => setDifficultyFilter(e.target.value)}>
-              <option value="All">Difficulty</option>
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
               <option value="Hard">Hard</option>
+              <option value="All">Difficulty</option>
             </select>
 
             <select onChange={(e) => setDurationFilter(e.target.value)}>
@@ -339,9 +339,9 @@ const HomePage = () => {
                         Expert feedback & tips
                     </li>
                 </ul>
-
-
+              <Link to="/bookonline">
                 <button className="book-btn">Book a Session</button>
+              </Link>
             </div>
         </section>
 

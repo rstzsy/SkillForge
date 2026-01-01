@@ -83,10 +83,11 @@ const Header = () => {
 
       {/* Header */}
       <header className="header">
-        <div className="header-logo">
+        <Link to="/" className="header-logo" onClick={closeMenu}>
           <img src="/assets/logo2.png" alt="SkillForge Logo" className="logo-img" />
           <span className="logo-text">SkillForge</span>
-        </div>
+        </Link>
+
 
         <nav className="header-nav">
           <Link to="/" className="nav-link active">Home</Link>
