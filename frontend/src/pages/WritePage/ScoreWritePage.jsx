@@ -17,7 +17,9 @@ const ScoreWritePage = () => {
       navigate("/");
       return;
     }
-    setLoading(false);
+    setTimeout(() => {
+      setLoading(false);
+    }, 800);
   }, [userWriting, aiResult, navigate]);
 
   if (loading) return <p className="loading">Analyzing your writing with Gemini AI...</p>;

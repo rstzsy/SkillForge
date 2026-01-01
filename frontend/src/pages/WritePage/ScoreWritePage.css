@@ -10,6 +10,8 @@
 }
 
 .score-title {
+  font-weight: 700;
+  font-size: 25 !important;
   text-align: center;
   color: #d6a302;
   margin-bottom: 25px;

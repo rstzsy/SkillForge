@@ -11,6 +11,7 @@ const WriteDetail = () => {
   const [wordCount, setWordCount] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [sections, setSections] = useState({
     introduction: "",
     body1: "",
@@ -54,6 +55,8 @@ const WriteDetail = () => {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true); // ✅ Bật loading ngay khi bắt đầu submit
+    
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
     const essayText = Object.values(sections).join("\n\n");
@@ -80,7 +83,7 @@ const WriteDetail = () => {
       });
 
       const data = await res.json();
-      console.log("📥 Received from API:", data); // ✅ DEBUG
+      console.log("📥 Received from API:", data);
 
       if (res.status === 200) {
         const taskRef = doc(db, "writing_practices", id);
@@ -93,13 +96,13 @@ const WriteDetail = () => {
           last_completed_at: new Date(),
         });
 
+        // ✅ KHÔNG tắt loading, để popup hiển thị cho đến khi chuyển trang
         navigate(`/score/write/${id}`, {
           state: { aiResult: data, userWriting: sections },
         });
-      } else {
-        alert("AI evaluation failed: " + data.message);
       }
     } catch (error) {
+      setIsSubmitting(false); // ✅ Tắt loading khi có exception
       console.error("Submit error:", error);
       alert("Server error during submission");
     }
@@ -143,23 +146,69 @@ const WriteDetail = () => {
                   placeholder={`Write your ${sec} here...`}
                   value={sections[sec]}
                   onChange={(e) => handleChange(sec, e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
             ))}
           </div>
 
           <div className="write-detail-buttons">
-            <button className="write-detail-back" onClick={() => navigate(-1)}>
+            <button 
+              className="write-detail-back" 
+              onClick={() => navigate(-1)}
+              disabled={isSubmitting} // ✅ Disable khi đang submit
+            >
               Back
             </button>
-            <button className="write-detail-submit" onClick={handleSubmit}>
-              Submit
+            <button 
+              className="write-detail-submit" 
+              onClick={handleSubmit}
+              disabled={isSubmitting} // ✅ Disable khi đang submit
+            >
+              {isSubmitting ? "Submitting..." : "Submit"}
             </button>
           </div>
         </div>
       </div>
 
       {/* 🔹 Modal */}
+      {/* {showModal && (
+        <div className="write-detail-modal">
+          <div className="write-detail-modal-content">
+            <h3>Your writing has been submitted!</h3>
+            <div className="write-detail-modal-buttons">
+              <button onClick={() => navigate("/")}>Return to Course Page</button>
+              <button
+                onClick={() =>
+                  navigate(`/score/write/${id}`, {
+                    state: { userWriting: sections },
+                  })
+                }
+              >
+                View Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
+
+      {/* ✅ Loading Popup */}
+      {isSubmitting && (
+        <div className="write-detail-loading-overlay">
+          <div className="write-detail-loading-popup">
+            <div className="write-detail-spinner"></div>
+            <h3>Evaluating your essay...</h3>
+            <p>AI is analyzing your writing. This may take 10-30 seconds.</p>
+            <div className="write-detail-progress-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔹 Success Modal */}
       {showModal && (
         <div className="write-detail-modal">
           <div className="write-detail-modal-content">
