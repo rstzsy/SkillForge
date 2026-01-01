@@ -55,7 +55,9 @@ const WriteDetail = () => {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true); // ✅ Bật loading ngay khi bắt đầu submit
+    // ✅ Bắt đầu hiển thị loading popup ngay lập tức
+    setIsSubmitting(true);
+    const startTime = Date.now();
     
     const user = JSON.parse(localStorage.getItem("user"));
     const userId = user?.id;
@@ -85,7 +87,7 @@ const WriteDetail = () => {
       const data = await res.json();
       console.log("📥 Received from API:", data);
 
-      if (res.status === 200) {
+      if (res.status === 200 || res.ok) {
         const taskRef = doc(db, "writing_practices", id);
         const taskSnap = await getDoc(taskRef);
         const currentAttempts = taskSnap.data()?.attempts || 0;
@@ -96,19 +98,28 @@ const WriteDetail = () => {
           last_completed_at: new Date(),
         });
 
-        // ✅ KHÔNG tắt loading, để popup hiển thị cho đến khi chuyển trang
+        // ✅ Đảm bảo popup hiển thị ít nhất 2 giây để người dùng có trải nghiệm tốt
+        const elapsedTime = Date.now() - startTime;
+        const minDisplayTime = 2000; // 2 giây
+        
+        if (elapsedTime < minDisplayTime) {
+          await new Promise(resolve => setTimeout(resolve, minDisplayTime - elapsedTime));
+        }
+
+        // ✅ Chuyển sang trang kết quả sau khi loading đủ thời gian
         navigate(`/score/write/${id}`, {
           state: { aiResult: data, userWriting: sections },
         });
+      } else {
+        setIsSubmitting(false);
+        alert("AI evaluation failed: " + (data.message || "Unknown error"));
       }
     } catch (error) {
-      setIsSubmitting(false); // ✅ Tắt loading khi có exception
+      setIsSubmitting(false);
       console.error("Submit error:", error);
-      alert("Server error during submission");
+      alert("Server error during submission: " + error.message);
     }
   };
-
-
 
   const formatTime = (secs) => {
     const m = String(Math.floor(secs / 60)).padStart(2, "0");
@@ -156,14 +167,14 @@ const WriteDetail = () => {
             <button 
               className="write-detail-back" 
               onClick={() => navigate(-1)}
-              disabled={isSubmitting} // ✅ Disable khi đang submit
+              disabled={isSubmitting}
             >
               Back
             </button>
             <button 
               className="write-detail-submit" 
               onClick={handleSubmit}
-              disabled={isSubmitting} // ✅ Disable khi đang submit
+              disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit"}
             </button>
@@ -171,28 +182,7 @@ const WriteDetail = () => {
         </div>
       </div>
 
-      {/* 🔹 Modal */}
-      {/* {showModal && (
-        <div className="write-detail-modal">
-          <div className="write-detail-modal-content">
-            <h3>Your writing has been submitted!</h3>
-            <div className="write-detail-modal-buttons">
-              <button onClick={() => navigate("/")}>Return to Course Page</button>
-              <button
-                onClick={() =>
-                  navigate(`/score/write/${id}`, {
-                    state: { userWriting: sections },
-                  })
-                }
-              >
-                View Score
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {/* ✅ Loading Popup */}
+      {/* ✅ Loading Popup - Hiển thị khi đang submit */}
       {isSubmitting && (
         <div className="write-detail-loading-overlay">
           <div className="write-detail-loading-popup">
@@ -208,7 +198,7 @@ const WriteDetail = () => {
         </div>
       )}
 
-      {/* 🔹 Success Modal */}
+      {/* 🔹 Success Modal (không dùng trong flow này) */}
       {showModal && (
         <div className="write-detail-modal">
           <div className="write-detail-modal-content">
