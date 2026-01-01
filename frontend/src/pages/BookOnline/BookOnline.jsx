@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../../component/Toast/ToastContainer";
 import "./BookOnline.css";
 
 const BookOnline = () => {
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,8 +19,6 @@ const BookOnline = () => {
   const [allBookings, setAllBookings] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
-  const toast = useToast();
-  
 
   const loadBookings = async (userId) => {
     try {
@@ -38,14 +40,14 @@ const BookOnline = () => {
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    console.log("🔍 Stored user:", storedUser); 
+    console.log("🔍 Stored user:", storedUser);
 
     if (storedUser) {
       setFormData((prev) => ({
         ...prev,
         name: storedUser.userName,
         email: storedUser.email,
-        userId: storedUser.id, 
+        userId: storedUser.id,
       }));
 
       loadBookings(storedUser.id);
@@ -54,8 +56,8 @@ const BookOnline = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
@@ -68,10 +70,10 @@ const BookOnline = () => {
 
   const isPastTime = (date, time) => {
     const now = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
     const bookingDateTime = new Date(date);
     bookingDateTime.setHours(hours, minutes, 0, 0);
-    
+
     return bookingDateTime < now;
   };
 
@@ -109,7 +111,7 @@ const BookOnline = () => {
       userId,
       date,
       time,
-      status: "Scheduled",
+      status: "Pending", // Thay đổi từ "Scheduled" thành "Pending"
       bookedAt: new Date().toISOString(),
     };
 
@@ -124,8 +126,11 @@ const BookOnline = () => {
 
       if (res.ok) {
         toast(`Successfully booked for ${name} on ${formatDate(date)} at ${time}`);
-        await loadBookings(userId);
-        setFormData((prev) => ({ ...prev, date: "", time: "" }));
+        
+        // Đợi 1.5 giây để user đọc thông báo, sau đó chuyển trang
+        setTimeout(() => {
+          navigate("/coursepage");
+        }, 1500);
       } else {
         const err = await res.json();
         console.error("Backend error:", err);
@@ -197,7 +202,7 @@ const BookOnline = () => {
             className="input-bookonl"
             value={formData.date}
             onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
+            min={new Date().toISOString().split("T")[0]}
           />
 
           {formData.date && (
@@ -208,7 +213,7 @@ const BookOnline = () => {
                   const isBooked = isTimeSlotBooked(formData.date, time);
                   const isPast = isPastTime(formData.date, time);
                   const isDisabled = isBooked || isPast;
-                  
+
                   return (
                     <div
                       key={time}
@@ -226,12 +231,19 @@ const BookOnline = () => {
                       }}
                       style={{
                         cursor: isDisabled ? "not-allowed" : "pointer",
-                        opacity: isDisabled ? 0.5 : 1
+                        opacity: isDisabled ? 0.5 : 1,
                       }}
                     >
                       {time}
-                      {isPast && <span style={{ fontSize: "0.8em", color: "#999" }}> (Past)</span>}
-                      {!isPast && isBooked && <span style={{ fontSize: "0.8em" }}> (Booked)</span>}
+                      {isPast && (
+                        <span style={{ fontSize: "0.8em", color: "#999" }}>
+                          {" "}
+                          (Past)
+                        </span>
+                      )}
+                      {!isPast && isBooked && (
+                        <span style={{ fontSize: "0.8em" }}> (Booked)</span>
+                      )}
                     </div>
                   );
                 })}
@@ -251,11 +263,21 @@ const BookOnline = () => {
               {bookings.map((b, idx) => (
                 <div key={idx} className="booking-item-bookonl">
                   <div className="booking-info-bookonl">
-                    <p><strong>Name:</strong> {b.name}</p>
-                    <p><strong>Email:</strong> {b.email}</p>
-                    <p><strong>Date:</strong> {formatDate(b.date)}</p>
-                    <p><strong>Time:</strong> {b.time}</p>
-                    <p><strong>Status:</strong> {b.status}</p>
+                    <p>
+                      <strong>Name:</strong> {b.name}
+                    </p>
+                    <p>
+                      <strong>Email:</strong> {b.email}
+                    </p>
+                    <p>
+                      <strong>Date:</strong> {formatDate(b.date)}
+                    </p>
+                    <p>
+                      <strong>Time:</strong> {b.time}
+                    </p>
+                    <p>
+                      <strong>Status:</strong> {b.status}
+                    </p>
                   </div>
                   <button
                     className="btn-delete-booking-bookonl"
