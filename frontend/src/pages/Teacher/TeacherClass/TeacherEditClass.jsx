@@ -81,7 +81,7 @@ const TeacherEditClass = () => {
           </label>
 
           <label>
-            Zoom Link:
+            Room Link:
             <input
               type="text"
               name="zoomLink"

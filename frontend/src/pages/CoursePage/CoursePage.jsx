@@ -345,14 +345,14 @@ const CoursePage = () => {
                   </a>
                 </p>
                 <p>
-                  <strong>Zoom Link: </strong>
+                  <strong>Room Link: </strong>
                   <a
                     href={selectedItem.zoomLink}
                     target="_blank"
                     rel="noreferrer"
                     style={{ color: "#fe5d01" }}
                   >
-                    <FontAwesomeIcon icon={faLink} /> Join Zoom
+                    <FontAwesomeIcon icon={faLink} /> Join Room
                   </a>
                 </p>
               </>

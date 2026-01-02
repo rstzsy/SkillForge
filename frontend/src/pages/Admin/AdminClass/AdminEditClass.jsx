@@ -164,7 +164,7 @@ const AdminEditClass = () => {
           </label>
 
           <label>
-            Zoom Link:
+            Room Link:
             <input type="text" name="zoomLink" value={classData.zoomLink} onChange={handleChange} />
           </label>
 

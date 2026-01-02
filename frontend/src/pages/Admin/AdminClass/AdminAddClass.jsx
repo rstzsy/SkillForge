@@ -164,7 +164,7 @@ const AdminAddClass = () => {
           </label>
 
           <label>
-            Zoom/WebRTC Link:
+            Room/WebRTC Link:
             <input type="text" name="zoomLink" value={classData.zoomLink} readOnly />
             <button
               type="button"

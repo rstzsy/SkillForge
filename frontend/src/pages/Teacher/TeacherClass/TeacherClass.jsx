@@ -188,13 +188,13 @@ const TeacherClass = () => {
                 </a>
               </p>
               <p>
-                <strong>Zoom Link: </strong>
+                <strong>Room Link: </strong>
                 <a
                   href={selectedClass.zoomLink}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <FontAwesomeIcon icon={faLink} /> Join Zoom
+                  <FontAwesomeIcon icon={faLink} /> Join Room
                 </a>
               </p>
               <button className="btn-close-modal" onClick={closeModal}>
