@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-dotenv.config();
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -30,7 +29,7 @@ import chatRoutes from "./routes/chatRoute.js";
 import participantRoutes from "./routes/participantRoute.js";
 
 
-
+dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cors());
