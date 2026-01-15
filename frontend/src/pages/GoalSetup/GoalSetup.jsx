@@ -29,6 +29,7 @@ const GoalSetup = () => {
   const [userId, setUserId] = useState("");
   const [currentBand, setCurrentBand] = useState("-");
   const [roadmap, setRoadmap] = useState(null);
+  const [roadmapWarning, setRoadmapWarning] = useState(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -69,6 +70,15 @@ const GoalSetup = () => {
     if (!name.trim()) return setMessage("Please enter your name.");
     if (!validateEmail(email)) return setMessage("Please enter a valid email.");
     if (!targetDate) return setMessage("Please choose a target date.");
+    
+    // Kiểm tra ngày không được trong quá khứ
+    const selectedDate = new Date(targetDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      return setMessage("Target date cannot be in the past.");
+    }
 
     const payload = {
       user_id: userId,
@@ -98,6 +108,35 @@ const GoalSetup = () => {
       const goalId = data.data?.id || data.data?.goal_id || data.id || data.goal_id;
       console.log("Extracted goalId:", goalId);
 
+      // ✅ VALIDATE Ở FRONTEND TRƯỚC KHI GỌI API
+      const validation = validateGoalFeasibilityFrontend(
+        parseFloat(currentBand),
+        parseFloat(targetBand),
+        daysUntil()
+      );
+
+      console.log("🔍 Frontend Validation:", validation);
+
+      // ✅ NẾU MỤC TIÊU KHÔNG REALISTIC, HIỂN THỊ WARNING NGAY
+      if (!validation.realistic) {
+        setRoadmapWarning({
+          isRealistic: false,
+          message: validation.warning,
+          feasibilityScore: validation.score,
+          recommendedTarget: validation.suggestedTarget,
+          recommendedTimeline: validation.suggestedTimeline,
+          studyHoursPerDay: validation.studyHoursPerDay,
+          monthsNeeded: validation.monthsNeeded
+        });
+        
+        // ✅ VẪN GỌI API ĐỂ TẠO ROADMAP (NẾU CẦN), NHƯNG KHÔNG HIỂN THỊ
+        setRoadmap(null); // Không set roadmap để không hiển thị steps
+        
+        console.warn("⚠️ Goal is unrealistic, showing warning instead of roadmap");
+        return; // ✅ DỪNG TẠI ĐÂY, KHÔNG GỌI API ROADMAP
+      }
+
+      // ✅ NẾU REALISTIC, TIẾP TỤC GỌI API ROADMAP
       try {
         const roadmapPayload = {
           ...payload,
@@ -112,8 +151,23 @@ const GoalSetup = () => {
 
         if (roadmapRes.ok) {
           const roadmapData = await roadmapRes.json();
-          setRoadmap(roadmapData);
-          console.log("Generated roadmap:", roadmapData);
+          
+          console.log("🔍 Roadmap Data:", roadmapData);
+          
+          // ✅ Thêm validation data vào roadmap response
+          const enrichedRoadmap = {
+            ...roadmapData,
+            is_realistic: validation.realistic,
+            feasibility_score: validation.score,
+            study_hours_per_day: validation.studyHoursPerDay,
+            months_needed: validation.monthsNeeded,
+            warning_message: validation.warning
+          };
+          
+          setRoadmap(enrichedRoadmap);
+          setRoadmapWarning(null); // Clear warning nếu realistic
+          
+          console.log("✅ Goal is realistic, roadmap generated successfully");
         } else {
           console.error("Failed to generate roadmap");
         }
@@ -127,10 +181,119 @@ const GoalSetup = () => {
     }
   };
 
+  // ✅ THÊM HÀM VALIDATE Ở FRONTEND (COPY TỪ BACKEND LOGIC)
+  const validateGoalFeasibilityFrontend = (currentBand, targetBand, daysAvailable) => {
+    const bandGap = targetBand - currentBand;
+    const monthsAvailable = daysAvailable / 30;
+    const current = currentBand;
+    
+    // Điều chỉnh hệ số khó dựa trên level hiện tại
+    let difficultyMultiplier = 1.0;
+    if (current >= 7.0) difficultyMultiplier = 1.5;
+    else if (current >= 6.0) difficultyMultiplier = 1.3;
+    else if (current >= 5.0) difficultyMultiplier = 1.2;
+    else difficultyMultiplier = 1.0;
+    
+    // Tính thời gian cần thiết thực tế (tháng)
+    const monthsNeeded = (bandGap * 4) * difficultyMultiplier;
+    
+    // Tính study intensity cần thiết (giờ/ngày)
+    const hoursNeeded = bandGap * 200 * difficultyMultiplier;
+    const studyHoursPerDay = hoursNeeded / daysAvailable;
+    
+    let realistic = true;
+    let score = 10;
+    let warning = "";
+    let suggestedTarget = targetBand;
+    let suggestedTimeline = "";
+
+    // === RULE 1: Mục tiêu không hợp lệ ===
+    if (bandGap <= 0) {
+      realistic = false;
+      score = 0;
+      warning = `Your target band (${targetBand}) must be higher than your current band (${currentBand}). Please set a higher target to create a meaningful improvement plan.`;
+    }
+    
+    // === RULE 2: Mục tiêu cực kỳ phi thực tế (>5h/ngày) ===
+    else if (studyHoursPerDay > 5) {
+      realistic = false;
+      score = 1;
+      const realisticMonths = Math.ceil(monthsNeeded);
+      suggestedTarget = (current + bandGap * 0.4).toFixed(1);
+      suggestedTimeline = `${realisticMonths} months`;
+      warning = `This goal requires ${studyHoursPerDay.toFixed(1)} hours of intensive daily study, which is extremely difficult to maintain. We strongly recommend either targeting band ${suggestedTarget} in ${Math.round(monthsAvailable)} months, or planning ${suggestedTimeline} to reach band ${targetBand} with sustainable daily practice (2-3 hours).`;
+    }
+    
+    // === RULE 3: Rất khó (4-5h/ngày) ===
+    else if (studyHoursPerDay > 4) {
+      realistic = false;
+      score = 3;
+      const realisticMonths = Math.ceil(monthsNeeded * 0.8);
+      suggestedTarget = (current + bandGap * 0.6).toFixed(1);
+      suggestedTimeline = `${realisticMonths} months`;
+      warning = `This timeline requires ${studyHoursPerDay.toFixed(1)} hours of daily study - very intensive and difficult to sustain long-term. For a more balanced approach, consider targeting band ${suggestedTarget} in your current timeframe, or allow ${suggestedTimeline} to reach band ${targetBand} with 2-3 hours of daily practice.`;
+    }
+    
+    // === RULE 4: Khó nhưng có thể (3-4h/ngày) ===
+    else if (studyHoursPerDay > 3) {
+      realistic = false;
+      score = 5;
+      const realisticMonths = Math.ceil(monthsNeeded * 0.9);
+      suggestedTarget = (current + bandGap * 0.75).toFixed(1);
+      suggestedTimeline = `${realisticMonths} months`;
+      warning = `Achieving this goal requires approximately ${studyHoursPerDay.toFixed(1)} hours of focused daily study - challenging but possible with strong commitment and excellent discipline. For better work-life balance and sustainable progress, consider band ${suggestedTarget} in your timeframe, or extend your timeline to ${suggestedTimeline} for band ${targetBand}.`;
+    }
+    
+    // === RULE 5: Căng thẳng (2.5-3h/ngày) ===
+    else if (studyHoursPerDay > 2.5) {
+      realistic = true;
+      score = 6;
+      warning = `This is an ambitious but achievable timeline requiring approximately ${studyHoursPerDay.toFixed(1)} hours of focused study daily. Maintain consistency with your practice schedule and prioritize your weak areas for best results!`;
+    }
+    
+    // === RULE 6: Hợp lý (2-2.5h/ngày) ===
+    else if (studyHoursPerDay >= 2) {
+      realistic = true;
+      score = 8;
+      warning = "";
+    }
+    
+    // === RULE 7: Thoải mái (1.5-2h/ngày) ===
+    else if (studyHoursPerDay >= 1.5) {
+      realistic = true;
+      score = 9;
+      warning = "";
+    }
+    
+    // === RULE 8: Rất thoải mái (<1.5h/ngày) ===
+    else {
+      realistic = true;
+      score = 10;
+      warning = "";
+    }
+
+    return {
+      realistic,
+      score,
+      warning,
+      suggestedTarget: realistic ? targetBand.toFixed(1) : suggestedTarget,
+      suggestedTimeline,
+      studyHoursPerDay: studyHoursPerDay.toFixed(1),
+      monthsNeeded: monthsNeeded.toFixed(1)
+    };
+  };
+
   const clearSaved = () => {
     localStorage.removeItem("userGoal");
-    setName(""); setEmail(""); setTargetBand("6.5"); setTargetDate("");
-    setPrioritySkills(["Speaking"]); setNotes(""); setSavedAt(null);
+    setName(""); 
+    setEmail(""); 
+    setTargetBand("6.5"); 
+    setTargetDate("");
+    setPrioritySkills(["Speaking"]); 
+    setNotes(""); 
+    setSavedAt(null);
+    setRoadmap(null); // ✅ Clear roadmap
+    setRoadmapWarning(null); // ✅ Clear warning
     setMessage("Cleared saved goal.");
   };
 
@@ -222,6 +385,7 @@ const GoalSetup = () => {
                 type="date"
                 value={targetDate}
                 onChange={(e) => setTargetDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
                 required
               />
             </label>
@@ -271,6 +435,14 @@ const GoalSetup = () => {
                 <p><strong>Target date:</strong> {targetDate || "—"}</p>
                 <p><strong>Days left:</strong> {daysUntil() !== null ? `${daysUntil()} days` : "—"}</p>
                 <p><strong>Priority:</strong> {prioritySkills.join(", ")}</p>
+                
+                {/* ✅ Hiển thị study intensity nếu có roadmap */}
+                {roadmap && roadmap.study_hours_per_day && (
+                  <p style={{ marginTop: '0.5rem', color: '#fe5d01', fontWeight: 'bold' }}>
+                    📚 Required study: {roadmap.study_hours_per_day}h/day
+                  </p>
+                )}
+                
                 <p className="goalsetup-suggestion">{progressSuggestion()}</p>
               </div>
             ) : (
@@ -279,6 +451,53 @@ const GoalSetup = () => {
           </aside>
         </div>
       </section>
+
+      {/* ✅ Warning Section - Chỉ hiển thị khi roadmapWarning.isRealistic === false */}
+      {roadmapWarning && roadmapWarning.isRealistic === false && (
+        <section className="goalsetup-warning">
+          <div className="goalsetup-warning-container">
+            <div className="goalsetup-warning-icon">⚠️</div>
+            <div className="goalsetup-warning-content">
+              <h3 className="goalsetup-warning-title">
+                Goal Feasibility Alert (Score: {roadmapWarning.feasibilityScore}/10)
+              </h3>
+              <p className="goalsetup-warning-message">{roadmapWarning.message}</p>
+              
+              {/* ✅ Hiển thị study intensity */}
+              {roadmapWarning.studyHoursPerDay && (
+                <p style={{ marginTop: '1rem', color: '#ff5722', fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  📊 This goal requires <strong>{roadmapWarning.studyHoursPerDay} hours of intensive daily study</strong>, which is extremely challenging to maintain consistently.
+                </p>
+              )}
+              
+              {roadmapWarning.recommendedTarget && (
+                <div className="goalsetup-warning-suggestions">
+                  <p><strong>💡 Recommended Option 1:</strong> Target band {roadmapWarning.recommendedTarget} with your current timeline ({daysUntil()} days)</p>
+                  {roadmapWarning.recommendedTimeline && (
+                    <p><strong>💡 Recommended Option 2:</strong> Keep band {targetBand} but extend timeline to {roadmapWarning.recommendedTimeline}</p>
+                  )}
+                </div>
+              )}
+              
+              <button 
+                className="goalsetup-warning-adjust-btn"
+                onClick={() => {
+                  if (window.confirm(`Would you like to adjust your target band to ${roadmapWarning.recommendedTarget}?`)) {
+                    setTargetBand(roadmapWarning.recommendedTarget);
+                    setRoadmapWarning(null);
+                    // ✅ Auto-submit form sau khi adjust
+                    setTimeout(() => {
+                      document.querySelector('.goalsetup-save-btn').click();
+                    }, 100);
+                  }
+                }}
+              >
+                Adjust My Goal to Band {roadmapWarning.recommendedTarget}
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Level Check Section */}
       <section className="goalsetup-levelcheck">
@@ -304,63 +523,98 @@ const GoalSetup = () => {
         </div>
       </section>
 
+      {/* ✅ Roadmap Section */}
       <section className="goalsetup-roadmap">
         <h2 className="goalsetup-roadmap-title">🎯 Suggested Roadmap</h2>
-        <p className="goalsetup-roadmap-subtitle">
-          A personalized step-by-step guide designed to help you achieve your dream IELTS band with confidence.
-        </p>
+        
+        {roadmapWarning && roadmapWarning.isRealistic === false ? (
+          // ✅ Hiển thị khi mục tiêu không thực tế
+          <div className="goalsetup-roadmap-unrealistic">
+            <p className="goalsetup-roadmap-subtitle" style={{ color: '#ff9800', fontWeight: 'bold', fontSize: '1.2rem' }}>
+              ⚠️ Your current goal requires {roadmapWarning.studyHoursPerDay}h of daily study, which may be too intensive for most learners. Please review the warning above and adjust your goal for a more realistic and sustainable roadmap.
+            </p>
+            <div className="goalsetup-roadmap-unrealistic-content">
+              <img src="/assets/goal.png" alt="Adjust Goal" style={{ width: '200px', opacity: 0.6 }} />
+              <p style={{ color: '#666', fontSize: '1.1rem', marginTop: '1rem' }}>
+                A personalized roadmap will be generated once you set a realistic and achievable goal that fits your lifestyle.
+              </p>
+              <button 
+                className="goalsetup-warning-adjust-btn"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                style={{ marginTop: '1.5rem' }}
+              >
+                Adjust My Goal Now
+              </button>
+            </div>
+          </div>
+        ) : (
+          // ✅ Hiển thị roadmap bình thường
+          <>
+            <p className="goalsetup-roadmap-subtitle">
+              A personalized step-by-step guide designed to help you achieve your dream IELTS band with confidence.
+              {roadmap && roadmap.study_hours_per_day && (
+                <span style={{ color: '#fe5d01', fontWeight: 'bold', marginLeft: '0.5rem' }}>
+                  (Requires ~{roadmap.study_hours_per_day}h/day)
+                </span>
+              )}
+            </p>
 
-        <div className="goalsetup-roadmap-steps">
-          {roadmap && roadmap.steps?.length > 0 ? (
-            roadmap.steps.map((step, index) => (
-              <div key={index} className="goalsetup-roadmap-step">
-                <img
-                  src={step.icon || "/assets/goal.png"}
-                  alt={step.title}
-                  className="goalsetup-roadmap-icon"
-                />
-                <h3 className="goalsetup-roadmap-step-title">
-                  Step {index + 1}: {step.title}
-                </h3>
-                <p className="goalsetup-roadmap-step-text">{step.description}</p>
-              </div>
-            ))
-          ) : (
-            <>
-              <div className="goalsetup-roadmap-step">
-                <img src="/assets/assessmentIcon.png" alt="Start" className="goalsetup-roadmap-icon" />
-                <h3 className="goalsetup-roadmap-step-title">Step 1: Diagnostic Test</h3>
-                <p className="goalsetup-roadmap-step-text">
-                  Begin with a short diagnostic test to understand your current strengths and weaknesses across all four skills.
-                </p>
-              </div>
+            <div className="goalsetup-roadmap-steps">
+              {roadmap && roadmap.steps?.length > 0 ? (
+                roadmap.steps.map((step, index) => (
+                  <div key={index} className="goalsetup-roadmap-step">
+                    <img
+                      src={step.icon || "/assets/goal.png"}
+                      alt={step.title}
+                      className="goalsetup-roadmap-icon"
+                    />
+                    <h3 className="goalsetup-roadmap-step-title">
+                      Step {index + 1}: {step.title}
+                    </h3>
+                    <p className="goalsetup-roadmap-step-text">{step.description}</p>
+                    <p style={{ color: '#888', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                      Duration: ~{step.estimated_duration_days} days
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="goalsetup-roadmap-step">
+                    <img src="/assets/assessmentIcon.png" alt="Start" className="goalsetup-roadmap-icon" />
+                    <h3 className="goalsetup-roadmap-step-title">Step 1: Diagnostic Test</h3>
+                    <p className="goalsetup-roadmap-step-text">
+                      Begin with a short diagnostic test to understand your current strengths and weaknesses across all four skills.
+                    </p>
+                  </div>
 
-              <div className="goalsetup-roadmap-step">
-                <img src="/assets/personalizedPlan.png" alt="Plan" className="goalsetup-roadmap-icon" />
-                <h3 className="goalsetup-roadmap-step-title">Step 2: Smart Study Plan</h3>
-                <p className="goalsetup-roadmap-step-text">
-                  Get a weekly plan tailored to your target band, focusing on your priority skills and available study time.
-                </p>
-              </div>
+                  <div className="goalsetup-roadmap-step">
+                    <img src="/assets/personalizedPlan.png" alt="Plan" className="goalsetup-roadmap-icon" />
+                    <h3 className="goalsetup-roadmap-step-title">Step 2: Smart Study Plan</h3>
+                    <p className="goalsetup-roadmap-step-text">
+                      Get a weekly plan tailored to your target band, focusing on your priority skills and available study time.
+                    </p>
+                  </div>
 
-              <div className="goalsetup-roadmap-step">
-                <img src="/assets/practiceAndLearn.png" alt="Practice" className="goalsetup-roadmap-icon" />
-                <h3 className="goalsetup-roadmap-step-title">Step 3: Practice & Feedback</h3>
-                <p className="goalsetup-roadmap-step-text">
-                  Engage in interactive exercises, receive instant AI feedback, and improve through realistic speaking sessions.
-                </p>
-              </div>
+                  <div className="goalsetup-roadmap-step">
+                    <img src="/assets/practiceAndLearn.png" alt="Practice" className="goalsetup-roadmap-icon" />
+                    <h3 className="goalsetup-roadmap-step-title">Step 3: Practice & Feedback</h3>
+                    <p className="goalsetup-roadmap-step-text">
+                      Engage in interactive exercises, receive instant AI feedback, and improve through realistic speaking sessions.
+                    </p>
+                  </div>
 
-              <div className="goalsetup-roadmap-step">
-                <img src="/assets/goal.png" alt="Track Progress" className="goalsetup-roadmap-icon" />
-                <h3 className="goalsetup-roadmap-step-title">Step 4: Progress Review</h3>
-                <p className="goalsetup-roadmap-step-text">
-                  Track your improvement through monthly mock tests and adjust your strategy for maximum score gain.
-                </p>
-              </div>
-            </>
-          )}
-        </div>
+                  <div className="goalsetup-roadmap-step">
+                    <img src="/assets/goal.png" alt="Track Progress" className="goalsetup-roadmap-icon" />
+                    <h3 className="goalsetup-roadmap-step-title">Step 4: Progress Review</h3>
+                    <p className="goalsetup-roadmap-step-text">
+                      Track your improvement through monthly mock tests and adjust your strategy for maximum score gain.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        )}
       </section>
 
       {/* 🆕 Suggested Exercises từ Firebase */}
