@@ -97,7 +97,7 @@ const SpeakDetail = () => {
         const data = await res.json();
 
         if (data.success && data.submissions.length > 0) {
-          console.log("✅ Found submissions:", data.submissions.length);
+          console.log("Found submissions:", data.submissions.length);
 
           const newRecordedQuestions = new Map();
           
@@ -110,7 +110,21 @@ const SpeakDetail = () => {
               let evaluation = submission;
               if (typeof submission.feedback === "string") {
                 try {
-                  const parsedFeedback = JSON.parse(submission.feedback);
+                  // const parsedFeedback = JSON.parse(submission.feedback);
+                  const parsedFeedback = React.useMemo(() => {
+                    if (!currentEvaluation?.feedback) return null;
+
+                    if (typeof currentEvaluation.feedback === "string") {
+                      try {
+                        return JSON.parse(currentEvaluation.feedback);
+                      } catch {
+                        return { feedback: currentEvaluation.feedback };
+                      }
+                    }
+
+                    return currentEvaluation.feedback;
+                  }, [currentEvaluation]);
+
                   evaluation = { ...submission, ...parsedFeedback };
                 } catch (e) {
                   console.warn("Could not parse feedback JSON:", e);
@@ -139,10 +153,10 @@ const SpeakDetail = () => {
             }
           }
 
-          console.log("✅ Loaded submissions for questions:", Array.from(newRecordedQuestions.keys()));
+          console.log("Loaded submissions for questions:", Array.from(newRecordedQuestions.keys()));
         }
       } catch (error) {
-        console.error("❌ Error loading submissions:", error);
+        console.error("Error loading submissions:", error);
       }
     };
 
@@ -266,7 +280,7 @@ const SpeakDetail = () => {
       formData.append("questionId", currentQuestion.id);
       formData.append("questionText", currentQuestion.text);
       formData.append("section", selectedTopic.section);
-      formData.append("audioFormat", mimeType); // ✅ Gửi format info
+      formData.append("audioFormat", mimeType); // Gửi format info
 
       console.log("📤 Submitting audio for evaluation...");
 
@@ -276,14 +290,14 @@ const SpeakDetail = () => {
       });
 
       const responseText = await res.text();
-      console.log("📥 Raw server response:", responseText);
+      console.log("Raw server response:", responseText);
       
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log("✅ Parsed result:", result);
+        console.log("Parsed result:", result);
       } catch (parseError) {
-        console.error("❌ JSON parse error:", parseError);
+        console.error("JSON parse error:", parseError);
         setEvaluating(false);
         toast("Server returned invalid response format");
         return;
@@ -295,12 +309,12 @@ const SpeakDetail = () => {
           transcript: result.transcript,
           audio_url: result.audio_url
         };
-        console.log("✅ AI Evaluation received:", evaluation);
+        console.log("AI Evaluation received:", evaluation);
         
         setRecordedQuestions((prev) => {
           const newMap = new Map(prev);
           newMap.set(currentQuestionIndex, evaluation);
-          console.log("💾 Updated recordedQuestions, size:", newMap.size);
+          console.log("Updated recordedQuestions, size:", newMap.size);
           return newMap;
         });
 
@@ -314,7 +328,7 @@ const SpeakDetail = () => {
         toast("Failed to evaluate your answer. Please try again.");
       }
     } catch (error) {
-      console.error("❌ Error submitting audio:", error);
+      console.error("Error submitting audio:", error);
       setEvaluating(false);
       toast("Error connecting to server.");
     }
@@ -332,10 +346,10 @@ const SpeakDetail = () => {
       
       if (result.success) {
         setOverallScore(result.overall_score);
-        toast(`🎉 Completed! Your overall band: ${result.overall_score.overall_band}`);
+        toast(`Completed! Your overall band: ${result.overall_score.overall_band}`);
       }
     } catch (error) {
-      console.error("❌ Error finalizing:", error);
+      console.error("Error finalizing:", error);
       toast("Failed to save overall score.");
     }
   };
@@ -378,13 +392,13 @@ const SpeakDetail = () => {
 
         {allCompleted && !overallScore && (
           <button className="finalize-btn" onClick={handleFinalize}>
-            🎯 Submit Final Score
+            Submit Final Score
           </button>
         )}
 
         {overallScore && (
           <div className="overall-score">
-            <h4>✅ Overall Band: {overallScore.overall_band}</h4>
+            <h4>Overall Band: {overallScore.overall_band}</h4>
             <p>Pronunciation: {overallScore.pronunciation_score}</p>
             <p>Fluency: {overallScore.fluency_score}</p>
             <p>Grammar: {overallScore.grammar_score}</p>
@@ -415,23 +429,25 @@ const SpeakDetail = () => {
 
         {audioURL && (
           <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
-            <h4>🔊 Listen to your answer:</h4>
-            <audio 
-              src={audioURL} 
-              controls 
+            <h4>Listen to your answer:</h4>
+            <audio
+              src={audioURL}
+              controls
+              preload="metadata"
+              crossOrigin="anonymous"
               onError={(e) => {
-                console.error("❌ Audio load error:", e);
-                toast("Cannot play audio. Please check your connection.");
+                console.error("Audio load error:", e);
+                toast("Cannot play audio. Please try re-recording.");
               }}
-              onLoadStart={() => console.log("⏳ Loading audio...")}
-              onCanPlay={() => console.log("✅ Audio ready to play")}
+              onCanPlay={() => console.log("🎧 Audio ready")}
             />
           </div>
         )}
 
+
         {showFeedback && currentEvaluation && (
           <div className="ai-feedback">
-            <h3>🤖 AI Evaluation</h3>
+            <h3>AI Evaluation</h3>
             
             <p><strong>Transcript:</strong> {currentEvaluation.transcript}</p>
 
@@ -442,29 +458,37 @@ const SpeakDetail = () => {
               <span>Grammar: {currentEvaluation.grammar_score}</span>
               <span>Vocabulary: {currentEvaluation.lexical_score || currentEvaluation.vocab_score}</span>
             </div>
-            <p className="feedback-text">
-              {typeof currentEvaluation.feedback === "string" 
-                ? currentEvaluation.feedback 
-                : JSON.stringify(currentEvaluation.feedback)}
-            </p>
+            {parsedFeedback?.feedback && (
+              <p className="feedback-text">{parsedFeedback.feedback}</p>
+            )}
             
-            {currentEvaluation.errors?.length > 0 && (
+            {parsedFeedback?.errors?.some(e => e.explanation?.includes("accent")) && (
+              <div className="accent-note">
+                Giọng địa phương được ghi nhận. Accent không bị trừ điểm nếu vẫn dễ hiểu.
+              </div>
+            )}
+
+
+            
+            {parsedFeedback?.errors?.length > 0 && (
               <div className="errors">
                 <h4>Errors Detected:</h4>
-                {currentEvaluation.errors.map((err, i) => (
+                {parsedFeedback.errors.map((err, i) => (
                   <div key={i} className="error-item">
-                    <strong>{err.type}:</strong> "{err.text}" → {err.correction}
+                    <strong>{err.type}:</strong>{" "}
+                    <em>"{err.text}"</em> → <strong>{err.correction}</strong>
                     <p>{err.explanation}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            {currentEvaluation.suggestions?.length > 0 && (
+
+            {parsedFeedback?.suggestions?.length > 0 && (
               <div className="suggestions">
                 <h4>Suggestions:</h4>
                 <ul>
-                  {currentEvaluation.suggestions.map((s, i) => (
+                  {parsedFeedback.suggestions.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
                 </ul>
@@ -499,7 +523,7 @@ const SpeakDetail = () => {
           </button>
         ) : (
           <button className="record-btn stop" onClick={handleStopRecording}>
-            ⏹ Stop
+            Stop
           </button>
         )}
       </div>

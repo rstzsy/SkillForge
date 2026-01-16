@@ -13,7 +13,7 @@ export const SpeakingService = {
       const data = XLSX.utils.sheet_to_json(sheet);
 
       if (!data.length) throw new Error("Excel file is empty");
-      console.log(`🧾 Found ${data.length} rows in Excel`);
+      console.log(`Found ${data.length} rows in Excel`);
 
       for (const row of data) {
         const {
