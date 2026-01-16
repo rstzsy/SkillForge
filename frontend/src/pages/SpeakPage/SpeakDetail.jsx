@@ -487,17 +487,6 @@ const SpeakDetail = () => {
           <div className="ai-feedback">
             <h3>AI Evaluation</h3>
             
-            {/* ✅ Accent note - hiển thị luôn */}
-            <div className="accent-note" style={{
-              background: "#e3f2fd",
-              padding: "10px",
-              borderRadius: "5px",
-              marginBottom: "15px",
-              borderLeft: "4px solid #2196f3"
-            }}>
-              💡 <strong>Lưu ý:</strong> Giọng địa phương được ghi nhận. 
-              Accent không bị trừ điểm nếu phát âm vẫn rõ ràng và dễ hiểu.
-            </div>
             
             <p><strong>Transcript:</strong> {currentEvaluation.transcript}</p>
 

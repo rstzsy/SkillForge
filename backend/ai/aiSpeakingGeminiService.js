@@ -108,24 +108,23 @@ export const aiSpeakingGeminiService = {
         "grammar_score": number,
         "feedback": "2–3 câu nhận xét tổng quan BẰNG TIẾNG VIỆT",
         "errors": [
-          {
-            "type": "pronunciation | grammar | vocabulary",
-            "text": "từ/cụm từ gốc (EN)",
-            "correction": "phiên bản đúng (EN)",
-            "explanation": "giải thích BẰNG TIẾNG VIỆT (ghi rõ nếu do accent)"
-          }
-        ],
+            { 
+              "type": "pronunciation/grammar/vocabulary", 
+              "text": "cụm từ/câu có lỗi",
+              "correction": "đề xuất sửa",
+              "explanation": "giải thích lỗi BẰNG TIẾNG VIỆT"
+            }
+          ],
         "suggestions": [
-          "Gợi ý cải thiện 1 (TV)",
-          "Gợi ý cải thiện 2 (TV)",
-          "Gợi ý cải thiện 3 (TV)"
+          "Gợi ý cụ thể 1 BẰNG TIẾNG VIỆT",
+          "Gợi ý cụ thể 2 BẰNG TIẾNG VIỆT",
+          "Gợi ý cụ thể 3 BẰNG TIẾNG VIỆT"
         ]
       }
-
-      LƯU Ý:
-      - Feedback & explanation PHẢI BẰNG TIẾNG VIỆT
-      - Không phạt accent
-      - Phản hồi mang tính GIẢNG DẠY
+      **LƯU Ý QUAN TRỌNG:**
+        - Tất cả feedback, explanation và suggestions PHẢI BẰNG TIẾNG VIỆT
+        - Chỉ giữ nguyên tiếng Anh ở phần "text" và "correction" trong errors
+        - Phản hồi phải chi tiết, cụ thể và có tính xây dựng
       `;
 
       console.log("📤 Sending request to Gemini...");
