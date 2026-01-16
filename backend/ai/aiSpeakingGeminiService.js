@@ -190,7 +190,12 @@ export const aiSpeakingGeminiService = {
         fluency_score: finalResult.fluency_score,
         grammar_score: finalResult.grammar_score,
         vocab_score: finalResult.lexical_score,
-        feedback: JSON.stringify(finalResult),
+        
+        // ✅ Tách riêng từng field
+        feedback_text: finalResult.feedback,  // Text nhận xét
+        errors: JSON.stringify(finalResult.errors || []),
+        suggestions: JSON.stringify(finalResult.suggestions || []),
+        
         updated_at: new Date(),
       };
 
