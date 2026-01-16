@@ -149,10 +149,39 @@ const SpeakDetail = () => {
   const parsedFeedback = React.useMemo(() => {
     if (!currentEvaluation) return null;
 
+    // ✅ Kiểm tra xem có phải data từ API mới không (có suggestions trực tiếp)
+    if (currentEvaluation.suggestions && Array.isArray(currentEvaluation.suggestions)) {
+      return {
+        feedback: currentEvaluation.feedback,  // ✅ Đúng field
+        errors: currentEvaluation.errors || [],
+        suggestions: currentEvaluation.suggestions || []
+      };
+    }
+
+    // ✅ Nếu là data cũ từ DB (feedback là string JSON)
+    if (typeof currentEvaluation.feedback === "string") {
+      try {
+        const parsed = JSON.parse(currentEvaluation.feedback);
+        return {
+          feedback: parsed.feedback,
+          errors: parsed.errors || [],
+          suggestions: parsed.suggestions || []
+        };
+      } catch (err) {
+        console.error("Parse error:", err);
+        return {
+          feedback: currentEvaluation.feedback,
+          errors: [],
+          suggestions: []
+        };
+      }
+    }
+
+    // ✅ Fallback
     return {
-      feedback: currentEvaluation.feedback_text,
-      errors: currentEvaluation.errors ? JSON.parse(currentEvaluation.errors) : [],
-      suggestions: currentEvaluation.suggestions ? JSON.parse(currentEvaluation.suggestions) : []
+      feedback: currentEvaluation.feedback || "",
+      errors: currentEvaluation.errors || [],
+      suggestions: currentEvaluation.suggestions || []
     };
   }, [currentEvaluation]);
 
