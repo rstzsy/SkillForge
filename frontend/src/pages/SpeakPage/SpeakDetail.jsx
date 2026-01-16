@@ -90,86 +90,76 @@ const SpeakDetail = () => {
       if (!selectedTopic || !userId) return;
 
       try {
-        console.log("📥 Loading user submissions...");
         const res = await fetch(
           `https://skillforge-99ct.onrender.com/api/speaking/submissions/${userId}/${id}`
         );
         const data = await res.json();
 
-        if (data.success && data.submissions.length > 0) {
-          console.log("Found submissions:", data.submissions.length);
+        if (!data.success || !data.submissions?.length) return;
 
-          const newRecordedQuestions = new Map();
-          
-          data.submissions.forEach((submission) => {
-            const questionIndex = selectedTopic.questions.findIndex(
-              (q) => q.id === submission.speaking_questions_id
-            );
+        const newRecordedQuestions = new Map();
 
-            if (questionIndex !== -1) {
-              let evaluation = submission;
-              if (typeof submission.feedback === "string") {
-                try {
-                  // const parsedFeedback = JSON.parse(submission.feedback);
-                  const parsedFeedback = React.useMemo(() => {
-                    if (!currentEvaluation?.feedback) return null;
+        data.submissions.forEach((submission) => {
+          const questionIndex = selectedTopic.questions.findIndex(
+            (q) => q.id === submission.speaking_questions_id
+          );
 
-                    if (typeof currentEvaluation.feedback === "string") {
-                      try {
-                        return JSON.parse(currentEvaluation.feedback);
-                      } catch {
-                        return { feedback: currentEvaluation.feedback };
-                      }
-                    }
+          if (questionIndex === -1) return;
 
-                    return currentEvaluation.feedback;
-                  }, [currentEvaluation]);
+          let evaluation = { ...submission };
 
-                  evaluation = { ...submission, ...parsedFeedback };
-                } catch (e) {
-                  console.warn("Could not parse feedback JSON:", e);
-                }
-              }
-
-              if (submission.audio_url) {
-                evaluation.audio_url = submission.audio_url;
-              }
-
-              newRecordedQuestions.set(questionIndex, evaluation);
-            }
-          });
-
-          setRecordedQuestions(newRecordedQuestions);
-
-          if (newRecordedQuestions.has(currentQuestionIndex)) {
-            const currentEval = newRecordedQuestions.get(currentQuestionIndex);
-            setCurrentEvaluation(currentEval);
-            setShowFeedback(true);
-            
-            if (currentEval?.audio_url) {
-              const fullURL = getFullAudioURL(currentEval.audio_url);
-              console.log("🔊 Setting audio URL on load:", fullURL);
-              setAudioURL(fullURL);
+          if (typeof submission.feedback === "string") {
+            try {
+              const parsed = JSON.parse(submission.feedback);
+              evaluation = { ...evaluation, ...parsed };
+            } catch {
+              evaluation.feedback = submission.feedback;
             }
           }
 
-          console.log("Loaded submissions for questions:", Array.from(newRecordedQuestions.keys()));
+          newRecordedQuestions.set(questionIndex, evaluation);
+        });
+
+        setRecordedQuestions(newRecordedQuestions);
+
+        if (newRecordedQuestions.has(currentQuestionIndex)) {
+          const currentEval = newRecordedQuestions.get(currentQuestionIndex);
+          setCurrentEvaluation(currentEval);
+          setShowFeedback(true);
+
+          if (currentEval?.audio_url) {
+            setAudioURL(getFullAudioURL(currentEval.audio_url));
+          }
         }
-      } catch (error) {
-        console.error("Error loading submissions:", error);
+      } catch (err) {
+        console.error("Error loading submissions:", err);
       }
     };
 
-    if (selectedTopic) {
-      loadUserSubmissions();
-    }
-  }, [selectedTopic, userId, id, currentQuestionIndex]);
+    loadUserSubmissions();
+  }, [selectedTopic, userId, id]);
+
 
   useEffect(() => {
     if (selectedTopic && recordedQuestions.size === selectedTopic.questions.length) {
       setAllCompleted(true);
     }
   }, [recordedQuestions, selectedTopic]);
+
+  const parsedFeedback = React.useMemo(() => {
+    if (!currentEvaluation?.feedback) return null;
+
+    if (typeof currentEvaluation.feedback === "string") {
+      try {
+        return JSON.parse(currentEvaluation.feedback);
+      } catch {
+        return { feedback: currentEvaluation.feedback };
+      }
+    }
+
+    return currentEvaluation.feedback;
+  }, [currentEvaluation]);
+
 
   if (loading) return <p>Loading...</p>;
   if (!selectedTopic) return <p>Topic not found.</p>;
