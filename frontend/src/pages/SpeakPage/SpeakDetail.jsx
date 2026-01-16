@@ -106,14 +106,40 @@ const SpeakDetail = () => {
 
           if (questionIndex === -1) return;
 
+          // ✅ Parse errors và suggestions nếu là string
           let evaluation = { ...submission };
 
-          if (typeof submission.feedback === "string") {
+          // Parse errors
+          if (submission.errors) {
+            try {
+              evaluation.errors = typeof submission.errors === "string" 
+                ? JSON.parse(submission.errors) 
+                : submission.errors;
+            } catch {
+              evaluation.errors = [];
+            }
+          }
+
+          // Parse suggestions
+          if (submission.suggestions) {
+            try {
+              evaluation.suggestions = typeof submission.suggestions === "string"
+                ? JSON.parse(submission.suggestions)
+                : submission.suggestions;
+            } catch {
+              evaluation.suggestions = [];
+            }
+          }
+
+          // Fallback cho data cũ (feedback là JSON string)
+          if (!evaluation.feedback_text && typeof submission.feedback === "string") {
             try {
               const parsed = JSON.parse(submission.feedback);
-              evaluation = { ...evaluation, ...parsed };
+              evaluation.feedback_text = parsed.feedback;
+              evaluation.errors = parsed.errors || [];
+              evaluation.suggestions = parsed.suggestions || [];
             } catch {
-              evaluation.feedback = submission.feedback;
+              evaluation.feedback_text = submission.feedback;
             }
           }
 
@@ -137,8 +163,7 @@ const SpeakDetail = () => {
     };
 
     loadUserSubmissions();
-  }, [selectedTopic, userId, id]);
-
+  }, [selectedTopic, userId, id, currentQuestionIndex]);
 
   useEffect(() => {
     if (selectedTopic && recordedQuestions.size === selectedTopic.questions.length) {
@@ -146,19 +171,20 @@ const SpeakDetail = () => {
     }
   }, [recordedQuestions, selectedTopic]);
 
+  // ✅ Parse feedback - xử lý cả data mới và cũ
   const parsedFeedback = React.useMemo(() => {
     if (!currentEvaluation) return null;
 
-    // ✅ Kiểm tra xem có phải data từ API mới không (có suggestions trực tiếp)
+    // ✅ Trường hợp 1: Data mới từ API (có suggestions array trực tiếp)
     if (currentEvaluation.suggestions && Array.isArray(currentEvaluation.suggestions)) {
       return {
-        feedback: currentEvaluation.feedback,  // ✅ Đúng field
+        feedback: currentEvaluation.feedback_text || currentEvaluation.feedback,
         errors: currentEvaluation.errors || [],
         suggestions: currentEvaluation.suggestions || []
       };
     }
 
-    // ✅ Nếu là data cũ từ DB (feedback là string JSON)
+    // ✅ Trường hợp 2: Data cũ (feedback là JSON string)
     if (typeof currentEvaluation.feedback === "string") {
       try {
         const parsed = JSON.parse(currentEvaluation.feedback);
@@ -169,22 +195,25 @@ const SpeakDetail = () => {
         };
       } catch (err) {
         console.error("Parse error:", err);
-        return {
-          feedback: currentEvaluation.feedback,
-          errors: [],
-          suggestions: []
-        };
       }
     }
 
     // ✅ Fallback
     return {
-      feedback: currentEvaluation.feedback || "",
+      feedback: currentEvaluation.feedback_text || currentEvaluation.feedback || "",
       errors: currentEvaluation.errors || [],
       suggestions: currentEvaluation.suggestions || []
     };
   }, [currentEvaluation]);
 
+  // ✅ Debug log
+  useEffect(() => {
+    if (currentEvaluation && parsedFeedback) {
+      console.log("🔍 currentEvaluation:", currentEvaluation);
+      console.log("🔍 parsedFeedback:", parsedFeedback);
+      console.log("🔍 suggestions length:", parsedFeedback?.suggestions?.length);
+    }
+  }, [currentEvaluation, parsedFeedback]);
 
   if (loading) return <p>Loading...</p>;
   if (!selectedTopic) return <p>Topic not found.</p>;
@@ -198,7 +227,6 @@ const SpeakDetail = () => {
       Math.min(i + 1, selectedTopic.questions.length - 1)
     );
 
-  // ✅ FIX: Đọc câu hỏi bằng giọng tiếng Anh chuẩn
   const handleSpeak = () => {
     const utterance = new SpeechSynthesisUtterance(currentQuestion.text);
     utterance.lang = "en-US";
@@ -222,12 +250,10 @@ const SpeakDetail = () => {
     }
   };
 
-  // ✅ FIX: Ghi âm với định dạng tương thích iOS
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // ✅ Kiểm tra MediaRecorder support formats
       const mimeType = MediaRecorder.isTypeSupported('audio/mp4') 
         ? 'audio/mp4'
         : MediaRecorder.isTypeSupported('audio/webm') 
@@ -278,7 +304,6 @@ const SpeakDetail = () => {
     }
   };
 
-  // ✅ FIX: Submit audio với format info
   const submitAudio = async (audioBlob, mimeType) => {
     setEvaluating(true);
     setShowFeedback(false);
@@ -287,7 +312,6 @@ const SpeakDetail = () => {
     try {
       const formData = new FormData();
       
-      // ✅ Đặt tên file theo định dạng
       const extension = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
       formData.append("audio", audioBlob, `recording.${extension}`);
       formData.append("userId", userId);
@@ -295,7 +319,7 @@ const SpeakDetail = () => {
       formData.append("questionId", currentQuestion.id);
       formData.append("questionText", currentQuestion.text);
       formData.append("section", selectedTopic.section);
-      formData.append("audioFormat", mimeType); // Gửi format info
+      formData.append("audioFormat", mimeType);
 
       console.log("📤 Submitting audio for evaluation...");
 
@@ -459,10 +483,21 @@ const SpeakDetail = () => {
           </div>
         )}
 
-
         {showFeedback && currentEvaluation && (
           <div className="ai-feedback">
             <h3>AI Evaluation</h3>
+            
+            {/* ✅ Accent note - hiển thị luôn */}
+            <div className="accent-note" style={{
+              background: "#e3f2fd",
+              padding: "10px",
+              borderRadius: "5px",
+              marginBottom: "15px",
+              borderLeft: "4px solid #2196f3"
+            }}>
+              💡 <strong>Lưu ý:</strong> Giọng địa phương được ghi nhận. 
+              Accent không bị trừ điểm nếu phát âm vẫn rõ ràng và dễ hiểu.
+            </div>
             
             <p><strong>Transcript:</strong> {currentEvaluation.transcript}</p>
 
@@ -473,17 +508,10 @@ const SpeakDetail = () => {
               <span>Grammar: {currentEvaluation.grammar_score}</span>
               <span>Vocabulary: {currentEvaluation.lexical_score || currentEvaluation.vocab_score}</span>
             </div>
+
             {parsedFeedback?.feedback && (
-              <p className="feedback-text">{parsedFeedback.feedback}</p>
+              <p className="feedback-text"><strong>Nhận xét:</strong> {parsedFeedback.feedback}</p>
             )}
-            
-            {parsedFeedback?.errors?.some(e => e.explanation?.includes("accent")) && (
-              <div className="accent-note">
-                Giọng địa phương được ghi nhận. Accent không bị trừ điểm nếu vẫn dễ hiểu.
-              </div>
-            )}
-
-
             
             {parsedFeedback?.errors?.length > 0 && (
               <div className="errors">
@@ -497,7 +525,6 @@ const SpeakDetail = () => {
                 ))}
               </div>
             )}
-
 
             {parsedFeedback?.suggestions?.length > 0 && (
               <div className="suggestions">
