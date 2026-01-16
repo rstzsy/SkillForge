@@ -1,10 +1,9 @@
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegPath from "ffmpeg-static";
-import path from "path";
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-export function normalizeAudio(inputPath) {
+export async function preprocessAudio(inputPath) {
   return new Promise((resolve, reject) => {
     const outputPath = inputPath.replace(/\.\w+$/, ".wav");
 
