@@ -6,6 +6,9 @@ import { aiSpeakingGeminiService } from "../ai/aiSpeakingGeminiService.js";
 import { transcribeAudio } from "../services/whisperService.js";
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import { analyzeAudioWithOpenSmile } from "../services/audioFeatureService.js";
+import { calculateFluencyFromAudio } from "../services/fluencyScoring.js";
+
 
 // ✅ Set ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -273,6 +276,21 @@ export const SpeakingController = {
         mp3Path = await convertToMP3(audioPath);
         console.log("✅ Audio converted to MP3:", mp3Path);
         audioPath = mp3Path; // Use MP3 for transcription
+        let audioFeatures = null;
+        let fluencyFromAudio = null;
+
+        try {
+          console.log("🎧 Running openSMILE analysis...");
+          audioFeatures = await analyzeAudioWithOpenSmile(audioPath);
+          fluencyFromAudio = calculateFluencyFromAudio(audioFeatures);
+
+          console.log("📊 openSMILE result:", {
+            fluencyFromAudio,
+          });
+        } catch (e) {
+          console.warn("⚠️ openSMILE skipped:", e.message);
+        }
+
       } catch (conversionError) {
         console.error("❌ Audio conversion failed:", conversionError);
         return res.status(500).json({
@@ -342,7 +360,10 @@ export const SpeakingController = {
           questionText,
           transcript,
           audioUrl,
-          section: section || "Part 1"
+          section: section || "Part 1",
+          fluencyFromAudio,
+          audioFeatures
+
         });
 
         console.log("✅ AI evaluation completed:", aiResult.submission_id);

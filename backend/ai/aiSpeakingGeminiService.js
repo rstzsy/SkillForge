@@ -30,6 +30,8 @@ export const aiSpeakingGeminiService = {
     transcript,
     audioUrl,
     section,
+    fluencyFromAudio,
+    audioFeatures,
   }) {
     try {
       console.log("🤖 Starting AI evaluation...");
@@ -54,9 +56,18 @@ export const aiSpeakingGeminiService = {
 
         Trả lời **CHỈ BẰNG JSON HỢP LỆ**, không có text thừa.
 
+        ### DỮ LIỆU PHÂN TÍCH ÂM THANH (RẤT QUAN TRỌNG) ###
+        - Fluency score (từ audio analysis): ${fluencyFromAudio ?? "N/A"}
+        - Lưu ý:
+          - Điểm fluency ĐÃ ĐƯỢC TÍNH TỪ AUDIO THẬT
+          - KHÔNG được tự suy đoán fluency chỉ dựa vào transcript
+          - Nếu fluencyFromAudio có giá trị → hãy ưu tiên dùng nó
+
         ### TIÊU CHÍ ĐÁNH GIÁ:
         - **Pronunciation (Phát âm):** Độ rõ ràng, giọng điệu, trọng âm từ, ngữ điệu (thang điểm 0-9)
         - **Fluency & Coherence (Độ trưu chảy & Mạch lạc):** Tự nhiên, dừng nghỉ, do dự, tổ chức logic (0-9)
+          - Nếu có fluencyFromAudio → dùng làm điểm chính
+          - Nếu không có → mới ước lượng từ transcript
         - **Lexical Resource (Vốn từ vựng):** Phạm vi từ vựng, độ chính xác, cụm từ, diễn đạt (0-9)
         - **Grammatical Range & Accuracy (Ngữ pháp):** Đa dạng cấu trúc câu, độ chính xác, độ phức tạp (0-9)
 
@@ -136,6 +147,14 @@ export const aiSpeakingGeminiService = {
           "Sử dụng từ vựng đa dạng hơn",
         ],
       };
+
+      if (typeof fluencyFromAudio === "number" && !Number.isNaN(fluencyFromAudio)) {
+        console.log(
+          "Overriding fluency score from audio:",
+          fluencyFromAudio
+        );
+        finalResult.fluency_score = Number(fluencyFromAudio.toFixed(1));
+      }
 
       console.log("💾 Saving to Firestore...");
 
