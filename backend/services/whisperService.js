@@ -1,10 +1,6 @@
 import fs from "fs";
 import FormData from "form-data";
 import axios from "axios";
-import { preprocessAudio } from "./audioPreprocess.js";
-import { compareTranscriptWithExpected } from "./pronunciationDiff.js";
-
-
 
 export async function transcribeAudio(filePath, expectedText = "") {
   try {
@@ -12,12 +8,9 @@ export async function transcribeAudio(filePath, expectedText = "") {
     if (!fs.existsSync(filePath)) {
       throw new Error(`Audio file not found: ${filePath}`);
     }
-    
-    const cleanPath = await preprocessAudio(filePath);
 
     // Đọc file audio
-    const audioBuffer = fs.readFileSync(cleanPath);
-
+    const audioBuffer = fs.readFileSync(filePath);
     
     // Tạo FormData
     const formData = new FormData();
@@ -54,25 +47,18 @@ export async function transcribeAudio(filePath, expectedText = "") {
     // Phần chấm điểm mô phỏng
     const wordCount = transcript.split(/\s+/).length;
     const hasGoodLength = wordCount >= 5;
-    const pronunciationIssues = compareTranscriptWithExpected(
-      transcript,
-      expectedText
-    );
-
     
     const analysis = {
-      transcript,
+      transcript: transcript,
       pronunciation_score: hasGoodLength ? 7.5 : 6.0,
       fluency_score: hasGoodLength ? 7.0 : 6.0,
       grammar_score: 6.5,
       vocab_score: 7.0,
       ai_score: 7.0,
-      pronunciation_issues: pronunciationIssues,
-      feedback: hasGoodLength
-        ? "Phát âm khá rõ, tuy nhiên có một số từ bị nuốt âm hoặc ảnh hưởng bởi accent."
-        : "Câu trả lời quá ngắn, khó đánh giá phát âm."
+      feedback: hasGoodLength 
+        ? "Your pronunciation and fluency are acceptable. Improve your grammar in complex sentences."
+        : "Try to speak more. Your answer is too short."
     };
-
 
     return analysis;
 

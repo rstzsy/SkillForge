@@ -90,79 +90,65 @@ const SpeakDetail = () => {
       if (!selectedTopic || !userId) return;
 
       try {
+        console.log("📥 Loading user submissions...");
         const res = await fetch(
           `https://skillforge-99ct.onrender.com/api/speaking/submissions/${userId}/${id}`
         );
         const data = await res.json();
 
-        if (!data.success || !data.submissions?.length) return;
+        if (data.success && data.submissions.length > 0) {
+          console.log("✅ Found submissions:", data.submissions.length);
 
-        const newRecordedQuestions = new Map();
+          const newRecordedQuestions = new Map();
+          
+          data.submissions.forEach((submission) => {
+            const questionIndex = selectedTopic.questions.findIndex(
+              (q) => q.id === submission.speaking_questions_id
+            );
 
-        data.submissions.forEach((submission) => {
-          const questionIndex = selectedTopic.questions.findIndex(
-            (q) => q.id === submission.speaking_questions_id
-          );
+            if (questionIndex !== -1) {
+              let evaluation = submission;
+              if (typeof submission.feedback === "string") {
+                try {
+                  const parsedFeedback = JSON.parse(submission.feedback);
+                  evaluation = { ...submission, ...parsedFeedback };
+                } catch (e) {
+                  console.warn("Could not parse feedback JSON:", e);
+                }
+              }
 
-          if (questionIndex === -1) return;
+              if (submission.audio_url) {
+                evaluation.audio_url = submission.audio_url;
+              }
 
-          // ✅ Parse errors và suggestions nếu là string
-          let evaluation = { ...submission };
+              newRecordedQuestions.set(questionIndex, evaluation);
+            }
+          });
 
-          // Parse errors
-          if (submission.errors) {
-            try {
-              evaluation.errors = typeof submission.errors === "string" 
-                ? JSON.parse(submission.errors) 
-                : submission.errors;
-            } catch {
-              evaluation.errors = [];
+          setRecordedQuestions(newRecordedQuestions);
+
+          if (newRecordedQuestions.has(currentQuestionIndex)) {
+            const currentEval = newRecordedQuestions.get(currentQuestionIndex);
+            setCurrentEvaluation(currentEval);
+            setShowFeedback(true);
+            
+            if (currentEval?.audio_url) {
+              const fullURL = getFullAudioURL(currentEval.audio_url);
+              console.log("🔊 Setting audio URL on load:", fullURL);
+              setAudioURL(fullURL);
             }
           }
 
-          // Parse suggestions
-          if (submission.suggestions) {
-            try {
-              evaluation.suggestions = typeof submission.suggestions === "string"
-                ? JSON.parse(submission.suggestions)
-                : submission.suggestions;
-            } catch {
-              evaluation.suggestions = [];
-            }
-          }
-
-          // Fallback cho data cũ (feedback là JSON string)
-          if (!evaluation.feedback_text && typeof submission.feedback === "string") {
-            try {
-              const parsed = JSON.parse(submission.feedback);
-              evaluation.feedback_text = parsed.feedback;
-              evaluation.errors = parsed.errors || [];
-              evaluation.suggestions = parsed.suggestions || [];
-            } catch {
-              evaluation.feedback_text = submission.feedback;
-            }
-          }
-
-          newRecordedQuestions.set(questionIndex, evaluation);
-        });
-
-        setRecordedQuestions(newRecordedQuestions);
-
-        if (newRecordedQuestions.has(currentQuestionIndex)) {
-          const currentEval = newRecordedQuestions.get(currentQuestionIndex);
-          setCurrentEvaluation(currentEval);
-          setShowFeedback(true);
-
-          if (currentEval?.audio_url) {
-            setAudioURL(getFullAudioURL(currentEval.audio_url));
-          }
+          console.log("✅ Loaded submissions for questions:", Array.from(newRecordedQuestions.keys()));
         }
-      } catch (err) {
-        console.error("Error loading submissions:", err);
+      } catch (error) {
+        console.error("❌ Error loading submissions:", error);
       }
     };
 
-    loadUserSubmissions();
+    if (selectedTopic) {
+      loadUserSubmissions();
+    }
   }, [selectedTopic, userId, id, currentQuestionIndex]);
 
   useEffect(() => {
@@ -170,50 +156,6 @@ const SpeakDetail = () => {
       setAllCompleted(true);
     }
   }, [recordedQuestions, selectedTopic]);
-
-  // ✅ Parse feedback - xử lý cả data mới và cũ
-  const parsedFeedback = React.useMemo(() => {
-    if (!currentEvaluation) return null;
-
-    // ✅ Trường hợp 1: Data mới từ API (có suggestions array trực tiếp)
-    if (currentEvaluation.suggestions && Array.isArray(currentEvaluation.suggestions)) {
-      return {
-        feedback: currentEvaluation.feedback_text || currentEvaluation.feedback,
-        errors: currentEvaluation.errors || [],
-        suggestions: currentEvaluation.suggestions || []
-      };
-    }
-
-    // ✅ Trường hợp 2: Data cũ (feedback là JSON string)
-    if (typeof currentEvaluation.feedback === "string") {
-      try {
-        const parsed = JSON.parse(currentEvaluation.feedback);
-        return {
-          feedback: parsed.feedback,
-          errors: parsed.errors || [],
-          suggestions: parsed.suggestions || []
-        };
-      } catch (err) {
-        console.error("Parse error:", err);
-      }
-    }
-
-    // ✅ Fallback
-    return {
-      feedback: currentEvaluation.feedback_text || currentEvaluation.feedback || "",
-      errors: currentEvaluation.errors || [],
-      suggestions: currentEvaluation.suggestions || []
-    };
-  }, [currentEvaluation]);
-
-  // ✅ Debug log
-  useEffect(() => {
-    if (currentEvaluation && parsedFeedback) {
-      console.log("🔍 currentEvaluation:", currentEvaluation);
-      console.log("🔍 parsedFeedback:", parsedFeedback);
-      console.log("🔍 suggestions length:", parsedFeedback?.suggestions?.length);
-    }
-  }, [currentEvaluation, parsedFeedback]);
 
   if (loading) return <p>Loading...</p>;
   if (!selectedTopic) return <p>Topic not found.</p>;
@@ -227,6 +169,7 @@ const SpeakDetail = () => {
       Math.min(i + 1, selectedTopic.questions.length - 1)
     );
 
+  // ✅ FIX: Đọc câu hỏi bằng giọng tiếng Anh chuẩn
   const handleSpeak = () => {
     const utterance = new SpeechSynthesisUtterance(currentQuestion.text);
     utterance.lang = "en-US";
@@ -250,10 +193,12 @@ const SpeakDetail = () => {
     }
   };
 
+  // ✅ FIX: Ghi âm với định dạng tương thích iOS
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
+      // ✅ Kiểm tra MediaRecorder support formats
       const mimeType = MediaRecorder.isTypeSupported('audio/mp4') 
         ? 'audio/mp4'
         : MediaRecorder.isTypeSupported('audio/webm') 
@@ -304,6 +249,7 @@ const SpeakDetail = () => {
     }
   };
 
+  // ✅ FIX: Submit audio với format info
   const submitAudio = async (audioBlob, mimeType) => {
     setEvaluating(true);
     setShowFeedback(false);
@@ -312,6 +258,7 @@ const SpeakDetail = () => {
     try {
       const formData = new FormData();
       
+      // ✅ Đặt tên file theo định dạng
       const extension = mimeType === 'audio/mp4' ? 'm4a' : 'webm';
       formData.append("audio", audioBlob, `recording.${extension}`);
       formData.append("userId", userId);
@@ -319,7 +266,7 @@ const SpeakDetail = () => {
       formData.append("questionId", currentQuestion.id);
       formData.append("questionText", currentQuestion.text);
       formData.append("section", selectedTopic.section);
-      formData.append("audioFormat", mimeType);
+      formData.append("audioFormat", mimeType); // ✅ Gửi format info
 
       console.log("📤 Submitting audio for evaluation...");
 
@@ -329,14 +276,14 @@ const SpeakDetail = () => {
       });
 
       const responseText = await res.text();
-      console.log("Raw server response:", responseText);
+      console.log("📥 Raw server response:", responseText);
       
       let result;
       try {
         result = JSON.parse(responseText);
-        console.log("Parsed result:", result);
+        console.log("✅ Parsed result:", result);
       } catch (parseError) {
-        console.error("JSON parse error:", parseError);
+        console.error("❌ JSON parse error:", parseError);
         setEvaluating(false);
         toast("Server returned invalid response format");
         return;
@@ -348,12 +295,12 @@ const SpeakDetail = () => {
           transcript: result.transcript,
           audio_url: result.audio_url
         };
-        console.log("AI Evaluation received:", evaluation);
+        console.log("✅ AI Evaluation received:", evaluation);
         
         setRecordedQuestions((prev) => {
           const newMap = new Map(prev);
           newMap.set(currentQuestionIndex, evaluation);
-          console.log("Updated recordedQuestions, size:", newMap.size);
+          console.log("💾 Updated recordedQuestions, size:", newMap.size);
           return newMap;
         });
 
@@ -367,7 +314,7 @@ const SpeakDetail = () => {
         toast("Failed to evaluate your answer. Please try again.");
       }
     } catch (error) {
-      console.error("Error submitting audio:", error);
+      console.error("❌ Error submitting audio:", error);
       setEvaluating(false);
       toast("Error connecting to server.");
     }
@@ -385,10 +332,10 @@ const SpeakDetail = () => {
       
       if (result.success) {
         setOverallScore(result.overall_score);
-        toast(`Completed! Your overall band: ${result.overall_score.overall_band}`);
+        toast(`🎉 Completed! Your overall band: ${result.overall_score.overall_band}`);
       }
     } catch (error) {
-      console.error("Error finalizing:", error);
+      console.error("❌ Error finalizing:", error);
       toast("Failed to save overall score.");
     }
   };
@@ -431,13 +378,13 @@ const SpeakDetail = () => {
 
         {allCompleted && !overallScore && (
           <button className="finalize-btn" onClick={handleFinalize}>
-            Submit Final Score
+            🎯 Submit Final Score
           </button>
         )}
 
         {overallScore && (
           <div className="overall-score">
-            <h4>Overall Band: {overallScore.overall_band}</h4>
+            <h4>✅ Overall Band: {overallScore.overall_band}</h4>
             <p>Pronunciation: {overallScore.pronunciation_score}</p>
             <p>Fluency: {overallScore.fluency_score}</p>
             <p>Grammar: {overallScore.grammar_score}</p>
@@ -468,17 +415,16 @@ const SpeakDetail = () => {
 
         {audioURL && (
           <div className="playback" style={{ textAlign: "center", marginTop: "10px" }}>
-            <h4>Listen to your answer:</h4>
-            <audio
-              src={audioURL}
-              controls
-              preload="metadata"
-              crossOrigin="anonymous"
+            <h4>🔊 Listen to your answer:</h4>
+            <audio 
+              src={audioURL} 
+              controls 
               onError={(e) => {
-                console.error("Audio load error:", e);
-                toast("Cannot play audio. Please try re-recording.");
+                console.error("❌ Audio load error:", e);
+                toast("Cannot play audio. Please check your connection.");
               }}
-              onCanPlay={() => console.log("🎧 Audio ready")}
+              onLoadStart={() => console.log("⏳ Loading audio...")}
+              onCanPlay={() => console.log("✅ Audio ready to play")}
             />
           </div>
         )}
@@ -486,7 +432,6 @@ const SpeakDetail = () => {
         {showFeedback && currentEvaluation && (
           <div className="ai-feedback">
             <h3>AI Evaluation</h3>
-            
             
             <p><strong>Transcript:</strong> {currentEvaluation.transcript}</p>
 
@@ -497,29 +442,29 @@ const SpeakDetail = () => {
               <span>Grammar: {currentEvaluation.grammar_score}</span>
               <span>Vocabulary: {currentEvaluation.lexical_score || currentEvaluation.vocab_score}</span>
             </div>
-
-            {parsedFeedback?.feedback && (
-              <p className="feedback-text"><strong>Nhận xét:</strong> {parsedFeedback.feedback}</p>
-            )}
+            <p className="feedback-text">
+              {typeof currentEvaluation.feedback === "string" 
+                ? currentEvaluation.feedback 
+                : JSON.stringify(currentEvaluation.feedback)}
+            </p>
             
-            {parsedFeedback?.errors?.length > 0 && (
+            {currentEvaluation.errors?.length > 0 && (
               <div className="errors">
                 <h4>Errors Detected:</h4>
-                {parsedFeedback.errors.map((err, i) => (
+                {currentEvaluation.errors.map((err, i) => (
                   <div key={i} className="error-item">
-                    <strong>{err.type}:</strong>{" "}
-                    <em>"{err.text}"</em> → <strong>{err.correction}</strong>
+                    <strong>{err.type}:</strong> "{err.text}" → {err.correction}
                     <p>{err.explanation}</p>
                   </div>
                 ))}
               </div>
             )}
 
-            {parsedFeedback?.suggestions?.length > 0 && (
+            {currentEvaluation.suggestions?.length > 0 && (
               <div className="suggestions">
                 <h4>Suggestions:</h4>
                 <ul>
-                  {parsedFeedback.suggestions.map((s, i) => (
+                  {currentEvaluation.suggestions.map((s, i) => (
                     <li key={i}>{s}</li>
                   ))}
                 </ul>
