@@ -239,6 +239,9 @@ export const SpeakingController = {
     
     let audioPath = null;
     let mp3Path = null;
+    let audioFeatures = null;
+    let fluencyFromAudio = null;
+
     
     try {
       const { userId, speakingId, questionId, questionText, section } = req.body;
@@ -276,9 +279,6 @@ export const SpeakingController = {
         mp3Path = await convertToMP3(audioPath);
         console.log("✅ Audio converted to MP3:", mp3Path);
         audioPath = mp3Path; // Use MP3 for transcription
-        let audioFeatures = null;
-        let fluencyFromAudio = null;
-
         try {
           console.log("🎧 Running openSMILE analysis...");
           audioFeatures = await analyzeAudioWithOpenSmile(audioPath);
