@@ -147,17 +147,13 @@ const SpeakDetail = () => {
   }, [recordedQuestions, selectedTopic]);
 
   const parsedFeedback = React.useMemo(() => {
-    if (!currentEvaluation?.feedback) return null;
+    if (!currentEvaluation) return null;
 
-    if (typeof currentEvaluation.feedback === "string") {
-      try {
-        return JSON.parse(currentEvaluation.feedback);
-      } catch {
-        return { feedback: currentEvaluation.feedback };
-      }
-    }
-
-    return currentEvaluation.feedback;
+    return {
+      feedback: currentEvaluation.feedback_text,
+      errors: currentEvaluation.errors ? JSON.parse(currentEvaluation.errors) : [],
+      suggestions: currentEvaluation.suggestions ? JSON.parse(currentEvaluation.suggestions) : []
+    };
   }, [currentEvaluation]);
 
 

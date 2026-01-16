@@ -191,8 +191,7 @@ export const aiSpeakingGeminiService = {
         grammar_score: finalResult.grammar_score,
         vocab_score: finalResult.lexical_score,
         
-        // ✅ Tách riêng từng field
-        feedback_text: finalResult.feedback,  // Text nhận xét
+        feedback_text: finalResult.feedback,
         errors: JSON.stringify(finalResult.errors || []),
         suggestions: JSON.stringify(finalResult.suggestions || []),
         
