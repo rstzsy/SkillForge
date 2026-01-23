@@ -1,14 +1,33 @@
 import express from "express";
 import {
   createBooking,
-  getBookings,
-  getBookingsByUser,
+  getAllBookings,       
+  getBookingsByUserId,   
+  updateBookingStatus,   
   deleteBooking,
 } from "../controllers/bookingController.js";
 
 const router = express.Router();
 
-router.get("/user/:userId", getBookingsByUser);
+router.get("/user/:userId", async (req, res) => {
+  try {
+    const bookings = await getBookingsByUserId(req.params.userId);
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error getting user bookings:", error);
+    res.status(500).json({ message: "Failed to get bookings" });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const bookings = await getAllBookings();
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error getting bookings:", error);
+    res.status(500).json({ message: "Failed to get bookings" });
+  }
+});
 
 router.post("/", async (req, res) => {
   try {
@@ -20,13 +39,19 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    const bookings = await getBookings();
-    res.json(bookings);
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+    
+    const booking = await updateBookingStatus(req.params.id, status);
+    res.json(booking);
   } catch (error) {
-    console.error("Error getting bookings:", error);
-    res.status(500).json({ message: "Failed to get bookings" });
+    console.error("Error updating booking status:", error);
+    res.status(500).json({ message: "Failed to update booking status" });
   }
 });
 

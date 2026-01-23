@@ -25,6 +25,21 @@ export const getAllBookings = async () => {
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 };
 
+export const getBookingsByUserId = async (userId) => {
+  const snapshot = await db.collection(COLLECTION_NAME)
+    .where("userId", "==", userId)
+    .get();
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+};
+
+export const updateBookingStatus = async (id, status) => {
+  const docRef = db.collection(COLLECTION_NAME).doc(id);
+  await docRef.update({ status });
+  
+  const doc = await docRef.get();
+  return { id: doc.id, ...doc.data() };
+};
+
 export const deleteBooking = async (id) => {
   await db.collection(COLLECTION_NAME).doc(id).delete();
 };

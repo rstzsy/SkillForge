@@ -3,11 +3,7 @@ import './Header.css'
 import { FiUser, FiMenu, FiX, FiHeart } from 'react-icons/fi'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 
-const coupons = [
-  { couponValue: 20, minOrderValue: 50, code: 'SAVE20' },
-  { couponValue: 10, minOrderValue: 30, code: 'DISCOUNT10' },
-  { couponValue: 15, minOrderValue: 40, code: 'SALE15' },
-]
+
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -63,39 +59,9 @@ const Header = () => {
     navigate('/login')
   }
 
-  useEffect(() => {
-    if (!scrollRef.current) return
-    const wrapper = scrollRef.current
-    const parentWidth = wrapper.parentElement.offsetWidth
-    const contentWidth = wrapper.scrollWidth
-
-    if (contentWidth < parentWidth) {
-      let html = wrapper.innerHTML
-      while (wrapper.scrollWidth < parentWidth * 1.5) {
-        wrapper.innerHTML += html
-      }
-    }
-
-    wrapper.style.setProperty('--scroll-width', `${wrapper.scrollWidth}px`)
-    const speed = 80
-    const duration = wrapper.scrollWidth / speed
-    wrapper.style.animationDuration = `${duration}s`
-  }, [coupons])
 
   return (
     <>
-      {/* Coupon Banner */}
-      <div className="top-strip">
-        <div className="container-fluid">
-          <p ref={scrollRef} className="mb-0 mt-0 scrolling-text">
-            {coupons.map((coupon, idx) => (
-              <span className="coupon-item" key={idx}>
-                {coupon.couponValue}% OFF NOW FOR ORDER FROM ${coupon.minOrderValue} - Code: {coupon.code}
-              </span>
-            ))}
-          </p>
-        </div>
-      </div>
 
       {/* Header */}
       <header className="header">
