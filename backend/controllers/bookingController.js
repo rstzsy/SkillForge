@@ -9,7 +9,6 @@ export const createBooking = async (data) => {
   const booking = new Booking(data);
 
   const bookingData = {
-    ...data,
     name: booking.name,
     email: booking.email,
     date: booking.date,
@@ -23,27 +22,26 @@ export const createBooking = async (data) => {
   return { id: docRef.id, ...bookingData };
 };
 
-export const getBookings = async () => {
+export const getAllBookings = async () => {
   const snapshot = await db.collection(COLLECTION_NAME).get();
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 };
 
-export const deleteBooking = async (id) => {
-  await db.collection(COLLECTION_NAME).doc(id).delete();
+export const getBookingsByUserId = async (userId) => {
+  const snapshot = await db.collection(COLLECTION_NAME)
+    .where("userId", "==", userId)
+    .get();
+  return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
 };
 
-export const getBookingsByUser = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const snapshot = await db
-      .collection(COLLECTION_NAME)
-      .where("userId", "==", userId)
-      .get();
+export const updateBookingStatus = async (id, status) => {
+  const docRef = db.collection(COLLECTION_NAME).doc(id);
+  await docRef.update({ status });
+  
+  const doc = await docRef.get();
+  return { id: doc.id, ...doc.data() };
+};
 
-    const bookings = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-    res.json(bookings);
-  } catch (err) {
-    console.error("Error fetching user bookings:", err);
-    res.status(500).json({ message: err.message });
-  }
+export const deleteBooking = async (id) => {
+  await db.collection(COLLECTION_NAME).doc(id).delete();
 };
